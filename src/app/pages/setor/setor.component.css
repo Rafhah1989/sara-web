@@ -1,12 +1,10 @@
 .setor-page {
-    padding: 2rem 1rem;
+    padding: 0 1rem 2rem 1rem;
 }
 
+/* Page title is now handled by .page-title-banner in src/styles.css */
 .setor-page h1 {
-    text-align: center;
-    color: var(--secondary-dark);
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
+    display: none;
 }
 
 .card {
@@ -84,9 +82,6 @@
 
 .form-group input,
 .form-group select {
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
     font-size: 1rem;
     transition: border-color 0.3s;
     width: 100%;

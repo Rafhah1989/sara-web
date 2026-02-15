@@ -1,13 +1,10 @@
-/* Estilos para a página de Produtos */
 .products-page {
-    padding: 2rem 1rem;
+    padding: 0 1rem 2rem 1rem;
 }
 
+/* Page title is now handled by .page-title-banner in src/styles.css */
 .products-page h1 {
-    text-align: center;
-    color: var(--secondary-dark);
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
+    display: none;
 }
 
 .card {
@@ -38,13 +35,6 @@
 .form-group label {
     margin-bottom: 0.5rem;
     font-weight: 600;
-}
-
-.form-group input,
-.form-group select {
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
 }
 
 .checkbox-group {

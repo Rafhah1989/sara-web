@@ -11,14 +11,42 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: var(--background-off-white);
   color: var(--text-dark);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Times New Roman', Times, serif; /* Placeholder for a better serif font */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Cinzel', serif;
   color: var(--secondary-dark);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.page-title-banner {
+  background-color: #000;
+  width: 100%;
+  padding: 3rem 0;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.page-title-banner h1 {
+  color: var(--primary-gold);
+  font-size: 3.5rem;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--primary-gold);
+  text-align: center;
 }
 
 a {
@@ -52,3 +80,36 @@ ul {
   background-color: var(--primary-gold-dark);
 }
 
+/* Global Form Controls */
+input,
+select,
+textarea {
+  border: 2px solid #000 !important;
+  border-radius: 4px;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 18px;
+  color: #000;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-gold) !important;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+input.error,
+select.error,
+textarea.error {
+  border-color: #f44336 !important;
+}
