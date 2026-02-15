@@ -1,0 +1,78 @@
+<section class="products-page container">
+    <h1>Gestão de Produtos</h1>
+
+    <!-- Formulário de Cadastro/Edição -->
+    <div class="product-form-container card">
+        <h2>{{ modoEdicao ? 'Editar Produto' : 'Novo Produto' }}</h2>
+        <form (ngSubmit)="salvar()" #produtoForm="ngForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">Nome do Produto</label>
+                    <input type="text" id="nome" name="nome" [(ngModel)]="produtoAtual.nome" required
+                        placeholder="Ex: Nossa Senhora">
+                </div>
+                <div class="form-group">
+                    <label for="tamanho">Tamanho (cm)</label>
+                    <input type="number" id="tamanho" name="tamanho" [(ngModel)]="produtoAtual.tamanho"
+                        placeholder="Ex: 30">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    <label for="ativo">Ativo</label>
+                    <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="produtoAtual.ativo">
+                </div>
+                <div class="form-group">
+                    <label for="imagem">Imagem do Produto</label>
+                    <input type="file" id="imagem" (change)="onFileSelected($event)" accept="image/*">
+                </div>
+            </div>
+
+            <div class="image-preview" *ngIf="produtoAtual.imagem">
+                <p>Prévia da Imagem:</p>
+                <img [src]="produtoAtual.imagem" alt="Preview">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-gold" [disabled]="!produtoForm.form.valid">
+                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Produto' }}
+                </button>
+                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Busca -->
+    <div class="search-container">
+        <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome..." (keyup.enter)="pesquisar()">
+        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
+    </div>
+
+    <!-- Lista de Produtos -->
+    <div class="product-grid">
+        <div class="product-card" *ngFor="let product of produtos">
+            <div class="product-image-container">
+                <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome" class="product-img">
+                <div *ngIf="!product.imagem" class="product-image placeholder">Sem Imagem</div>
+            </div>
+            <div class="product-info">
+                <h3>{{ product.nome }}</h3>
+                <p>Tamanho: {{ product.tamanho }} cm</p>
+                <p class="status" [class.inactive]="!product.ativo">
+                    {{ product.ativo ? 'Disponível' : 'Indisponível' }}
+                </p>
+                <div class="card-actions">
+                    <button class="btn-edit" (click)="editar(product)">Editar</button>
+                    <button class="btn-delete" (click)="excluir(product.id)">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="produtos.length === 0" class="no-products">
+        <p>Nenhum produto encontrado.</p>
+    </div>
+</section>

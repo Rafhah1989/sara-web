@@ -1,0 +1,131 @@
+<section class="setor-page container">
+    <h1>Gestão de Setores</h1>
+
+    <!-- Formulário -->
+    <div class="setor-form-container card">
+        <h2>{{ modoEdicao ? 'Alterar Setor' : 'Novo Setor' }}</h2>
+
+        <!-- Navegação por Abas -->
+        <div class="tabs-header">
+            <button type="button" class="tab-btn" [class.active]="abaAtiva === 1" (click)="setAba(1)">Dados do
+                Setor</button>
+            <button type="button" class="tab-btn" [class.active]="abaAtiva === 2" (click)="setAba(2)">Tabelas de
+                Frete</button>
+        </div>
+
+        <form (ngSubmit)="salvar()" #setorForm="ngForm">
+            <!-- Aba 1: Dados do Setor -->
+            <div *ngIf="abaAtiva === 1" class="tab-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="descricao">Descrição do Setor</label>
+                        <input type="text" id="descricao" name="descricao" [(ngModel)]="setorAtual.descricao" required
+                            placeholder="Digite o nome do setor">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label for="ativo">Ativo</label>
+                        <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="setorAtual.ativo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba 2: Tabelas de Frete -->
+            <div *ngIf="abaAtiva === 2" class="tab-content">
+                <div class="form-row relation-row">
+                    <div class="form-group">
+                        <label for="buscaTabela">Buscar Tabela de Frete</label>
+                        <input type="text" id="buscaTabela" name="buscaTabela" [(ngModel)]="termoBuscaTabela"
+                            (input)="onBuscaTabelaInput($event)" placeholder="Mínimo 3 letras...">
+                    </div>
+                    <div class="form-group">
+                        <label for="tabelaSelecionada">Tabela</label>
+                        <div class="select-with-button">
+                            <select id="tabelaSelecionada" name="tabelaSelecionada" [(ngModel)]="tabelaSelecionadaId">
+                                <option [ngValue]="undefined" disabled>Selecione uma tabela...</option>
+                                <option *ngFor="let tab of tabelasFiltradas" [value]="tab.id">{{ tab.descricao }} ({{
+                                    tab.valor | currency:'BRL' }})</option>
+                            </select>
+                            <button type="button" class="btn-add" (click)="adicionarTabela()"
+                                [disabled]="!tabelaSelecionadaId">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="linked-tables">
+                    <h3>Tabelas Vinculadas</h3>
+                    <table class="inner-table">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let tab of tabelasVinculadas">
+                                <td>{{ tab.descricao }}</td>
+                                <td>{{ tab.valor | currency:'BRL' }}</td>
+                                <td>
+                                    <button type="button" class="btn-remove"
+                                        (click)="removerTabela(tab.id)">Remover</button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="tabelasVinculadas.length === 0">
+                                <td colspan="3" class="no-data-inner">Nenhuma tabela vinculada.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-gold" [disabled]="!setorForm.form.valid">
+                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Setor' }}
+                </button>
+                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <hr class="divider">
+
+    <div class="search-container">
+        <input type="text" [(ngModel)]="filtroDescricaoSetor" placeholder="Pesquisar setor por descrição..."
+            (keyup.enter)="pesquisarSetores()">
+        <button class="btn-gold" (click)="pesquisarSetores()">Pesquisar</button>
+    </div>
+
+    <div class="setor-list">
+        <table class="card">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let setor of setores">
+                    <td>{{ setor.descricao }}</td>
+                    <td>
+                        <span class="status-badge" [class.active]="setor.ativo" [class.inactive]="!setor.ativo">
+                            {{ setor.ativo ? 'Ativo' : 'Inativo' }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-edit" (click)="editar(setor)" title="Editar">✏️</button>
+                        <button class="btn-delete" (click)="desativar(setor.id)" *ngIf="setor.ativo"
+                            title="Desativar">🚫</button>
+                        <button class="btn-success" (click)="ativar(setor.id)" *ngIf="!setor.ativo"
+                            title="Ativar">✅</button>
+                    </td>
+                </tr>
+                <tr *ngIf="setores.length === 0">
+                    <td colspan="3" class="no-data">Nenhum setor encontrado.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>

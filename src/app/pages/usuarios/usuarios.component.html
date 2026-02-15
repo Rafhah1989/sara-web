@@ -1,0 +1,153 @@
+<section class="users-page container">
+    <h1>Gestão de Usuários</h1>
+
+    <!-- Formulário -->
+    <div class="user-form-container card">
+        <h2>{{ modoEdicao ? 'Alterar Usuário' : 'Novo Usuário' }}</h2>
+        <form [formGroup]="userForm" (ngSubmit)="salvar()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" formControlName="nome" [class.error]="isInvalid('nome')"
+                        placeholder="Digite o nome completo">
+                    <span class="error-msg" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100 caracteres).</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cpfCnpj">CPF / CNPJ</label>
+                    <input type="text" id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)"
+                        [class.error]="isInvalid('cpfCnpj')" placeholder="000.000.000-00">
+                    <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
+                        [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
+                    <span class="error-msg" *ngIf="isInvalid('telefone')">Formato (xx) xxxxx-xxxx.</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
+                        [class.error]="isInvalid('cep')" placeholder="00000000">
+                    <span class="error-msg" *ngIf="isInvalid('cep')">CEP deve ter 8 dígitos numéricos.</span>
+                </div>
+                <div class="form-group">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
+                </div>
+                <div class="form-group small">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" formControlName="numero" placeholder="Nº">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" formControlName="cidade" [class.error]="isInvalid('cidade')"
+                        placeholder="Cidade">
+                    <span class="error-msg" *ngIf="isInvalid('cidade')">Cidade é obrigatória.</span>
+                </div>
+                <div class="form-group small">
+                    <label for="uf">UF</label>
+                    <select id="uf" formControlName="uf" [class.error]="isInvalid('uf')">
+                        <option value="">UF</option>
+                        <option *ngFor="let uf of ufs" [value]="uf">{{ uf }}</option>
+                    </select>
+                    <span class="error-msg" *ngIf="isInvalid('uf')">UF obrigatória.</span>
+                </div>
+                <div class="form-group">
+                    <label for="role">Tipo de Usuário</label>
+                    <select id="role" formControlName="role">
+                        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group password-field">
+                    <label for="senha">Senha (6 números)</label>
+                    <div class="input-wrapper">
+                        <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
+                            [class.error]="isInvalid('senha')">
+                        <button type="button" class="eye-icon" (mousedown)="showSenha = true"
+                            (mouseup)="showSenha = false" (mouseleave)="showSenha = false">
+                            👁️
+                        </button>
+                    </div>
+                    <span class="error-msg" *ngIf="isInvalid('senha')">Senha deve conter 6 números.</span>
+                </div>
+                <div class="form-group password-field">
+                    <label for="confirmarSenha">Confirmar Senha</label>
+                    <div class="input-wrapper">
+                        <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
+                            formControlName="confirmarSenha"
+                            [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
+                        <button type="button" class="eye-icon" (mousedown)="showConfirmSenha = true"
+                            (mouseup)="showConfirmSenha = false" (mouseleave)="showConfirmSenha = false">
+                            👁️
+                        </button>
+                    </div>
+                    <span class="error-msg"
+                        *ngIf="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">As senhas não
+                        coincidem.</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-gold" [disabled]="userForm.invalid">
+                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Usuário' }}
+                </button>
+                <button type="button" class="btn-outline" (click)="finalizarAcao()" *ngIf="modoEdicao">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <hr class="divider">
+
+    <div class="search-container">
+        <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome..." (keyup.enter)="pesquisar()">
+        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
+    </div>
+
+    <div class="user-list">
+        <table class="card">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users">
+                    <td>{{ user.nome }}</td>
+                    <td>{{ user.cpfCnpj }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>
+                        <span class="status-badge" [class.active]="user.ativo" [class.inactive]="!user.ativo">
+                            {{ user.ativo ? 'Ativo' : 'Inativo' }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-edit" (click)="editar(user)" title="Editar">✏️</button>
+                        <button class="btn-delete" (click)="desativar(user.id)" *ngIf="user.ativo"
+                            title="Desativar">🚫</button>
+                        <button class="btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo"
+                            title="Ativar">✅</button>
+                    </td>
+                </tr>
+                <tr *ngIf="users.length === 0">
+                    <td colspan="5" class="no-data">Nenhum usuário encontrado.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>

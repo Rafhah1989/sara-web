@@ -1,0 +1,140 @@
+.hero-section {
+    background-color: var(--secondary-dark);
+    color: #fff;
+    padding: 4rem 1rem;
+    text-align: center;
+    /* Background image placeholder */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-logo {
+    height: 210px;
+    width: auto;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+}
+
+.hero-content .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.hero-content .description {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+    color: #ddd;
+}
+
+.featured-products {
+    padding: 4rem 1rem;
+    text-align: center;
+}
+
+.featured-products h2,
+.about-teaser h2 {
+    font-size: 2.5rem;
+    color: var(--primary-gold-dark);
+    margin-bottom: 2rem;
+    display: inline-block;
+    border-bottom: 2px solid var(--primary-gold);
+    padding-bottom: 0.5rem;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.product-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-image.placeholder {
+    width: 100%;
+    height: 250px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+}
+
+.product-image.placeholder::after {
+    content: 'Imagem';
+}
+
+.product-card h3 {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product-card .price {
+    font-size: 1.1rem;
+    color: var(--primary-gold-dark);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.btn-details {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--secondary-dark);
+    border-radius: 4px;
+    color: var(--secondary-dark);
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.btn-details:hover {
+    background-color: var(--secondary-dark);
+    color: var(--primary-gold);
+}
+
+.about-teaser {
+    background-color: #f0f0f0;
+    padding: 4rem 1rem;
+    text-align: center;
+}
+
+.about-teaser p {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.btn-outline {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--primary-gold);
+    color: var(--primary-gold-dark);
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-gold);
+    color: white;
+}

@@ -1,0 +1,78 @@
+<section class="frete-page container">
+    <h1>Gestão de Tabela de Frete</h1>
+
+    <!-- Formulário de Cadastro/Edição -->
+    <div class="frete-form-container card">
+        <h2>{{ modoEdicao ? 'Editar Tabela de Frete' : 'Nova Tabela de Frete' }}</h2>
+        <form (ngSubmit)="salvar()" #freteForm="ngForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="descricao">Descrição</label>
+                    <input type="text" id="descricao" name="descricao" [(ngModel)]="freteAtual.descricao" required
+                        placeholder="Ex: Frete Capital">
+                </div>
+                <div class="form-group">
+                    <label for="valor">Valor (R$)</label>
+                    <input type="text" id="valor" name="valor" [(ngModel)]="valorMascarado"
+                        (input)="applyCurrencyMask($event)" required placeholder="R$ 0,00">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    <label for="ativo">Ativo</label>
+                    <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="freteAtual.ativo">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-gold" [disabled]="!freteForm.form.valid">
+                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Tabela' }}
+                </button>
+                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Busca -->
+    <div class="search-container">
+        <input type="text" [(ngModel)]="filtroDescricao" placeholder="Pesquisar por descrição..."
+            (keyup.enter)="pesquisar()">
+        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
+    </div>
+
+    <!-- Lista de Tabelas de Frete -->
+    <div class="frete-list">
+        <table class="card">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let frete of tabelasFrete">
+                    <td>{{ frete.descricao }}</td>
+                    <td>{{ frete.valor | currency:'BRL' }}</td>
+                    <td>
+                        <span class="status-badge" [class.active]="frete.ativo" [class.inactive]="!frete.ativo">
+                            {{ frete.ativo ? 'Ativo' : 'Inativo' }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-edit" (click)="editar(frete)">✏️</button>
+                        <button class="btn-delete" (click)="desativar(frete.id)" *ngIf="frete.ativo">🚫</button>
+                        <button class="btn-activate" (click)="ativar(frete)" *ngIf="!frete.ativo">✅</button>
+                    </td>
+                </tr>
+                <tr *ngIf="tabelasFrete.length === 0">
+                    <td colspan="4" class="no-data">Nenhuma tabela de frete encontrada.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
