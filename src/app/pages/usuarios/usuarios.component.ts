@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
+import { SetorService } from '../../services/setor.service';
+import { FreteService } from '../../services/frete.service';
 import { Usuario, Role } from '../../models/usuario.model';
+import { Setor } from '../../models/setor.model';
+import { Frete } from '../../models/frete.model';
 
 @Component({
     selector: 'app-usuarios',
@@ -11,6 +15,8 @@ import { Usuario, Role } from '../../models/usuario.model';
 export class UsuariosComponent implements OnInit {
     userForm: FormGroup;
     users: Usuario[] = [];
+    setoresAtivos: Setor[] = [];
+    tabelasFreteFiltradas: Frete[] = [];
     filtroNome: string = '';
     modoEdicao: boolean = false;
     usuarioIdEmEdicao?: number;
@@ -19,29 +25,81 @@ export class UsuariosComponent implements OnInit {
     showConfirmSenha: boolean = false;
 
     roles = Object.values(Role);
+    formasPagamento = [{ id: 'PIX', descricao: 'PIX' }, { id: 'DINHEIRO', descricao: 'Dinheiro' }];
     ufs = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
     constructor(
         private fb: FormBuilder,
-        private usuarioService: UsuarioService
+        private usuarioService: UsuarioService,
+        private setorService: SetorService,
+        private freteService: FreteService
     ) {
         this.userForm = this.fb.group({
             nome: ['', [Validators.required, Validators.maxLength(100)]],
             cep: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
             endereco: [''],
+            bairro: ['', Validators.required],
             numero: [''],
             cidade: ['', Validators.required],
             uf: ['', [Validators.required, Validators.maxLength(2)]],
             cpfCnpj: ['', [Validators.required]],
             telefone: ['', [Validators.required]],
+            observacao: [''],
+            padre: [''],
+            secretario: [''],
+            tesoureiro: [''],
+            formaPagamento: [''],
+            desconto: [0],
+            modalidadeEntrega: [''],
+            setorId: [''],
+            tabelaFreteId: [''],
             role: [Role.CLIENTE, Validators.required],
-            senha: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-            confirmarSenha: ['', Validators.required]
+            senha: ['', [Validators.pattern(/^\d{6}$/)]],
+            confirmarSenha: ['']
         }, { validator: this.passwordMatchValidator });
     }
 
     ngOnInit(): void {
         this.carregarUsuarios();
+        this.carregarSetores();
+    }
+
+    carregarSetores(): void {
+        this.setorService.listarTodos().subscribe({
+            next: (data) => this.setoresAtivos = data.filter(s => s.ativo),
+            error: (err) => console.error('Erro ao listar setores', err)
+        });
+    }
+
+    onSetorChange(keepValue: boolean = false): void {
+        const setorId = this.userForm.get('setorId')?.value;
+        const currentTabelaId = this.userForm.get('tabelaFreteId')?.value;
+
+        this.tabelasFreteFiltradas = [];
+        if (!keepValue) {
+            this.userForm.get('tabelaFreteId')?.setValue('');
+        }
+
+        if (setorId) {
+            this.setorService.buscarPorId(Number(setorId)).subscribe({
+                next: (setor) => {
+                    this.tabelasFreteFiltradas = setor.tabelasFrete?.filter(f => f.ativo) || [];
+
+                    // Se estivermos editando e o valor atual não estiver na lista (divergência), buscamos ele
+                    if (keepValue && currentTabelaId) {
+                        const exists = this.tabelasFreteFiltradas.some(f => f.id === Number(currentTabelaId));
+                        if (!exists) {
+                            this.freteService.buscarPorId(Number(currentTabelaId)).subscribe({
+                                next: (frete) => {
+                                    this.tabelasFreteFiltradas.push(frete);
+                                }
+                            });
+                        }
+                    }
+                },
+                error: (err) => console.error('Erro ao carregar tabelas do setor', err)
+            });
+        }
     }
 
     passwordMatchValidator(g: FormGroup) {
@@ -76,6 +134,7 @@ export class UsuariosComponent implements OnInit {
                     if (!data.erro) {
                         this.userForm.patchValue({
                             endereco: data.logradouro,
+                            bairro: data.bairro,
                             cidade: data.localidade,
                             uf: data.uf
                         });
@@ -115,7 +174,38 @@ export class UsuariosComponent implements OnInit {
         this.userForm.get('telefone')?.setValue(val, { emitEvent: false });
     }
 
+    applyPercentualMask(event: any): void {
+        let val = event.target.value.replace(/\D/g, '');
+        if (val === '') {
+            this.userForm.get('desconto')?.setValue(0, { emitEvent: false });
+            return;
+        }
+        let num = (parseFloat(val) / 100).toFixed(2);
+        this.userForm.get('desconto')?.setValue(num, { emitEvent: false });
+    }
+
     salvar(): void {
+        const senha = this.userForm.get('senha')?.value;
+        const confirmarSenha = this.userForm.get('confirmarSenha')?.value;
+
+        // Regra customizada de senha
+        if (!this.modoEdicao) {
+            if (!senha || senha.length !== 6 || senha !== confirmarSenha) {
+                alert('Por favor, informe a senha');
+                this.userForm.get('senha')?.markAsTouched();
+                this.userForm.get('confirmarSenha')?.markAsTouched();
+                return;
+            }
+        } else {
+            // Na edição, se preencher um, tem que preencher o outro e bater
+            if (senha || confirmarSenha) {
+                if (senha !== confirmarSenha || (senha && senha.length !== 6)) {
+                    alert('Por favor, informe a senha');
+                    return;
+                }
+            }
+        }
+
         if (this.userForm.invalid) {
             this.userForm.markAllAsTouched();
             return;
@@ -126,7 +216,8 @@ export class UsuariosComponent implements OnInit {
             ...rawData,
             cep: rawData.cep.replace(/\D/g, ''),
             cpfCnpj: rawData.cpfCnpj.replace(/\D/g, ''),
-            telefone: rawData.telefone
+            telefone: rawData.telefone,
+            senha: senha || undefined // Se vazio na edição, não envia
         };
 
         if (this.modoEdicao && this.usuarioIdEmEdicao) {
@@ -150,11 +241,7 @@ export class UsuariosComponent implements OnInit {
             senha: '',
             confirmarSenha: ''
         });
-        // Remove validators temporarily if updating and user doesn't want to change password?
-        // User request said: "senha e confirmar senha não devem receber o valor cadastrado, devem estar em branco"
-        // Does it mean they are OPTIONAL on edit? 
-        // "O formulário só pode ser submetido se Senha e Confirmar Senha tiverem o mesmo valor."
-        // I'll keep them required as the API might expect them. 
+        this.onSetorChange(true);
         window.scrollTo(0, 0);
     }
 

@@ -13,6 +13,16 @@ export interface Usuario {
     uf: string;
     cpfCnpj: string;
     telefone: string;
+    bairro: string;
+    observacao?: string;
+    padre?: string;
+    secretario?: string;
+    tesoureiro?: string;
+    formaPagamento?: string;
+    desconto?: number;
+    modalidadeEntrega?: string;
+    setorId?: number;
+    tabelaFreteId?: number;
     role: Role;
     senha?: string;
     ativo?: boolean;

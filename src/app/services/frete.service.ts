@@ -19,6 +19,10 @@ export class FreteService {
         return this.http.get<Frete[]>(`${this.apiUrl}/descricao/${descricao}`);
     }
 
+    buscarPorId(id: number): Observable<Frete> {
+        return this.http.get<Frete>(`${this.apiUrl}/${id}`);
+    }
+
     cadastrar(frete: Frete): Observable<Frete> {
         return this.http.post<Frete>(this.apiUrl, frete);
     }

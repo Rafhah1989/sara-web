@@ -5,99 +5,187 @@
     <div class="user-form-container card">
         <h2>{{ modoEdicao ? 'Alterar Usuário' : 'Novo Usuário' }}</h2>
         <form [formGroup]="userForm" (ngSubmit)="salvar()">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nome">Nome Completo</label>
-                    <input type="text" id="nome" formControlName="nome" [class.error]="isInvalid('nome')"
-                        placeholder="Digite o nome completo">
-                    <span class="error-msg" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100 caracteres).</span>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cpfCnpj">CPF / CNPJ</label>
-                    <input type="text" id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)"
-                        [class.error]="isInvalid('cpfCnpj')" placeholder="000.000.000-00">
-                    <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
-                </div>
-                <div class="form-group">
-                    <label for="telefone">Telefone</label>
-                    <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
-                        [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
-                    <span class="error-msg" *ngIf="isInvalid('telefone')">Formato (xx) xxxxx-xxxx.</span>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cep">CEP</label>
-                    <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
-                        [class.error]="isInvalid('cep')" placeholder="00000000">
-                    <span class="error-msg" *ngIf="isInvalid('cep')">CEP deve ter 8 dígitos numéricos.</span>
-                </div>
-                <div class="form-group">
-                    <label for="endereco">Endereço</label>
-                    <input type="text" id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
-                </div>
-                <div class="form-group small">
-                    <label for="numero">Número</label>
-                    <input type="text" id="numero" formControlName="numero" placeholder="Nº">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cidade">Cidade</label>
-                    <input type="text" id="cidade" formControlName="cidade" [class.error]="isInvalid('cidade')"
-                        placeholder="Cidade">
-                    <span class="error-msg" *ngIf="isInvalid('cidade')">Cidade é obrigatória.</span>
-                </div>
-                <div class="form-group small">
-                    <label for="uf">UF</label>
-                    <select id="uf" formControlName="uf" [class.error]="isInvalid('uf')">
-                        <option value="">UF</option>
-                        <option *ngFor="let uf of ufs" [value]="uf">{{ uf }}</option>
-                    </select>
-                    <span class="error-msg" *ngIf="isInvalid('uf')">UF obrigatória.</span>
-                </div>
-                <div class="form-group">
-                    <label for="role">Tipo de Usuário</label>
-                    <select id="role" formControlName="role">
-                        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group password-field">
-                    <label for="senha">Senha (6 números)</label>
-                    <div class="input-wrapper">
-                        <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
-                            [class.error]="isInvalid('senha')">
-                        <button type="button" class="eye-icon" (mousedown)="showSenha = true"
-                            (mouseup)="showSenha = false" (mouseleave)="showSenha = false">
-                            👁️
-                        </button>
+            <fieldset class="form-section">
+                <legend>Dados Básicos</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" formControlName="nome" [class.error]="isInvalid('nome')"
+                            placeholder="Digite o nome completo">
+                        <span class="error-msg" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100
+                            caracteres).</span>
                     </div>
-                    <span class="error-msg" *ngIf="isInvalid('senha')">Senha deve conter 6 números.</span>
                 </div>
-                <div class="form-group password-field">
-                    <label for="confirmarSenha">Confirmar Senha</label>
-                    <div class="input-wrapper">
-                        <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
-                            formControlName="confirmarSenha"
-                            [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
-                        <button type="button" class="eye-icon" (mousedown)="showConfirmSenha = true"
-                            (mouseup)="showConfirmSenha = false" (mouseleave)="showConfirmSenha = false">
-                            👁️
-                        </button>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cpfCnpj">CPF / CNPJ</label>
+                        <input type="text" id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)"
+                            [class.error]="isInvalid('cpfCnpj')" placeholder="000.000.000-00">
+                        <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
                     </div>
-                    <span class="error-msg"
-                        *ngIf="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">As senhas não
-                        coincidem.</span>
+                    <div class="form-group">
+                        <label for="telefone">Telefone</label>
+                        <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
+                            [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
+                        <span class="error-msg" *ngIf="isInvalid('telefone')">Formato (xx) xxxxx-xxxx.</span>
+                    </div>
                 </div>
-            </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Endereço</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cep">CEP</label>
+                        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
+                            [class.error]="isInvalid('cep')" placeholder="00000000">
+                        <span class="error-msg" *ngIf="isInvalid('cep')">CEP deve ter 8 dígitos numéricos.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="endereco">Endereço</label>
+                        <input type="text" id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
+                    </div>
+                    <div class="form-group small">
+                        <label for="numero">Número</label>
+                        <input type="text" id="numero" formControlName="numero" placeholder="Nº">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cidade">Cidade</label>
+                        <input type="text" id="cidade" formControlName="cidade" [class.error]="isInvalid('cidade')"
+                            placeholder="Cidade">
+                        <span class="error-msg" *ngIf="isInvalid('cidade')">Cidade é obrigatória.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="bairro">Bairro</label>
+                        <input type="text" id="bairro" formControlName="bairro" [class.error]="isInvalid('bairro')"
+                            placeholder="Bairro">
+                        <span class="error-msg" *ngIf="isInvalid('bairro')">Bairro é obrigatório.</span>
+                    </div>
+                    <div class="form-group small">
+                        <label for="uf">UF</label>
+                        <select id="uf" formControlName="uf" [class.error]="isInvalid('uf')">
+                            <option value="">UF</option>
+                            <option *ngFor="let uf of ufs" [value]="uf">{{ uf }}</option>
+                        </select>
+                        <span class="error-msg" *ngIf="isInvalid('uf')">UF obrigatória.</span>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Paróquia</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="padre">Padre</label>
+                        <input type="text" id="padre" formControlName="padre" placeholder="Nome do Padre">
+                    </div>
+                    <div class="form-group">
+                        <label for="secretario">Secretário(a)</label>
+                        <input type="text" id="secretario" formControlName="secretario"
+                            placeholder="Nome do(a) Secretário(a)">
+                    </div>
+                    <div class="form-group">
+                        <label for="tesoureiro">Tesoureiro</label>
+                        <input type="text" id="tesoureiro" formControlName="tesoureiro"
+                            placeholder="Nome do Tesoureiro">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Pagamento e Frete</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="formaPagamento">Forma de Pagamento</label>
+                        <select id="formaPagamento" formControlName="formaPagamento">
+                            <option value="">Selecione...</option>
+                            <option *ngFor="let forma of formasPagamento" [value]="forma.id">{{ forma.descricao }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="desconto">Desconto (%)</label>
+                        <input type="text" id="desconto" formControlName="desconto"
+                            (input)="applyPercentualMask($event)" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalidadeEntrega">Modalidade de Entrega</label>
+                        <input type="text" id="modalidadeEntrega" formControlName="modalidadeEntrega"
+                            placeholder="Ex: Correios">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="setorId">Setor</label>
+                        <select id="setorId" formControlName="setorId" (change)="onSetorChange()">
+                            <option value="">Selecione o Setor...</option>
+                            <option *ngFor="let setor of setoresAtivos" [value]="setor.id">{{ setor.descricao }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tabelaFreteId">Tabela de Frete</label>
+                        <select id="tabelaFreteId" formControlName="tabelaFreteId"
+                            [disabled]="!userForm.get('setorId')?.value">
+                            <option value="">{{ !userForm.get('setorId')?.value ? 'Selecione um setor primeiro' :
+                                'Selecione a Tabela...' }}</option>
+                            <option *ngFor="let frete of tabelasFreteFiltradas" [value]="frete.id">{{ frete.descricao }}
+                                (R$ {{ frete.valor }})</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Tipo de Usuário</label>
+                        <select id="role" formControlName="role">
+                            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Observações</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="observacao">Observação</label>
+                        <textarea id="observacao" formControlName="observacao" rows="2"
+                            placeholder="Observações adicionais..."></textarea>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Autenticação</legend>
+                <div class="form-row">
+                    <div class="form-group password-field">
+                        <label for="senha">Senha (6 números) {{ modoEdicao ? '(Opcional)' : '' }}</label>
+                        <div class="input-wrapper">
+                            <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
+                                [class.error]="isInvalid('senha')">
+                            <button type="button" class="eye-icon" (mousedown)="showSenha = true"
+                                (mouseup)="showSenha = false" (mouseleave)="showSenha = false">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group password-field">
+                        <label for="confirmarSenha">Confirmar Senha {{ modoEdicao ? '(Opcional)' : '' }}</label>
+                        <div class="input-wrapper">
+                            <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
+                                formControlName="confirmarSenha"
+                                [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
+                            <button type="button" class="eye-icon" (mousedown)="showConfirmSenha = true"
+                                (mouseup)="showConfirmSenha = false" (mouseleave)="showConfirmSenha = false">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
 
             <div class="form-actions">
                 <button type="submit" class="btn-gold" [disabled]="userForm.invalid">
