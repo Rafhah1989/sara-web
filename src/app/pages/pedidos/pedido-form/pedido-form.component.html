@@ -37,7 +37,7 @@
 
                 <div class="form-group">
                     <label>Frete (R$)</label>
-                    <input type="number" formControlName="frete" (input)="calcularTotais()" placeholder="0.00">
+                    <input type="text" formControlName="frete" (input)="applyFreteMask($event)" placeholder="R$ 0,00">
                 </div>
 
                 <div class="form-group">
@@ -91,7 +91,7 @@
                             <td>{{ item.get('produtoNome')?.value }}</td>
                             <td>{{ item.get('tamanho')?.value }}</td>
                             <td>
-                                <input type="number" formControlName="quantidade" (input)="calcularTotais()"
+                                <input type="number" formControlName="quantidade" (input)="onItemChange()"
                                     class="form-control small" style="width: 80px;">
                             </td>
                             <td>

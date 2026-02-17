@@ -3,4 +3,7 @@ export interface Frete {
     descricao: string;
     valor: number;
     ativo: boolean;
+    quantidadeFaixa?: number;
+    valorFaixa?: number;
+    minimoFaixa?: number;
 }

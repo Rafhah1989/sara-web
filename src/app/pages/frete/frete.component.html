@@ -15,9 +15,28 @@
                         placeholder="Ex: Frete Capital">
                 </div>
                 <div class="form-group">
-                    <label for="valor">Valor (R$)</label>
+                    <label for="valor">Valor Base (R$)</label>
                     <input type="text" id="valor" name="valor" [(ngModel)]="valorMascarado"
                         (input)="applyCurrencyMask($event)" required placeholder="R$ 0,00">
+                </div>
+            </div>
+
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="minimoFaixa">Valor Mínimo da Faixa (g) (Opcional)</label>
+                    <input type="number" class="form-control" id="minimoFaixa" [(ngModel)]="freteAtual.minimoFaixa"
+                        name="minimoFaixa" placeholder="Ex: 500">
+                </div>
+                <div class="form-group">
+                    <label for="quantidadeFaixa">Peso por Faixa (g) (Opcional)</label>
+                    <input type="number" id="quantidadeFaixa" name="quantidadeFaixa"
+                        [(ngModel)]="freteAtual.quantidadeFaixa" placeholder="Ex: 5">
+                </div>
+                <div class="form-group">
+                    <label for="valorFaixa">Valor da Faixa (R$)</label>
+                    <input type="text" id="valorFaixa" name="valorFaixa" [(ngModel)]="valorFaixaMascarado"
+                        (input)="applyValorFaixaMask($event)" placeholder="R$ 0,00">
                 </div>
             </div>
 

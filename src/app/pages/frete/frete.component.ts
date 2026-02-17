@@ -14,6 +14,7 @@ export class FreteComponent implements OnInit {
     filtroDescricao: string = '';
     modoEdicao: boolean = false;
     valorMascarado: string = '';
+    valorFaixaMascarado: string = '';
 
     constructor(private freteService: FreteService) { }
 
@@ -25,7 +26,10 @@ export class FreteComponent implements OnInit {
         return {
             descricao: '',
             valor: 0,
-            ativo: true
+            ativo: true,
+            quantidadeFaixa: undefined,
+            valorFaixa: undefined,
+            minimoFaixa: undefined
         };
     }
 
@@ -63,6 +67,22 @@ export class FreteComponent implements OnInit {
         });
     }
 
+    applyValorFaixaMask(event: any): void {
+        let value = event.target.value.replace(/\D/g, '');
+        if (!value) {
+            this.valorFaixaMascarado = '';
+            this.freteAtual.valorFaixa = undefined;
+            return;
+        }
+
+        const numberValue = (parseFloat(value) / 100);
+        this.freteAtual.valorFaixa = numberValue;
+        this.valorFaixaMascarado = numberValue.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+    }
+
     salvar(): void {
         if (this.modoEdicao && this.freteAtual.id) {
             this.freteService.alterar(this.freteAtual.id, this.freteAtual).subscribe({
@@ -95,6 +115,16 @@ export class FreteComponent implements OnInit {
             style: 'currency',
             currency: 'BRL'
         });
+
+        if (frete.valorFaixa) {
+            this.valorFaixaMascarado = frete.valorFaixa.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        } else {
+            this.valorFaixaMascarado = '';
+        }
+
         this.modoEdicao = true;
         window.scrollTo(0, 0);
     }
@@ -125,6 +155,7 @@ export class FreteComponent implements OnInit {
     finalizarAcao(): void {
         this.freteAtual = this.getNovoFrete();
         this.valorMascarado = '';
+        this.valorFaixaMascarado = '';
         this.modoEdicao = false;
     }
 }

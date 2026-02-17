@@ -23,7 +23,9 @@ export interface PedidoProduto {
     valor: number;
     quantidade: number;
     desconto: number;
-    peso: number;
+    peso?: number; // Optional or required? DTO has it.
+    imagem: string;
+    tamanho?: number;
 }
 
 @Injectable({
@@ -69,7 +71,7 @@ export class PedidoService {
         return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
     }
 
-    obterSugestaoFrete(usuarioId: number): Observable<number> {
-        return this.http.get<number>(`${this.apiUrl}/sugestao-frete/${usuarioId}`);
+    obterSugestaoFrete(usuarioId: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/sugestao-frete/${usuarioId}`);
     }
 }

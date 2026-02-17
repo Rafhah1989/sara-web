@@ -24,6 +24,7 @@ export class ProductsComponent implements OnInit {
     return {
       nome: '',
       tamanho: 0,
+      peso: 0,
       ativo: true,
       imagem: ''
     };
