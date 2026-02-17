@@ -14,6 +14,13 @@ import { ContactComponent } from './pages/contact/contact.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { FreteComponent } from './pages/frete/frete.component';
 import { SetorComponent } from './pages/setor/setor.component';
+import { PedidoListComponent } from './pages/pedidos/pedido-list/pedido-list.component';
+import { PedidoFormComponent } from './pages/pedidos/pedido-form/pedido-form.component';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+
+registerLocaleData(localePt);
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -23,6 +30,9 @@ const routes: Routes = [
   { path: 'usuarios', component: UsuariosComponent },
   { path: 'frete', component: FreteComponent },
   { path: 'setores', component: SetorComponent },
+  { path: 'pedidos', component: PedidoListComponent },
+  { path: 'pedidos/novo', component: PedidoFormComponent },
+  { path: 'pedidos/editar/:id', component: PedidoFormComponent },
   { path: '**', redirectTo: '' }
 ];
 
@@ -37,7 +47,9 @@ const routes: Routes = [
     ContactComponent,
     UsuariosComponent,
     FreteComponent,
-    SetorComponent
+    SetorComponent,
+    PedidoListComponent,
+    PedidoFormComponent
   ],
   imports: [
     BrowserModule,
@@ -46,7 +58,9 @@ const routes: Routes = [
     ReactiveFormsModule,
     RouterModule.forRoot(routes)
   ],
-  providers: [],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'pt-BR' }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,0 +1,151 @@
+<div class="page-container">
+    <div class="header-section">
+        <a href="javascript:void(0)" (click)="voltar()" class="back-link">
+            <i class="fa fa-arrow-left"></i> Voltar
+        </a>
+        <h1 class="cinzel-font color-primary-gold-dark">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}
+        </h1>
+    </div>
+
+    <form [formGroup]="pedidoForm" (ngSubmit)="salvar()" class="pedido-form">
+
+        <!-- Dados do Pedido -->
+        <fieldset class="form-section">
+            <legend>Dados do Pedido</legend>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 100%;">
+                    <label>Usuário (Cliente) *</label>
+                    <div style="position: relative;">
+                        <input type="text" formControlName="usuarioNome" placeholder="Digite 3 letras para buscar..."
+                            class="form-control" autocomplete="off" (click)="showUsuariosDropdown = true">
+                        <div class="autocomplete-dropdown" *ngIf="showUsuariosDropdown">
+                            <div *ngFor="let u of usuariosFiltrados" (click)="selecionarUsuario(u)"
+                                class="dropdown-item">
+                                {{ u.nome }} ({{ u.cidade }}/{{ u.uf }})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Desconto (%)</label>
+                    <input type="number" formControlName="desconto" (input)="calcularTotais()" placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label>Frete (R$)</label>
+                    <input type="number" formControlName="frete" (input)="calcularTotais()" placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label>Valor Total</label>
+                    <div class="total-display">{{ pedidoForm.get('valorTotal')?.value | currency:'BRL' }}</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Observação</label>
+                    <textarea formControlName="observacao" rows="2" placeholder="Observações do pedido..."></textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Itens do Pedido -->
+        <fieldset class="form-section">
+            <legend>Itens do Pedido</legend>
+
+            <div class="product-search-box">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Adicionar Produto</label>
+                <div style="position: relative;">
+                    <input type="text" [(ngModel)]="termoBuscaProduto" [ngModelOptions]="{standalone: true}"
+                        (input)="buscarProduto()" placeholder="Buscar produto por nome ou código..."
+                        class="form-control">
+                    <div class="autocomplete-dropdown" *ngIf="showProdutosDropdown">
+                        <div *ngFor="let p of produtosFiltrados" (click)="adicionarProduto(p)" class="dropdown-item">
+                            #{{ p.id }} - {{ p.nome }} ({{ p.tamanho }})
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="items-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cód.</th>
+                            <th>Produto</th>
+                            <th>Tamanho</th>
+                            <th width="100">Qtd</th>
+                            <th width="120">Valor (R$)</th>
+                            <th>Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="itens">
+                        <tr *ngFor="let item of itens.controls; let i = index" [formGroupName]="i">
+                            <td>{{ item.get('produtoCodigo')?.value }}</td>
+                            <td>{{ item.get('produtoNome')?.value }}</td>
+                            <td>{{ item.get('tamanho')?.value }}</td>
+                            <td>
+                                <input type="number" formControlName="quantidade" (input)="calcularTotais()"
+                                    class="form-control small" style="width: 80px;">
+                            </td>
+                            <td>
+                                <input type="text" formControlName="valor" (input)="applyMoedaMask($event, i)"
+                                    class="form-control small" style="width: 100px;">
+                            </td>
+                            <td>{{ item.get('total')?.value | currency:'BRL' }}</td>
+                            <td class="actions">
+                                <button type="button" class="btn-icon"
+                                    (click)="visualizarImagem(item.get('imagem')?.value)"
+                                    *ngIf="item.get('imagem')?.value" title="Ver Imagem">
+                                    <i class="fa fa-picture-o"></i>
+                                </button>
+                                <button type="button" class="btn-icon danger" (click)="removerItem(i)" title="Remover">
+                                    <i class="fa fa-times" style="color: red;"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="itens.length === 0">
+                            <td colspan="7" class="text-center" style="padding: 2rem; color: #888;">Nenhum produto
+                                adicionado ao pedido.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-gold" [disabled]="pedidoForm.invalid || itens.length === 0">
+                {{ modoEdicao ? 'Salvar Alterações' : 'Salvar Pedido' }}
+            </button>
+            <button type="button" class="btn-outline" (click)="voltar()">Cancelar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Pop up Sucesso Pedido -->
+<div class="modal-overlay" *ngIf="exibirSucesso">
+    <div class="modal-content">
+        <h2 class="cinzel-font">Pedido Salvo!</h2>
+        <p>Pedido criado com sucesso. Deseja gerar o PDF agora?</p>
+        <div class="modal-actions">
+            <button class="btn btn-primary" (click)="confirmarPdf(true)">Sim</button>
+            <button class="btn btn-secondary" (click)="confirmarPdf(false)">Não</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Imagem -->
+<div class="modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
+    <div class="modal-content image-modal" (click)="$event.stopPropagation()">
+        <img [src]="imagemUrlVisualizacao" alt="Produto" class="img-preview">
+        <div style="margin-top: 20px;">
+            <button class="btn btn-secondary" (click)="fecharVisualizacaoImagem()">Fechar</button>
+        </div>
+    </div>
+</div>
