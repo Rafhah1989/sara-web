@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Frete } from '../models/frete.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class FreteService {
-    private apiUrl = 'http://localhost:8080/api/tabelas-frete';
+    private apiUrl = `${environment.apiUrl}/tabelas-frete`;
 
     constructor(private http: HttpClient) { }
 

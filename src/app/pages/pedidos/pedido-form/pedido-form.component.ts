@@ -205,14 +205,18 @@ export class PedidoFormComponent implements OnInit {
     }
 
     atualizarValorFrete(): void {
-        if (!this.freteConfig) return;
+        console.log('--- atualizarValorFrete CHAMADO ---');
+        if (!this.freteConfig) {
+            console.log('Frete Config NÃO carregar ou nulo');
+            return;
+        }
 
         let pesoTotal = 0;
         this.itens.controls.forEach(control => {
-            const qtd = control.get('quantidade')?.value || 0;
+            const qtd = Number(control.get('quantidade')?.value) || 0;
             // We need to access the product weight. 
             // The item form should store it.
-            const peso = control.get('peso')?.value || 0;
+            const peso = Number(control.get('peso')?.value) || 0;
             pesoTotal += (peso * qtd);
         });
 
@@ -221,15 +225,28 @@ export class PedidoFormComponent implements OnInit {
         if (this.freteConfig.quantidadeFaixa && this.freteConfig.valorFaixa) {
             let pesoParaCalculo = pesoTotal;
 
+            console.log('--- Cálculo de Frete ---');
+            console.log('Peso Total:', pesoTotal);
+            console.log('Minimo Faixa:', this.freteConfig.minimoFaixa);
+            console.log('Qtd Faixa:', this.freteConfig.quantidadeFaixa);
+            console.log('Valor Faixa:', this.freteConfig.valorFaixa);
+
             // Check for minimum threshold
             if (this.freteConfig.minimoFaixa && pesoTotal > this.freteConfig.minimoFaixa) {
                 pesoParaCalculo = pesoTotal - this.freteConfig.minimoFaixa;
                 // quantidadeFaixa here is actually "Peso por Faixa" now
-                const faixas = Math.floor(pesoParaCalculo / this.freteConfig.quantidadeFaixa);
+                // Using Math.ceil to ensure any excess >= 1g counts as a full range unit.
+                // Ex: 1g / 1000 = 0.001 -> Ceil = 1.
+                // Ex: 1000g / 1000 = 1 -> Ceil = 1.
+                // Ex: 1001g / 1000 = 1.001 -> Ceil = 2.
+                const faixas = Math.ceil(pesoParaCalculo / this.freteConfig.quantidadeFaixa);
+                console.log('Peso Excedente:', pesoParaCalculo);
+                console.log('Faixas Calculadas:', faixas);
+
                 freteCalculado += (faixas * this.freteConfig.valorFaixa);
             } else if (!this.freteConfig.minimoFaixa) {
                 // If no minimum set, calculate on total weight directly (old logic)
-                const faixas = Math.floor(pesoParaCalculo / this.freteConfig.quantidadeFaixa);
+                const faixas = Math.ceil(pesoParaCalculo / this.freteConfig.quantidadeFaixa);
                 freteCalculado += (faixas * this.freteConfig.valorFaixa);
             }
         }

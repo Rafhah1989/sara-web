@@ -217,7 +217,11 @@ export class UsuariosComponent implements OnInit {
             cep: rawData.cep.replace(/\D/g, ''),
             cpfCnpj: rawData.cpfCnpj.replace(/\D/g, ''),
             telefone: rawData.telefone,
-            senha: senha || undefined // Se vazio na edição, não envia
+            senha: senha || undefined, // Se vazio na edição, não envia
+            formaPagamento: rawData.formaPagamento || null,
+            modalidadeEntrega: rawData.modalidadeEntrega || null,
+            setorId: rawData.setorId || null,
+            tabelaFreteId: rawData.tabelaFreteId || null
         };
 
         if (this.modoEdicao && this.usuarioIdEmEdicao) {
