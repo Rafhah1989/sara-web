@@ -1,8 +1,12 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { AuthGuard } from './guards/auth.guard';
+import { LoginComponent } from './pages/login/login.component';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -24,15 +28,16 @@ registerLocaleData(localePt);
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'quem-somos', component: AboutComponent },
-  { path: 'produtos', component: ProductsComponent },
+  { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard] },
   { path: 'contato', component: ContactComponent },
-  { path: 'usuarios', component: UsuariosComponent },
-  { path: 'frete', component: FreteComponent },
-  { path: 'setores', component: SetorComponent },
-  { path: 'pedidos', component: PedidoListComponent },
-  { path: 'pedidos/novo', component: PedidoFormComponent },
-  { path: 'pedidos/editar/:id', component: PedidoFormComponent },
+  { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
+  { path: 'frete', component: FreteComponent, canActivate: [AuthGuard] },
+  { path: 'setores', component: SetorComponent, canActivate: [AuthGuard] },
+  { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
+  { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
+  { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];
 
@@ -49,7 +54,8 @@ const routes: Routes = [
     FreteComponent,
     SetorComponent,
     PedidoListComponent,
-    PedidoFormComponent
+    PedidoFormComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -59,7 +65,8 @@ const routes: Routes = [
     RouterModule.forRoot(routes)
   ],
   providers: [
-    { provide: LOCALE_ID, useValue: 'pt-BR' }
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

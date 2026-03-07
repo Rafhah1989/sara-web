@@ -253,7 +253,7 @@ export class UsuariosComponent implements OnInit {
         if (id && confirm('Tem certeza que deseja desativar este usuário?')) {
             this.usuarioService.desativar(id).subscribe({
                 next: () => this.carregarUsuarios(),
-                error: (err) => console.error('Erro ao desativar usuário', err)
+                error: (err) => alert(err.error || 'Erro ao desativar usuário')
             });
         }
     }
@@ -262,7 +262,7 @@ export class UsuariosComponent implements OnInit {
         if (id) {
             this.usuarioService.ativar(id).subscribe({
                 next: () => this.carregarUsuarios(),
-                error: (err) => console.error('Erro ao ativar usuário', err)
+                error: (err) => alert(err.error || 'Erro ao ativar usuário')
             });
         }
     }
