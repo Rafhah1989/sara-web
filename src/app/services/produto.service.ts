@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Produto } from '../models/produto.model';
 import { environment } from '../../environments/environment';
@@ -34,5 +34,15 @@ export class ProdutoService {
 
     excluir(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number): Observable<Produto[]> {
+        let params = new HttpParams();
+        if (nome) params = params.set('nome', nome);
+        if (tamanho) params = params.set('tamanho', tamanho.toString());
+        if (precoMin) params = params.set('precoMin', precoMin.toString());
+        if (precoMax) params = params.set('precoMax', precoMax.toString());
+
+        return this.http.get<Produto[]>(`${this.apiUrl}/loja`, { params });
     }
 }

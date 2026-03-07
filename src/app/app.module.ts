@@ -20,6 +20,7 @@ import { FreteComponent } from './pages/frete/frete.component';
 import { SetorComponent } from './pages/setor/setor.component';
 import { PedidoListComponent } from './pages/pedidos/pedido-list/pedido-list.component';
 import { PedidoFormComponent } from './pages/pedidos/pedido-form/pedido-form.component';
+import { LojaComponent } from './pages/loja/loja.component';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -35,6 +36,7 @@ const routes: Routes = [
   { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+  { path: 'loja', component: LojaComponent, canActivate: [AuthGuard] },
   { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
@@ -55,6 +57,7 @@ const routes: Routes = [
     SetorComponent,
     PedidoListComponent,
     PedidoFormComponent,
+    LojaComponent,
     LoginComponent
   ],
   imports: [

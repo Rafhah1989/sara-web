@@ -26,6 +26,19 @@
             </div>
 
             <div class="form-row">
+                <div class="form-group">
+                    <label for="codigo">Código</label>
+                    <input type="number" id="codigo" name="codigo" [(ngModel)]="produtoAtual.codigo" required
+                        placeholder="Ex: 1234">
+                </div>
+                <div class="form-group">
+                    <label for="preco">Preço (R$)</label>
+                    <input type="text" id="preco" name="preco" [(ngModel)]="precoFMT"
+                        (input)="applyCurrencyMask($event)" placeholder="Ex: R$ 50,00">
+                </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group checkbox-group">
                     <label for="ativo">Ativo</label>
                     <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="produtoAtual.ativo">
@@ -66,8 +79,9 @@
                 <div *ngIf="!product.imagem" class="product-image placeholder">Sem Imagem</div>
             </div>
             <div class="product-info">
-                <h3>{{ product.nome }}</h3>
+                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo }})</small></h3>
                 <p>Tamanho: {{ product.tamanho }} cm</p>
+                <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
                 <p class="status" [class.inactive]="!product.ativo">
                     {{ product.ativo ? 'Disponível' : 'Indisponível' }}
                 </p>

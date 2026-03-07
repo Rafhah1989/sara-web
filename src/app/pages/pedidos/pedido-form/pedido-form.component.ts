@@ -141,13 +141,16 @@ export class PedidoFormComponent implements OnInit {
             const qtd = itemExistente.get('quantidade')?.value;
             itemExistente.patchValue({ quantidade: qtd + 1 });
         } else {
+            const valorInicial = produto.preco || 0;
+            const valorInicialFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorInicial);
+
             const itemForm = this.fb.group({
                 produtoId: [produto.id],
                 produtoNome: [produto.nome],
                 produtoCodigo: [produto.id], // ID as code fallback
                 tamanho: [produto.tamanho],
                 quantidade: [1, [Validators.required, Validators.min(0.01)]],
-                valor: ['R$ 0,00', Validators.required],
+                valor: [valorInicialFormatado, Validators.required],
                 total: [{ value: 0, disabled: true }],
                 imagem: [produto.imagem],
                 peso: [produto.peso || 0]

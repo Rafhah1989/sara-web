@@ -83,6 +83,17 @@ export class AuthService {
     }
   }
 
+  getUsuarioIdDoToken(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.id || null;
+    } catch {
+      return null;
+    }
+  }
+
   // --- Gerenciamento de Sessão de 30 minutos ---
 
   public resetInactivityTimer() {

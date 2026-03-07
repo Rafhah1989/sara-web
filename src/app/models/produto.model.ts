@@ -3,6 +3,8 @@ export interface Produto {
     nome: string;
     tamanho: number;
     peso?: number;
+    preco?: number;
+    codigo?: number;
     ativo: boolean;
     imagem: string; // Base64
 }

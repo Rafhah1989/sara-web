@@ -1,0 +1,68 @@
+<div class="page-title-banner">
+    <h1>Loja Sara</h1>
+</div>
+
+<section class="loja-page container">
+    <div class="loja-layout">
+        
+        <!-- Sidebar Filtros -->
+        <aside class="loja-sidebar card">
+            <h2>Filtros</h2>
+            <div class="form-group">
+                <label>Nome do Produto</label>
+                <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)" placeholder="Mínimo 3 letras...">
+            </div>
+            
+            <div class="form-group">
+                <label>Tamanho (cm)</label>
+                <input type="number" [(ngModel)]="filtroTamanho" (change)="pesquisar()">
+            </div>
+            
+            <fieldset class="filter-fieldset">
+                <legend>Faixa de Preço</legend>
+                <div class="price-range-group">
+                    <div class="form-group">
+                        <label>Mínimo</label>
+                        <input type="text" [(ngModel)]="filtroPrecoMinFMT" (input)="applyCurrencyMask($event, 'min')" placeholder="R$ 0,00">
+                    </div>
+                    <div class="form-group">
+                        <label>Máximo</label>
+                        <input type="text" [(ngModel)]="filtroPrecoMaxFMT" (input)="applyCurrencyMask($event, 'max')" placeholder="R$ 0,00">
+                    </div>
+                </div>
+            </fieldset>
+
+            <button class="btn-gold" style="width: 100%; margin-top: 15px;" (click)="pesquisar()">Aplicar Filtros</button>
+            <button class="btn-clear" style="width: 100%; margin-top: 10px;" (click)="limparFiltros()">Limpar Filtros</button>
+        </aside>
+
+        <!-- Vitrine de Produtos -->
+        <main class="loja-vitrine">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-primary-dark); font-weight: 600; text-transform: uppercase;">Selecione seus Produtos</h2>
+            <div class="vitrine-grid">
+                <div class="vitrine-card" *ngFor="let product of produtos">
+                    <div class="card-image-wrapper">
+                        <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome">
+                        <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h4 class="card-title">{{ product.nome }}</h4>
+                        <p class="card-size">Tamanho: {{ product.tamanho }} cm</p>
+                        <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+                        
+                        <div class="card-actions">
+                            <label>Qtd:</label>
+                            <input type="number" min="1" [(ngModel)]="quantidades[product.id!]">
+                        </div>
+                        <button class="btn-add" (click)="adicionarAoCarrinho(product)">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="produtos.length === 0" class="no-products">
+                <p>Nenhum produto encontrado com estes filtros.</p>
+            </div>
+        </main>
+    </div>
+</section>

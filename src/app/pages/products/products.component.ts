@@ -13,6 +13,7 @@ export class ProductsComponent implements OnInit {
   produtoAtual: Produto = this.getNovoProduto();
   filtroNome: string = '';
   modoEdicao: boolean = false;
+  precoFMT: string = '';
 
   constructor(private produtoService: ProdutoService) { }
 
@@ -21,10 +22,13 @@ export class ProductsComponent implements OnInit {
   }
 
   getNovoProduto(): Produto {
+    this.precoFMT = '';
     return {
       nome: '',
+      codigo: 0,
       tamanho: 0,
       peso: 0,
+      preco: undefined,
       ativo: true,
       imagem: ''
     };
@@ -46,6 +50,22 @@ export class ProductsComponent implements OnInit {
     } else {
       this.carregarProdutos();
     }
+  }
+
+  applyCurrencyMask(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value === '') {
+      this.precoFMT = '';
+      this.produtoAtual.preco = undefined;
+      return;
+    }
+    let numeric = (Number(value) / 100).toFixed(2);
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(Number(numeric));
+    this.precoFMT = formatted;
+    this.produtoAtual.preco = Number(numeric);
   }
 
   salvar(): void {
@@ -71,6 +91,11 @@ export class ProductsComponent implements OnInit {
   editar(produto: Produto): void {
     this.produtoAtual = { ...produto };
     this.modoEdicao = true;
+    if (this.produtoAtual.preco != null) {
+      this.precoFMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(this.produtoAtual.preco);
+    } else {
+      this.precoFMT = '';
+    }
     window.scrollTo(0, 0);
   }
 
