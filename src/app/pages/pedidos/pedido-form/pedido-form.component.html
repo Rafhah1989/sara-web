@@ -80,7 +80,7 @@
         <fieldset class="form-section">
             <legend>Itens do Pedido</legend>
 
-            <div class="product-search-box" *ngIf="pedidoForm.get('situacao')?.value === 'NOVO'">
+            <div class="product-search-box" *ngIf="pedidoForm.get('situacao')?.value === 'PENDENTE'">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Adicionar Produto</label>
                 <div style="position: relative;">
                     <input type="text" [(ngModel)]="termoBuscaProduto" [ngModelOptions]="{standalone: true}"
@@ -127,7 +127,7 @@
                                     *ngIf="item.get('imagem')?.value && item.get('imagem')?.value !== ''" title="Ver Imagem">
                                     <i class="fa fa-image"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm mx-1" (click)="removerItem(i)" title="Remover" *ngIf="pedidoForm.get('situacao')?.value === 'NOVO'">
+                                <button type="button" class="btn btn-danger btn-sm mx-1" (click)="removerItem(i)" title="Remover" *ngIf="pedidoForm.get('situacao')?.value === 'PENDENTE'">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </td>

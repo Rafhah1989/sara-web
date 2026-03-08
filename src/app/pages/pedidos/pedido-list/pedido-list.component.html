@@ -6,9 +6,9 @@
 
     <div class="filter-section card">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-3" *ngIf="isAdmin">
                 <label>Por Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente"
+                <input type="text" [(ngModel)]="filtroCliente" (keyup.enter)="filtrarPedidos()" placeholder="Nome do cliente"
                     class="form-control">
             </div>
             <div class="col-md-2">

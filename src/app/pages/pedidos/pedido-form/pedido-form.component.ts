@@ -61,7 +61,7 @@ export class PedidoFormComponent implements OnInit {
             formaPagamentoId: [null],
             desconto: [0],
             frete: ['R$ 0,00'],
-            situacao: ['NOVO'],
+            situacao: ['PENDENTE'],
             observacao: [''],
             valorTotal: [{ value: 0, disabled: true }],
             itens: this.fb.array([])
@@ -215,7 +215,7 @@ export class PedidoFormComponent implements OnInit {
                 produtoNome: [produto.nome],
                 produtoCodigo: [produto.id], // ID as code fallback
                 tamanho: [produto.tamanho],
-                quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'NOVO' }, [Validators.required, Validators.min(0.01)]],
+                quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' }, [Validators.required, Validators.min(0.01)]],
                 valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
                 total: [{ value: 0, disabled: true }],
                 imagem: [produto.imagem],
@@ -381,7 +381,7 @@ export class PedidoFormComponent implements OnInit {
                     produtoNome: [p.produtoNome],
                     produtoCodigo: [p.produtoCodigo],
                     tamanho: [p.tamanho], // Now mapped from DTO
-                    quantidade: [{ value: p.quantidade, disabled: pedido.situacao !== 'NOVO' }, Validators.required],
+                    quantidade: [{ value: p.quantidade, disabled: pedido.situacao !== 'PENDENTE' }, Validators.required],
                     valor: [{ value: valorFormatted, disabled: !this.isAdmin }, Validators.required],
                     total: [{ value: p.quantidade * p.valor, disabled: true }],
                     imagem: [p.imagem], // Load the image from backend response
@@ -412,7 +412,7 @@ export class PedidoFormComponent implements OnInit {
             formaPagamentoId: formValue.formaPagamentoId,
             desconto: formValue.desconto,
             frete: this.parseMoeda(formValue.frete),
-            situacao: this.pedidoForm.get('situacao')?.value || 'NOVO',
+            situacao: this.pedidoForm.get('situacao')?.value || 'PENDENTE',
             valorTotal: formValue.valorTotal,
             observacao: formValue.observacao,
             produtos: formValue.itens.map((it: any) => ({

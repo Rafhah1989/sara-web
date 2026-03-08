@@ -14,6 +14,7 @@ export class PedidoListComponent implements OnInit {
     pedidos: Pedido[] = [];
     usuarios: Usuario[] = [];
     filtroCliente: string = '';
+    isAdmin: boolean = false;
     filtroId: number | null = null;
     filtroDataInicio: string = '';
     filtroDataFim: string = '';
@@ -40,6 +41,7 @@ export class PedidoListComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
         this.carregarSituacoes();
         this.carregarPedidos();
     }
@@ -130,7 +132,7 @@ export class PedidoListComponent implements OnInit {
     cancelarPedido(pedido: Pedido): void {
         const role = this.authService.getRoleDoToken();
         if (role === 'CLIENTE' && (pedido.situacao === 'EM_PRODUCAO' || pedido.situacao === 'FINALIZADO')) {
-            alert('Apenas pedidos com situação Novo ou Em Entrega podem ser cancelados por clientes.');
+            alert('Apenas pedidos com situação Pendente ou Em Entrega podem ser cancelados por clientes.');
             return;
         }
 
