@@ -24,7 +24,14 @@
                 <label>Data Fim</label>
                 <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="form-control">
             </div>
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-2">
+                <label>Situação</label>
+                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="form-control">
+                    <option value="">Todas</option>
+                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
                 <button class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
             </div>
         </div>
@@ -56,6 +63,7 @@
                         Data <i class="fa" [ngClass]="getSortIcon('dataPedido')"></i>
                     </th>
                     <th>Valor Total</th>
+                    <th>Situação</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -66,18 +74,19 @@
                     <td>{{ pedido.usuarioNome }}</td>
                     <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
+                    <td>{{ pedido.situacaoDescricao }}</td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td class="actions">
-                        <button class="btn-icon" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
-                            <i class="fa fa-file-pdf-o">PDF</i>
+                        <button class="btn btn-primary btn-sm mx-1" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
+                            <i class="fa fa-file-pdf"></i>
                         </button>
-                        <button class="btn-icon" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
+                        <button class="btn btn-warning btn-sm mx-1 text-white" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
                             [disabled]="pedido.cancelado">
-                            <i class="fa fa-pencil">Editar</i>
+                            <i class="fa fa-pencil"></i>
                         </button>
-                        <button class="btn-icon" title="Cancelar" *ngIf="!pedido.cancelado"
+                        <button class="btn btn-danger btn-sm mx-1" title="Cancelar" *ngIf="!pedido.cancelado"
                             (click)="cancelarPedido(pedido)">
-                            <i class="fa fa-trash">Cancelar</i>
+                            <i class="fa fa-trash"></i>
                         </button>
                     </td>
                 </tr>

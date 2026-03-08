@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { PedidoService, Pedido, PedidoProduto } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
+import { AuthService } from '../../../services/auth.service';
 import { ProdutoService } from '../../../services/produto.service';
 import { Usuario } from '../../../models/usuario.model';
 import { Produto } from '../../../models/produto.model';
@@ -27,7 +28,9 @@ export class PedidoFormComponent implements OnInit {
     showProdutosDropdown: boolean = false;
 
     formasPagamento: any[] = [];
+    situacoesPedido: any[] = [];
     descontoUsuarioAtual: number = 0;
+    isAdmin: boolean = false;
 
     exibirSucesso: boolean = false;
     exibirVisualizacaoImagem: boolean = false;
@@ -43,6 +46,7 @@ export class PedidoFormComponent implements OnInit {
         private fb: FormBuilder,
         private pedidoService: PedidoService,
         private usuarioService: UsuarioService,
+        private authService: AuthService,
         productService: ProdutoService,
         route: ActivatedRoute,
         router: Router
@@ -57,6 +61,7 @@ export class PedidoFormComponent implements OnInit {
             formaPagamentoId: [null],
             desconto: [0],
             frete: ['R$ 0,00'],
+            situacao: ['NOVO'],
             observacao: [''],
             valorTotal: [{ value: 0, disabled: true }],
             itens: this.fb.array([])
@@ -69,10 +74,43 @@ export class PedidoFormComponent implements OnInit {
             this.modoEdicao = true;
             this.pedidoId = id;
             this.carregarPedido(id);
+        } else {
+            // New order
+            this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
+            if (!this.isAdmin) {
+                // If CLIENTE, auto-fill and disable client selection
+                const userId = this.authService.getUsuarioIdDoToken();
+                const userNome = this.authService.getSubjectDoToken();
+                if (userId) {
+                    // simulate user selection to load freight
+                    this.pedidoForm.patchValue({
+                        usuarioId: userId,
+                        usuarioNome: userNome
+                    });
+                    this.pedidoForm.get('usuarioNome')?.disable();
+                    this.carregarConfiguracaoFrete(userId);
+                }
+            }
         }
 
         this.setupBuscaUsuarios();
         this.carregarFormasPagamento();
+        this.carregarSituacoes();
+        
+        // Disable fields for CLIENTE globally
+        this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
+        if (!this.isAdmin) {
+            this.pedidoForm.get('desconto')?.disable();
+            this.pedidoForm.get('frete')?.disable();
+            this.pedidoForm.get('situacao')?.disable();
+            this.pedidoForm.get('usuarioNome')?.disable();
+        }
+    }
+
+    carregarSituacoes(): void {
+        this.pedidoService.obterSituacoesPedido().subscribe(situacoes => {
+            this.situacoesPedido = situacoes;
+        });
     }
 
     carregarFormasPagamento(): void {
@@ -177,8 +215,8 @@ export class PedidoFormComponent implements OnInit {
                 produtoNome: [produto.nome],
                 produtoCodigo: [produto.id], // ID as code fallback
                 tamanho: [produto.tamanho],
-                quantidade: [1, [Validators.required, Validators.min(0.01)]],
-                valor: [valorInicialFormatado, Validators.required],
+                quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'NOVO' }, [Validators.required, Validators.min(0.01)]],
+                valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
                 total: [{ value: 0, disabled: true }],
                 imagem: [produto.imagem],
                 peso: [produto.peso || 0]
@@ -320,6 +358,7 @@ export class PedidoFormComponent implements OnInit {
                 formaPagamentoId: pedido.formaPagamentoId || null,
                 desconto: pedido.desconto,
                 frete: freteFormatted,
+                situacao: pedido.situacao,
                 observacao: pedido.observacao
             }, { emitEvent: false });
 
@@ -342,8 +381,8 @@ export class PedidoFormComponent implements OnInit {
                     produtoNome: [p.produtoNome],
                     produtoCodigo: [p.produtoCodigo],
                     tamanho: [p.tamanho], // Now mapped from DTO
-                    quantidade: [p.quantidade, Validators.required],
-                    valor: [valorFormatted, Validators.required],
+                    quantidade: [{ value: p.quantidade, disabled: pedido.situacao !== 'NOVO' }, Validators.required],
+                    valor: [{ value: valorFormatted, disabled: !this.isAdmin }, Validators.required],
                     total: [{ value: p.quantidade * p.valor, disabled: true }],
                     imagem: [p.imagem], // Load the image from backend response
                     peso: [p.peso || 0]
@@ -373,6 +412,7 @@ export class PedidoFormComponent implements OnInit {
             formaPagamentoId: formValue.formaPagamentoId,
             desconto: formValue.desconto,
             frete: this.parseMoeda(formValue.frete),
+            situacao: this.pedidoForm.get('situacao')?.value || 'NOVO',
             valorTotal: formValue.valorTotal,
             observacao: formValue.observacao,
             produtos: formValue.itens.map((it: any) => ({

@@ -3,6 +3,7 @@ import { PedidoService, Pedido } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
 import { Usuario } from '../../../models/usuario.model';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
     selector: 'app-pedido-list',
@@ -16,7 +17,10 @@ export class PedidoListComponent implements OnInit {
     filtroId: number | null = null;
     filtroDataInicio: string = '';
     filtroDataFim: string = '';
+    filtroSituacao: string = '';
     exibirCancelados: boolean = false;
+    
+    situacoesPedido: any[] = [];
 
     currentPage: number = 0;
     pageSize: number = 10;
@@ -31,11 +35,19 @@ export class PedidoListComponent implements OnInit {
     constructor(
         private pedidoService: PedidoService,
         private usuarioService: UsuarioService,
+        private authService: AuthService,
         private router: Router
     ) { }
 
     ngOnInit(): void {
+        this.carregarSituacoes();
         this.carregarPedidos();
+    }
+
+    carregarSituacoes(): void {
+        this.pedidoService.obterSituacoesPedido().subscribe(situacoes => {
+            this.situacoesPedido = situacoes;
+        });
     }
 
     carregarPedidos(): void {
@@ -57,6 +69,7 @@ export class PedidoListComponent implements OnInit {
             this.filtroCliente || undefined,
             dataInicioISO,
             dataFimISO,
+            this.filtroSituacao || undefined,
             this.currentPage,
             this.pageSize,
             sortParam,
@@ -102,6 +115,7 @@ export class PedidoListComponent implements OnInit {
         this.filtroId = null;
         this.filtroDataInicio = '';
         this.filtroDataFim = '';
+        this.filtroSituacao = '';
         this.filtrarPedidos();
     }
 
@@ -114,6 +128,12 @@ export class PedidoListComponent implements OnInit {
     }
 
     cancelarPedido(pedido: Pedido): void {
+        const role = this.authService.getRoleDoToken();
+        if (role === 'CLIENTE' && (pedido.situacao === 'EM_PRODUCAO' || pedido.situacao === 'FINALIZADO')) {
+            alert('Apenas pedidos com situação Novo ou Em Entrega podem ser cancelados por clientes.');
+            return;
+        }
+
         const confirmacao = confirm(`Deseja realmente cancelar o pedido #${pedido.id}?\nCliente: ${pedido.usuarioNome}\nData: ${new Date(pedido.dataPedido).toLocaleDateString()}`);
         if (confirmacao) {
             this.pedidoService.cancelar(pedido.id).subscribe(() => {

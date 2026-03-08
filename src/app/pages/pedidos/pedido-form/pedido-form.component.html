@@ -41,6 +41,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Situação</label>
+                    <select formControlName="situacao" class="form-control">
+                        <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Valor Total</label>
                     <div class="total-display">{{ pedidoForm.get('valorTotal')?.value | currency:'BRL' }}</div>
                 </div>
@@ -73,7 +80,7 @@
         <fieldset class="form-section">
             <legend>Itens do Pedido</legend>
 
-            <div class="product-search-box">
+            <div class="product-search-box" *ngIf="pedidoForm.get('situacao')?.value === 'NOVO'">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Adicionar Produto</label>
                 <div style="position: relative;">
                     <input type="text" [(ngModel)]="termoBuscaProduto" [ngModelOptions]="{standalone: true}"
@@ -115,13 +122,13 @@
                             </td>
                             <td>{{ item.get('total')?.value | currency:'BRL' }}</td>
                             <td class="actions">
-                                <button type="button" class="btn-icon"
+                                <button type="button" class="btn btn-info btn-sm mx-1 text-white"
                                     (click)="visualizarImagem(item.get('imagem')?.value)"
-                                    *ngIf="item.get('imagem')?.value" title="Ver Imagem">
-                                    <i class="fa fa-picture-o"></i>
+                                    *ngIf="item.get('imagem')?.value && item.get('imagem')?.value !== ''" title="Ver Imagem">
+                                    <i class="fa fa-image"></i>
                                 </button>
-                                <button type="button" class="btn-icon danger" (click)="removerItem(i)" title="Remover">
-                                    <i class="fa fa-times" style="color: red;"></i>
+                                <button type="button" class="btn btn-danger btn-sm mx-1" (click)="removerItem(i)" title="Remover" *ngIf="pedidoForm.get('situacao')?.value === 'NOVO'">
+                                    <i class="fa fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
