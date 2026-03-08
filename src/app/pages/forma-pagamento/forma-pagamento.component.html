@@ -1,0 +1,100 @@
+<div class="page-title-banner">
+    <h1>Gerenciamento de Formas de Pagamento</h1>
+</div>
+
+<section class="container form-page">
+    <div class="header-actions">
+        <h2>Lista de Formas de Pagamento</h2>
+        <button class="btn-primary" (click)="abrirModalParaCriar()"><i class="fa fa-plus"></i> Novo Cadastro</button>
+    </div>
+
+    <!-- Tabela de Listagem -->
+    <div class="table-container shadow-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Forma</th>
+                    <th>Ícone Visual</th>
+                    <th>Desconto (%)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let forma of formasPagamento">
+                    <td>{{ forma.id }}</td>
+                    <td class="destaque">{{ forma.descricao }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i *ngIf="forma.iconeFontAwesome" [ngClass]="forma.iconeFontAwesome" class="fa-lg preview-icon" [title]="forma.iconeFontAwesome"></i>
+                            <span *ngIf="forma.iconeFontAwesome" class="text-muted" style="font-size: 0.85rem; font-family: monospace; user-select: all;">
+                                &lt;i class="{{ forma.iconeFontAwesome }}"&gt;&lt;/i&gt;
+                            </span>
+                            <span *ngIf="!forma.iconeFontAwesome">-</span>
+                        </div>
+                    </td>
+                    <td>{{ forma.desconto }} %</td>
+                    <td class="td-actions">
+                        <button class="btn-icon text-primary" (click)="abrirModalParaEditar(forma)" title="Editar">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn-icon text-danger" (click)="confirmarExclusao(forma.id)" title="Excluir">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="formasPagamento.length === 0">
+                    <td colspan="5" class="text-center">Nenhuma forma de pagamento encontrada.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Modal de Cadastro / Edição -->
+<div class="modal-overlay" *ngIf="exibirModal">
+    <div class="modal-content shadow-card">
+        <h3>{{ formaPagamentoAtual.id ? 'Editar Forma de Pagamento' : 'Nova Forma de Pagamento' }}</h3>
+        
+        <form (ngSubmit)="salvarFormaPagamento()">
+            <div class="form-group flex-col">
+                <label for="descricao">Nome/Descrição *</label>
+                <input type="text" id="descricao" name="descricao" [(ngModel)]="formaPagamentoAtual.descricao" required placeholder="Ex: PIX">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-col">
+                    <label for="desconto">Desconto Fixo (%)</label>
+                    <input type="number" id="desconto" name="desconto" [(ngModel)]="formaPagamentoAtual.desconto" step="0.5" min="0" placeholder="Ex: 5">
+                </div>
+
+                <div class="form-group flex-col">
+                    <label for="icone">Classe Font-Awesome Opcional</label>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="icone" name="icone" [(ngModel)]="formaPagamentoAtual.iconeFontAwesome" placeholder="Ex: fa-brands fa-pix">
+                        <div class="real-time-preview">
+                            <i [ngClass]="formaPagamentoAtual.iconeFontAwesome" class="fa-2x text-primary" [title]="'Preview Atual' "></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn-primary" [disabled]="!formaPagamentoAtual.descricao">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Avisos e Excluir -->
+<div class="modal-overlay" *ngIf="exibirAviso">
+    <div class="modal-content text-center alert-shadow">
+        <h3>Atenção</h3>
+        <p [innerHTML]="mensagemAviso"></p>
+        <div class="modal-actions justify-center mt-20">
+            <button *ngIf="eExclusao" class="btn-secondary" (click)="fecharAviso()">Não</button>
+            <button class="btn-primary" [ngClass]="{'btn-danger': eExclusao}" (click)="executarAcaoAviso()">{{ eExclusao ? 'Sim, Excluir' : 'Ok' }}</button>
+        </div>
+    </div>
+</div>

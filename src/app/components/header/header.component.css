@@ -124,3 +124,40 @@
     display: flex;
     align-items: center;
 }
+
+/* Cart Icon and Badge Attributes */
+.cart-link {
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-icon {
+    font-size: 1.25rem;
+    color: var(--primary-gold);
+    transition: transform 0.2s ease;
+}
+
+.cart-link:hover .cart-icon {
+    transform: scale(1.1);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background-color: var(--status-active, #4CAF50);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}

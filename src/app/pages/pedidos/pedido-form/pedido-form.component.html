@@ -52,6 +52,21 @@
                     <textarea formControlName="observacao" rows="2" placeholder="Observações do pedido..."></textarea>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 100%;">
+                    <label>Forma de Pagamento</label>
+                    <div class="payment-options">
+                        <label class="payment-radio" *ngFor="let forma of formasPagamento">
+                            <input type="radio" formControlName="formaPagamentoId" [value]="forma.id" (change)="aoSelecionarFormaPagamento(forma.id)">
+                            <div class="payment-card">
+                                <i [ngClass]="forma.iconeFontAwesome"></i>
+                                <span>{{ forma.descricao }}</span>
+                                <small *ngIf="forma.desconto > 0">(-{{ forma.desconto }}%)</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
         </fieldset>
 
         <!-- Itens do Pedido -->

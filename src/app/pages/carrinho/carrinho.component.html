@@ -1,0 +1,123 @@
+<div class="page-title-banner">
+    <h1>Carrinho de Compras</h1>
+</div>
+
+<section class="carrinho-page container">
+    <div *ngIf="itensCarrinho.length === 0" class="carrinho-vazio">
+        <i class="fa fa-shopping-basket fa-4x empty-icon"></i>
+        <h2>Seu carrinho está vazio!</h2>
+        <p>Volte à loja para adicionar produtos incríveis.</p>
+        <button class="btn-gold" routerLink="/loja">Ir para a Loja</button>
+    </div>
+
+    <div *ngIf="itensCarrinho.length > 0" class="carrinho-conteudo">
+        <div class="carrinho-header-actions">
+            <h3>Meus Itens</h3>
+            <button class="btn-esvaziar" (click)="abrirModalLimpar()">
+                <i class="fa fa-trash"></i> Esvaziar Carrinho
+            </button>
+        </div>
+
+        <div class="grupos-container">
+            <!-- Quadros de Tamanho -->
+            <div class="tamanho-card" *ngFor="let grupo of gruposPorTamanho">
+                <div class="tamanho-card-header">
+                    <h4>Tamanho: {{ grupo.tamanho }} cm</h4>
+                </div>
+                
+                <div class="tamanho-card-body">
+                    <div class="carrinho-item" *ngFor="let item of grupo.itens">
+                        <div class="item-imagem">
+                            <img *ngIf="item.produtoImagem" [src]="item.produtoImagem" [alt]="item.produtoNome">
+                            <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
+                        </div>
+                        
+                        <div class="item-info">
+                            <h5 class="item-nome">{{ item.produtoNome }}</h5>
+                            <span class="item-preco">{{ item.produtoPreco | currency:'BRL':'symbol':'1.2-2' }}</span>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <div class="qtd-control">
+                                <label>Qtd:</label>
+                                <input type="number" min="1" 
+                                    [ngModel]="item.quantidade" 
+                                    (change)="atualizarQuantidade(item, $any($event.target).value)">
+                            </div>
+                            
+                            <button class="btn-remover" (click)="removerItem(item.produtoId)" title="Remover Produto">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra Lateral de Pagamento e Finalização -->
+        <aside class="carrinho-checkout shadow-card">
+            <h3>Resumo do Pedido</h3>
+            
+            <div class="resumo-linha">
+                <span>Subtotal:</span>
+                <span class="resumo-valor">{{ valorSubtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </div>
+
+            <div class="resumo-linha text-danger" *ngIf="valorDescontoCalculado > 0">
+                <span>Descontos ({{ descontoUsuario + descontoForma }}%):</span>
+                <span class="resumo-valor">- {{ valorDescontoCalculado | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </div>
+
+            <div class="resumo-linha">
+                <span>Frete (Sugestão):</span>
+                <span class="resumo-valor" *ngIf="freteSugerido">{{ freteSugerido | currency:'BRL':'symbol':'1.2-2' }}</span>
+                <span class="resumo-valor" *ngIf="!freteSugerido">Grátis</span>
+            </div>
+
+            <hr>
+
+            <div class="resumo-linha">
+                <strong>Total Final:</strong>
+                <strong class="resumo-valor destaque-gold">{{ valorTotalGeral | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+
+            <div class="forma-pagamento-section mt-15">
+                <h4>Forma de Pagamento</h4>
+                <div class="radio-cards">
+                    <label class="payment-radio" *ngFor="let forma of formasPagamento">
+                        <input type="radio" name="formaPagamento" [value]="forma.id" [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()">
+                        <div class="payment-card">
+                            <i [ngClass]="forma.iconeFontAwesome"></i>
+                            <span>{{ forma.descricao || forma.nome }}</span>
+                            <small *ngIf="forma.desconto > 0">(-{{ forma.desconto }}%)</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-gerar-pedido mt-15" (click)="gerarPedido()" [disabled]="!formaPagamentoSelecionada">
+                Gerar Pedido
+            </button>
+        </aside>
+    </div>
+</section>
+
+<!-- Modal de Confirmação: Limpar Carrinho -->
+<div class="modal-overlay" *ngIf="exibirModalLimpar">
+    <div class="modal-container">
+        <h3 class="modal-title alert-title">Atenção!</h3>
+        <div class="modal-body text-center">
+            <p>Tem certeza de que deseja excluir <strong>todos</strong> os produtos do seu carrinho?</p>
+            <p class="text-muted">Esta ação não poderá ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancelar" (click)="fecharModalLimpar()">Não, cancelar</button>
+            <button class="btn-confirmar btn-danger" (click)="limparCarrinhoConfirmado()">Sim, excluir tudo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" *ngIf="exibirToast">
+    {{ mensagemToast }}
+</div>

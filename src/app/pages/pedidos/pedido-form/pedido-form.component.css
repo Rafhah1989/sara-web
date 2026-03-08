@@ -1,5 +1,47 @@
 .page-container {
-    padding: 0 1rem 2rem 1rem;
+    padding: 2rem;
+}
+
+.payment-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.payment-radio {
+    cursor: pointer;
+}
+
+.payment-radio input {
+    display: none;
+}
+
+.payment-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #fcfcfc;
+    transition: all 0.2s ease-in-out;
+}
+
+.payment-card i {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.payment-radio input:checked + .payment-card {
+    border-color: var(--primary-color);
+    background-color: #f7f1e3;
+}
+
+.payment-radio input:checked + .payment-card i,
+.payment-radio input:checked + .payment-card span {
+    color: var(--primary-color);
+    font-weight: bold;
 }
 
 /* Page title is now handled by .header-section */

@@ -7,6 +7,8 @@ export interface Pedido {
     id: number;
     usuarioId: number;
     usuarioNome: string;
+    formaPagamentoId?: number;
+    formaPagamentoDescricao?: string;
     desconto: number;
     frete: number;
     valorTotal: number;
@@ -74,5 +76,9 @@ export class PedidoService {
 
     obterSugestaoFrete(usuarioId: number): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/sugestao-frete/${usuarioId}`);
+    }
+
+    obterFormasPagamento(): Observable<any[]> {
+        return this.http.get<any[]>(`${environment.apiUrl}/formas-pagamento`);
     }
 }

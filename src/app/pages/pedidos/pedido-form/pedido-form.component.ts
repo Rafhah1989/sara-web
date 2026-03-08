@@ -26,6 +26,9 @@ export class PedidoFormComponent implements OnInit {
     showUsuariosDropdown: boolean = false;
     showProdutosDropdown: boolean = false;
 
+    formasPagamento: any[] = [];
+    descontoUsuarioAtual: number = 0;
+
     exibirSucesso: boolean = false;
     exibirVisualizacaoImagem: boolean = false;
     imagemUrlVisualizacao: string = '';
@@ -51,6 +54,7 @@ export class PedidoFormComponent implements OnInit {
         this.pedidoForm = this.fb.group({
             usuarioId: ['', Validators.required],
             usuarioNome: ['', Validators.required],
+            formaPagamentoId: [null],
             desconto: [0],
             frete: ['R$ 0,00'],
             observacao: [''],
@@ -68,6 +72,13 @@ export class PedidoFormComponent implements OnInit {
         }
 
         this.setupBuscaUsuarios();
+        this.carregarFormasPagamento();
+    }
+
+    carregarFormasPagamento(): void {
+        this.pedidoService.obterFormasPagamento().subscribe(formas => {
+            this.formasPagamento = formas;
+        });
     }
 
     get itens() {
@@ -87,10 +98,12 @@ export class PedidoFormComponent implements OnInit {
     }
 
     selecionarUsuario(usuario: Usuario): void {
+        this.descontoUsuarioAtual = usuario.desconto || 0;
+        
         this.pedidoForm.patchValue({
             usuarioId: usuario.id,
             usuarioNome: usuario.nome,
-            desconto: usuario.desconto || 0
+            desconto: this.calcularDescontoTotal(this.pedidoForm.get('formaPagamentoId')?.value)
         }, { emitEvent: false });
         this.showUsuariosDropdown = false;
 
@@ -116,6 +129,21 @@ export class PedidoFormComponent implements OnInit {
                 // calculated totals is called after items change.
             }
         });
+    }
+
+    aoSelecionarFormaPagamento(id: number): void {
+        const descT = this.calcularDescontoTotal(id);
+        this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
+        this.calcularTotais();
+    }
+
+    calcularDescontoTotal(formaPagamentoId?: number): number {
+        let maxForma = 0;
+        if (formaPagamentoId) {
+            const fp = this.formasPagamento.find(f => f.id === formaPagamentoId);
+            if (fp) maxForma = fp.desconto || 0;
+        }
+        return this.descontoUsuarioAtual + maxForma;
     }
 
     buscarProduto(): void {
@@ -289,11 +317,19 @@ export class PedidoFormComponent implements OnInit {
             this.pedidoForm.patchValue({
                 usuarioId: pedido.usuarioId,
                 usuarioNome: pedido.usuarioNome,
+                formaPagamentoId: pedido.formaPagamentoId || null,
                 desconto: pedido.desconto,
                 frete: freteFormatted,
                 observacao: pedido.observacao
             }, { emitEvent: false });
 
+            // Pulo do gato: Para não perder o valor original e a base de cálculo. 
+            // Como a API não traz o "desconto padrão do usuário" no responseDTO do pedido, 
+            // nós assumimos que o desconto salvo já é a representação real do momento atual.
+            this.descontoUsuarioAtual = pedido.desconto || 0;
+            // E na re-seleção somaria, mas apenas se desmarcássemos.
+            // Para editar mantemos o valor salvo pelo Backend.
+            
             // Load freight config for this user to enable dynamic updates during edit
             this.carregarConfiguracaoFrete(pedido.usuarioId);
 
@@ -334,6 +370,7 @@ export class PedidoFormComponent implements OnInit {
         const formValue = this.pedidoForm.getRawValue();
         const pedidoData = {
             usuarioId: formValue.usuarioId,
+            formaPagamentoId: formValue.formaPagamentoId,
             desconto: formValue.desconto,
             frete: this.parseMoeda(formValue.frete),
             valorTotal: formValue.valorTotal,

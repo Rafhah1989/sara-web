@@ -66,3 +66,37 @@
         </main>
     </div>
 </section>
+
+<!-- Modal de Sugestões de Compra -->
+<div class="modal-overlay" *ngIf="exibirModalSugestao">
+    <div class="modal-container">
+        <h3 class="modal-title">Incluir {{produtoOriginalSelecionado?.nome}} de outros tamanhos disponíveis?</h3>
+        
+        <div class="modal-body">
+            <div class="sugestao-item" *ngFor="let sugestao of sugestoesTamanhos">
+                <div class="sugestao-img-container" [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
+                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem" [alt]="sugestao.nome" class="sugestao-img">
+                    <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
+                </div>
+                <div class="sugestao-info">
+                    <span class="sugestao-tamanho">Tamanho: {{sugestao.tamanho}}</span>
+                    <span class="sugestao-preco">{{sugestao.preco | currency:'BRL':'symbol':'1.2-2'}}</span>
+                </div>
+                <div class="sugestao-action">
+                    <label>Qtd:</label>
+                    <input type="number" min="0" [(ngModel)]="quantidadesSugestao[sugestao.id!]">
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-cancelar" (click)="adicionarApenasOriginal()">Não, obrigado</button>
+            <button class="btn-confirmar" (click)="adicionarComSugestoes()">Adicionar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" *ngIf="exibirToast">
+    {{ mensagemToast }}
+</div>
