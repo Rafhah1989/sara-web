@@ -23,6 +23,9 @@ export class LojaComponent implements OnInit {
   filtroPrecoMinFMT: string = '';
   filtroPrecoMaxFMT: string = '';
 
+  ordenacao: 'nome' | 'tamanho' | 'preco' = 'nome';
+  itensPorLinha: 3 | 4 | 5 = 3;
+
   quantidades: { [produtoId: number]: number } = {};
   nomeSubject = new Subject<string>();
 
@@ -97,6 +100,20 @@ export class LojaComponent implements OnInit {
       return isNaN(parsed) ? undefined : parsed;
   }
 
+  ordenarProdutos(): void {
+    if (!this.produtos) return;
+    this.produtos.sort((a, b) => {
+      if (this.ordenacao === 'nome') {
+        return (a.nome || '').localeCompare(b.nome || '');
+      } else if (this.ordenacao === 'tamanho') {
+        return (a.tamanho || 0) - (b.tamanho || 0);
+      } else if (this.ordenacao === 'preco') {
+        return (a.preco || 0) - (b.preco || 0);
+      }
+      return 0;
+    });
+  }
+
   pesquisar(): void {
     const nomeBusca = this.filtroNome.length >= 3 ? this.filtroNome : undefined;
     this.produtoService.buscarParaLoja(
@@ -107,6 +124,7 @@ export class LojaComponent implements OnInit {
     ).subscribe({
       next: (data) => {
         this.produtos = data;
+        this.ordenarProdutos();
         this.produtos.forEach(p => {
           if (!this.quantidades[p.id!]) {
             this.quantidades[p.id!] = 1;

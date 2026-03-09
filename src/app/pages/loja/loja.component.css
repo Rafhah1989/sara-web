@@ -185,6 +185,9 @@
         width: 100%;
         position: static;
     }
+    .vitrine-grid {
+        grid-template-columns: 1fr !important;
+    }
 }
 
 /* Modal Overlay Area */

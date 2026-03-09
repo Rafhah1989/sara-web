@@ -36,6 +36,16 @@ export class PedidoFormComponent implements OnInit {
     exibirVisualizacaoImagem: boolean = false;
     imagemUrlVisualizacao: string = '';
 
+    // Modal Alternativo State
+    exibirModalProdutosAlternativo: boolean = false;
+    produtosModal: any[] = [];
+    produtosModalFiltrados: any[] = [];
+    filtroModalNome: string = '';
+    filtroModalTamanho: string = '';
+    filtroModalPrecoMin: string = '';
+    filtroModalPrecoMax: string = '';
+    produtosModalAgrupadosPorTamanho: { tamanho: string, produtos: any[] }[] = [];
+
     produtoService: ProdutoService;
     route: ActivatedRoute;
     router: Router;
@@ -184,6 +194,165 @@ export class PedidoFormComponent implements OnInit {
         return this.descontoUsuarioAtual + maxForma;
     }
 
+    // --- Início Modal Alternativo ---
+    abrirModalProdutosAlternativo(): void {
+        this.exibirModalProdutosAlternativo = true;
+        this.filtroModalNome = '';
+        this.filtroModalTamanho = '';
+        this.filtroModalPrecoMin = '';
+        this.filtroModalPrecoMax = '';
+        
+        this.produtoService.listarTodos().subscribe(produtos => {
+            this.produtosModal = produtos.filter(p => p.ativo).map(p => ({
+                ...p,
+                quantidadeSelecionada: 0
+            }));
+            this.filtrarProdutosModal();
+        });
+    }
+
+    fecharModalProdutosAlternativo(): void {
+        this.exibirModalProdutosAlternativo = false;
+    }
+
+    limparFiltrosModal(): void {
+        this.filtroModalNome = '';
+        this.filtroModalTamanho = '';
+        this.filtroModalPrecoMin = '';
+        this.filtroModalPrecoMax = '';
+        this.filtrarProdutosModal();
+    }
+
+    filtrarProdutosModal(): void {
+        this.produtosModalFiltrados = this.produtosModal.filter(p => {
+            let matchNome = true;
+            let matchTamanho = true;
+            let matchPreco = true;
+
+            if (this.filtroModalNome && this.filtroModalNome.length >= 3) {
+                matchNome = p.nome.toLowerCase().includes(this.filtroModalNome.toLowerCase());
+            }
+            if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
+                matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
+            }
+
+            if (this.filtroModalPrecoMin) {
+                let clearMin = this.filtroModalPrecoMin.toString().replace(/[^\d,]/g, '').replace(',', '.');
+                let parsedMin = parseFloat(clearMin);
+                if (!isNaN(parsedMin) && parsedMin > 0) {
+                    matchPreco = p.preco !== undefined && p.preco !== null && p.preco >= parsedMin;
+                }
+            }
+            
+            if (this.filtroModalPrecoMax && matchPreco) {
+                let clearMax = this.filtroModalPrecoMax.toString().replace(/[^\d,]/g, '').replace(',', '.');
+                let parsedMax = parseFloat(clearMax);
+                if (!isNaN(parsedMax) && parsedMax > 0) {
+                    matchPreco = p.preco !== undefined && p.preco !== null && p.preco <= parsedMax;
+                }
+            }
+
+            return matchNome && matchTamanho && matchPreco;
+        });
+
+        this.atualizarAgrupamentoTamanhos();
+    }
+
+    atualizarAgrupamentoTamanhos(): void {
+        const grupos = new Map<string, any[]>();
+        this.produtosModalFiltrados.forEach(p => {
+            const tamanho = p.tamanho != null ? p.tamanho.toString() : 'Sem Tamanho';
+            if (!grupos.has(tamanho)) {
+                grupos.set(tamanho, []);
+            }
+            grupos.get(tamanho)?.push(p);
+        });
+
+        this.produtosModalAgrupadosPorTamanho = Array.from(grupos.entries()).map(([tamanho, produtos]) => ({
+            tamanho,
+            produtos
+        })).sort((a, b) => {
+            if (a.tamanho === 'Sem Tamanho') return 1;
+            if (b.tamanho === 'Sem Tamanho') return -1;
+            return a.tamanho.localeCompare(b.tamanho, undefined, { numeric: true });
+        });
+    }
+
+    applyFiltroMoedaMaskMin(event: any): void {
+        const input = event.target;
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') {
+            this.filtroModalPrecoMin = '';
+            this.filtrarProdutosModal();
+            return;
+        }
+        value = (Number(value) / 100).toFixed(2);
+        this.filtroModalPrecoMin = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+        this.filtrarProdutosModal();
+    }
+
+    applyFiltroMoedaMaskMax(event: any): void {
+        const input = event.target;
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') {
+            this.filtroModalPrecoMax = '';
+            this.filtrarProdutosModal();
+            return;
+        }
+        value = (Number(value) / 100).toFixed(2);
+        this.filtroModalPrecoMax = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+        this.filtrarProdutosModal();
+    }
+
+    get totalModalAlternativo(): number {
+        return this.produtosModalFiltrados.reduce((acc, p) => acc + ((p.quantidadeSelecionada || 0) * (p.preco || 0)), 0);
+    }
+
+    get totalModalAlternativoQtd(): number {
+        return this.produtosModalFiltrados.reduce((acc, p) => acc + (Number(p.quantidadeSelecionada) || 0), 0);
+    }
+
+    calcularQtdGrupo(grupo: any): number {
+        return grupo.produtos.reduce((acc: number, p: any) => acc + (Number(p.quantidadeSelecionada) || 0), 0);
+    }
+
+    calcularTotalGrupo(grupo: any): number {
+        return grupo.produtos.reduce((acc: number, p: any) => acc + ((Number(p.quantidadeSelecionada) || 0) * (p.preco || 0)), 0);
+    }
+
+    adicionarProdutosModal(): void {
+        const produtosSelecionados = this.produtosModalFiltrados.filter(p => p.quantidadeSelecionada > 0);
+        
+        produtosSelecionados.forEach(p => {
+            const itemExistente = this.itens.controls.find(c => c.get('produtoId')?.value === p.id);
+            if (itemExistente) {
+                const qtd = itemExistente.get('quantidade')?.value || 0;
+                itemExistente.patchValue({ quantidade: qtd + p.quantidadeSelecionada });
+            } else {
+                const valorInicialFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.preco || 0);
+                const itemForm = this.fb.group({
+                    produtoId: [p.id],
+                    produtoNome: [p.nome],
+                    produtoCodigo: [p.id],
+                    tamanho: [p.tamanho],
+                    quantidade: [{ value: p.quantidadeSelecionada, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' && !this.isAdmin }, [Validators.required, Validators.min(0.01)]],
+                    valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
+                    total: [{ value: 0, disabled: true }],
+                    imagem: [p.imagem],
+                    peso: [p.peso || 0]
+                });
+                this.itens.insert(0, itemForm);
+            }
+            
+            // resets modal qt if user stays inside or repositions
+            p.quantidadeSelecionada = 0;
+        });
+
+        this.atualizarValorFrete();
+        this.fecharModalProdutosAlternativo();
+    }
+    // --- Fim Modal Alternativo ---
+
     buscarProduto(): void {
         if (this.termoBuscaProduto.length >= 3) {
             // Tentar busca por código primeiro se for numérico
@@ -277,6 +446,7 @@ export class PedidoFormComponent implements OnInit {
         console.log('--- atualizarValorFrete CHAMADO ---');
         if (!this.freteConfig) {
             console.log('Frete Config NÃO carregar ou nulo');
+            this.calcularTotais();
             return;
         }
 

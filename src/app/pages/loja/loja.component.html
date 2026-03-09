@@ -38,8 +38,27 @@
 
         <!-- Vitrine de Produtos -->
         <main class="loja-vitrine">
+            <div class="d-flex justify-content-between align-items-center mb-4" style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label style="margin: 0; font-weight: 600; color: #555;">Ordenar por:</label>
+                    <select class="form-control form-control-sm" [(ngModel)]="ordenacao" (change)="ordenarProdutos()" style="width: 150px; display: inline-block;">
+                        <option value="nome">Nome</option>
+                        <option value="tamanho">Tamanho</option>
+                        <option value="preco">Preço</option>
+                    </select>
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label style="margin: 0; font-weight: 600; color: #555;">Itens por linha:</label>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm" [ngClass]="{'btn-gold': itensPorLinha === 3, 'btn-outline-secondary': itensPorLinha !== 3}" (click)="itensPorLinha = 3">3</button>
+                        <button type="button" class="btn btn-sm" [ngClass]="{'btn-gold': itensPorLinha === 4, 'btn-outline-secondary': itensPorLinha !== 4}" (click)="itensPorLinha = 4">4</button>
+                        <button type="button" class="btn btn-sm" [ngClass]="{'btn-gold': itensPorLinha === 5, 'btn-outline-secondary': itensPorLinha !== 5}" (click)="itensPorLinha = 5">5</button>
+                    </div>
+                </div>
+            </div>
             <h2 style="text-align: center; margin-bottom: 20px; color: var(--color-primary-dark); font-weight: 600; text-transform: uppercase;">Selecione seus Produtos</h2>
-            <div class="vitrine-grid">
+            <div class="vitrine-grid" [ngStyle]="{'grid-template-columns': 'repeat(' + itensPorLinha + ', 1fr)'}">
                 <div class="vitrine-card" *ngFor="let product of produtos">
                     <div class="card-image-wrapper">
                         <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome">

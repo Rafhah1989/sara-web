@@ -33,13 +33,13 @@
     color: #666;
 }
 
-.payment-radio input:checked + .payment-card {
+.payment-radio input:checked+.payment-card {
     border-color: var(--primary-color);
     background-color: #f7f1e3;
 }
 
-.payment-radio input:checked + .payment-card i,
-.payment-radio input:checked + .payment-card span {
+.payment-radio input:checked+.payment-card i,
+.payment-radio input:checked+.payment-card span {
     color: var(--primary-color);
     font-weight: bold;
 }
@@ -279,4 +279,59 @@ form {
 
 .image-modal {
     max-width: 80%;
+}
+
+.image-modal-overlay {
+    z-index: 10050 !important;
+}
+
+.large-modal {
+    width: 90%;
+    max-width: 1100px;
+    padding: 30px;
+    text-align: left;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.large-modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Custom Modal Buttons based on Loja */
+.btn-loja-add {
+    background-color: #3b6b91;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius, 4px);
+}
+
+.btn-loja-add:hover {
+    background-color: #4CAF50;
+}
+
+.btn-loja-cancelar {
+    background-color: #f28b82;
+    /* Light red */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: var(--border-radius, 4px);
+}
+
+.btn-loja-cancelar:hover {
+    background-color: #e53935;
+    /* Brighter, more vivid red */
 }
