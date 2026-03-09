@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-md-3" *ngIf="isAdmin">
                 <label>Por Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (keyup.enter)="filtrarPedidos()" placeholder="Nome do cliente"
-                    class="form-control">
+                <input type="text" [(ngModel)]="filtroCliente" (keyup.enter)="filtrarPedidos()"
+                    placeholder="Nome do cliente" class="form-control">
             </div>
             <div class="col-md-2">
                 <label>Número do Pedido</label>
@@ -80,8 +80,8 @@
                         <button class="btn btn-primary btn-sm mx-1" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                             <i class="fa fa-file-pdf"></i>
                         </button>
-                        <button class="btn btn-warning btn-sm mx-1 text-white" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
-                            [disabled]="pedido.cancelado">
+                        <button class="btn btn-warning btn-sm mx-1 text-white" title="Editar/Visualizar"
+                            (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado">
                             <i class="fa fa-pencil"></i>
                         </button>
                         <button class="btn btn-danger btn-sm mx-1" title="Cancelar" *ngIf="!pedido.cancelado"
@@ -118,5 +118,30 @@
         <h2 class="cinzel-font">Gerando PDF</h2>
         <p>O PDF com as informações do pedido está sendo gerado e baixado.</p>
         <button class="btn btn-primary" (click)="fecharAvisoPdf()">OK</button>
+    </div>
+</div>
+
+<!-- Modal de Sucesso Geração de Pedido -->
+<div class="modal-overlay" *ngIf="exibirModalSucessoNovoPedido">
+    <div class="modal-container"
+        style="max-width: 450px; text-align: center; padding: 40px 30px; background: #fff; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <i class="fa fa-check-circle" style="font-size: 5rem; margin-bottom: 20px; color: #28a745;"></i>
+        <h2 class="cinzel-font" style="font-weight: bold; color: #333; margin-bottom: 10px;">Pedido Criado!</h2>
+        <p style="font-size: 1.1rem; color: #555; margin-bottom: 25px;">
+            O pedido <strong>#{{ pedidoRecemCriadoId }}</strong> foi gerado com sucesso.
+        </p>
+        <p style="font-size: 1rem; color: #666; margin-bottom: 30px;">
+            Deseja gerar o PDF com o resumo do novo pedido neste momento?
+        </p>
+
+        <div class="d-flex justify-content-center" style="gap: 15px;">
+            <button class="btn btn-secondary" style="padding: 10px 25px; border-radius: 6px;"
+                (click)="fecharModalSucesso(false)">Não, obrigado</button>
+            <button class="btn btn-success"
+                style="padding: 10px 25px; margin-left: 10px; font-weight: bold; border-radius: 6px;"
+                (click)="fecharModalSucesso(true)">
+                <i class="fa fa-file-pdf"></i> Sim, baixar PDF
+            </button>
+        </div>
     </div>
 </div>

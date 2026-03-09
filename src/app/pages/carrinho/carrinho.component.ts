@@ -3,6 +3,7 @@ import { CarrinhoService, CarrinhoResponseDTO } from '../../services/carrinho.se
 import { PedidoService } from '../../services/pedido.service';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-carrinho',
@@ -26,6 +27,8 @@ export class CarrinhoComponent implements OnInit {
   valorTotalGeral: number = 0;
 
   exibirModalLimpar: boolean = false;
+  exibirModalGerarPedido: boolean = false;
+  observacaoPedido: string = '';
   
   // Toast Notification
   exibirToast: boolean = false;
@@ -36,7 +39,8 @@ export class CarrinhoComponent implements OnInit {
     private carrinhoService: CarrinhoService,
     private pedidoService: PedidoService,
     private authService: AuthService,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -193,7 +197,7 @@ export class CarrinhoComponent implements OnInit {
       });
   }
 
-  gerarPedido(): void {
+  abrirModalGerarPedido(): void {
       if (this.itensCarrinho.length === 0) {
           alert('Carrinho vazio.');
           return;
@@ -202,7 +206,48 @@ export class CarrinhoComponent implements OnInit {
           alert('Selecione uma forma de pagamento.');
           return;
       }
-      alert('Implementação de Geração de Pedido virá em breve!');
+      this.exibirModalGerarPedido = true;
+  }
+
+  fecharModalGerarPedido(): void {
+      this.exibirModalGerarPedido = false;
+  }
+
+  confirmarGerarPedido(): void {
+      const usuarioId = this.authService.getUsuarioIdDoToken();
+      if (!usuarioId) return;
+
+      const novoPedido = {
+          usuarioId: usuarioId,
+          formaPagamentoId: this.formaPagamentoSelecionada,
+          desconto: (this.descontoUsuario + this.descontoForma),
+          frete: this.freteSugerido,
+          valorTotal: this.valorTotalGeral,
+          observacao: this.observacaoPedido,
+          situacao: 'PENDENTE',
+          produtos: this.itensCarrinho.map(item => ({
+              produtoId: item.produtoId,
+              quantidade: item.quantidade,
+              valor: item.produtoPreco
+          }))
+      };
+
+      this.pedidoService.salvar(novoPedido).subscribe({
+          next: (res) => {
+              this.carrinhoService.limpar(usuarioId).subscribe({
+                  next: () => {
+                      this.fecharModalGerarPedido();
+                      // Navigation context passing for list success view
+                      this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: res.id } });
+                  },
+                  error: (err) => console.error('Limpa carrinho erro', err)
+              });
+          },
+          error: (err) => {
+              console.error('Erro ao salvar pedido', err);
+              this.mostrarToast('Erro ao confirmar seu pedido. Tente novamente mais tarde.');
+          }
+      });
   }
 
   mostrarToast(mensagem: string): void {
@@ -216,5 +261,16 @@ export class CarrinhoComponent implements OnInit {
       this.toastTimeout = setTimeout(() => {
           this.exibirToast = false;
       }, 3000);
+  }
+
+  get itensCarrinhoOrdenadosModal(): CarrinhoResponseDTO[] {
+      return [...this.itensCarrinho].sort((a, b) => {
+          const nomeA = a.produtoNome || '';
+          const nomeB = b.produtoNome || '';
+          const cmpNome = nomeA.localeCompare(nomeB);
+          if (cmpNome !== 0) return cmpNome;
+          
+          return (a.produtoTamanho || 0) - (b.produtoTamanho || 0);
+      });
   }
 }

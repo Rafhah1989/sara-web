@@ -126,3 +126,35 @@
     border: 5px solid #d4af37;
     max-width: 400px;
 }
+
+/* Hover effects for Success Modal buttons */
+.btn-success, .btn-secondary {
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: #fff !important;
+    filter: brightness(0.9);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+    color: #fff !important;
+    filter: brightness(0.9);
+}

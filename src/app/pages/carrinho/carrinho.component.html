@@ -24,27 +24,26 @@
                 <div class="tamanho-card-header">
                     <h4>Tamanho: {{ grupo.tamanho }} cm</h4>
                 </div>
-                
+
                 <div class="tamanho-card-body">
                     <div class="carrinho-item" *ngFor="let item of grupo.itens">
                         <div class="item-imagem">
                             <img *ngIf="item.produtoImagem" [src]="item.produtoImagem" [alt]="item.produtoNome">
                             <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
                         </div>
-                        
+
                         <div class="item-info">
                             <h5 class="item-nome">{{ item.produtoNome }}</h5>
                             <span class="item-preco">{{ item.produtoPreco | currency:'BRL':'symbol':'1.2-2' }}</span>
                         </div>
-                        
+
                         <div class="item-actions">
                             <div class="qtd-control">
                                 <label>Qtd:</label>
-                                <input type="number" min="1" 
-                                    [ngModel]="item.quantidade" 
+                                <input type="number" min="1" [ngModel]="item.quantidade"
                                     (change)="atualizarQuantidade(item, $any($event.target).value)">
                             </div>
-                            
+
                             <button class="btn-remover" (click)="removerItem(item.produtoId)" title="Remover Produto">
                                 <i class="fa fa-trash"></i>
                             </button>
@@ -57,7 +56,7 @@
         <!-- Barra Lateral de Pagamento e Finalização -->
         <aside class="carrinho-checkout shadow-card">
             <h3>Resumo do Pedido</h3>
-            
+
             <div class="resumo-linha">
                 <span>Subtotal:</span>
                 <span class="resumo-valor">{{ valorSubtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -70,7 +69,8 @@
 
             <div class="resumo-linha">
                 <span>Frete (Sugestão):</span>
-                <span class="resumo-valor" *ngIf="freteSugerido">{{ freteSugerido | currency:'BRL':'symbol':'1.2-2' }}</span>
+                <span class="resumo-valor" *ngIf="freteSugerido">{{ freteSugerido | currency:'BRL':'symbol':'1.2-2'
+                    }}</span>
                 <span class="resumo-valor" *ngIf="!freteSugerido">Grátis</span>
             </div>
 
@@ -78,14 +78,16 @@
 
             <div class="resumo-linha">
                 <strong>Total Final:</strong>
-                <strong class="resumo-valor destaque-gold">{{ valorTotalGeral | currency:'BRL':'symbol':'1.2-2' }}</strong>
+                <strong class="resumo-valor destaque-gold">{{ valorTotalGeral | currency:'BRL':'symbol':'1.2-2'
+                    }}</strong>
             </div>
 
             <div class="forma-pagamento-section mt-15">
                 <h4>Forma de Pagamento</h4>
                 <div class="radio-cards">
                     <label class="payment-radio" *ngFor="let forma of formasPagamento">
-                        <input type="radio" name="formaPagamento" [value]="forma.id" [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()">
+                        <input type="radio" name="formaPagamento" [value]="forma.id"
+                            [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()">
                         <div class="payment-card">
                             <i [ngClass]="forma.iconeFontAwesome"></i>
                             <span>{{ forma.descricao || forma.nome }}</span>
@@ -95,7 +97,8 @@
                 </div>
             </div>
 
-            <button class="btn-gerar-pedido mt-15" (click)="gerarPedido()" [disabled]="!formaPagamentoSelecionada">
+            <button class="btn-gerar-pedido mt-15" (click)="abrirModalGerarPedido()"
+                [disabled]="!formaPagamentoSelecionada">
                 Gerar Pedido
             </button>
         </aside>
@@ -113,6 +116,84 @@
         <div class="modal-footer">
             <button class="btn-cancelar" (click)="fecharModalLimpar()">Não, cancelar</button>
             <button class="btn-confirmar btn-danger" (click)="limparCarrinhoConfirmado()">Sim, excluir tudo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Geração de Pedido -->
+<div class="modal-overlay" *ngIf="exibirModalGerarPedido">
+    <div class="modal-container" style="max-width: 600px;">
+        <h3 class="modal-title alert-title" style="color: #333;"><i class="fa fa-shopping-bag"></i> Resumo do Pedido
+        </h3>
+        <div class="modal-body text-left">
+            <div class="table-responsive mb-3"
+                style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px;">
+                <table class="table table-sm mb-0"
+                    style="background: #fff; font-size: 0.9rem; border-collapse: collapse; width: 100%;">
+                    <thead style="background: #f4f4f4; position: sticky; top: 0; z-index: 1;">
+                        <tr>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Produto</th>
+                            <th class="text-center" style="width: 60px; border: 1px solid #ddd; padding: 8px;">Tam.</th>
+                            <th class="text-center" style="width: 60px; border: 1px solid #ddd; padding: 8px;">Qtd</th>
+                            <th class="text-right" style="width: 100px; border: 1px solid #ddd; padding: 8px;">Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of itensCarrinhoOrdenadosModal">
+                            <td class="align-middle" style="border: 1px solid #ddd; padding: 8px;">
+                                <span style="font-weight: 500; color: #444;">{{ item.produtoNome }}</span>
+                            </td>
+                            <td class="text-center align-middle" style="border: 1px solid #ddd; padding: 8px;">{{
+                                item.produtoTamanho }}cm</td>
+                            <td class="text-center align-middle" style="border: 1px solid #ddd; padding: 8px;">{{
+                                item.quantidade }}x</td>
+                            <td class="text-right align-middle"
+                                style="font-weight: 500; border: 1px solid #ddd; padding: 8px;">{{ (item.produtoPreco ||
+                                0) * (item.quantidade || 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px; margin-top: 20px;">
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="font-size: 1.1rem; color: #666;">Subtotal:</span>
+                    <span style="font-size: 1.1rem; font-weight: bold;">{{ valorSubtotal |
+                        currency:'BRL':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-danger" *ngIf="valorDescontoCalculado > 0">
+                    <span style="font-size: 1.1rem;">Descontos:</span>
+                    <span style="font-size: 1.1rem; font-weight: bold;">- {{ valorDescontoCalculado |
+                        currency:'BRL':'symbol':'1.2-2' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-info">
+                    <span style="font-size: 1.1rem;">Frete Sugerido:</span>
+                    <span style="font-size: 1.1rem; font-weight: bold;" *ngIf="freteSugerido">{{ freteSugerido |
+                        currency:'BRL':'symbol':'1.2-2' }}</span>
+                    <span style="font-size: 1.1rem; font-weight: bold;" *ngIf="!freteSugerido">Grátis</span>
+                </div>
+                <hr style="margin: 10px 0; border-top: 1px dashed #ccc;">
+                <div class="d-flex justify-content-between">
+                    <span style="font-size: 1.3rem; color: #333; font-weight: bold;">Total Geral:</span>
+                    <span style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">{{ valorTotalGeral |
+                        currency:'BRL':'symbol':'1.2-2' }}</span>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label style="font-weight: 600; color: #555;">Observações Adicionais:</label>
+                <textarea class="form-control" rows="2" [(ngModel)]="observacaoPedido"
+                    placeholder="Digite aqui alguma observação sobre o pedido (opcional)..."
+                    style="width: 90%;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-end" style="gap: 15px;">
+            <button class="btn btn-danger" style="padding: 10px 20px; font-weight: bold; border-radius: 6px;"
+                (click)="fecharModalGerarPedido()">Cancelar</button>
+            <button class="btn-gerar-pedido" style="width: auto; margin-top: 0; padding: 10px 20px; border-radius: 6px;"
+                (click)="confirmarGerarPedido()"><i class="fa fa-check"></i> Confirmar Pedido</button>
         </div>
     </div>
 </div>

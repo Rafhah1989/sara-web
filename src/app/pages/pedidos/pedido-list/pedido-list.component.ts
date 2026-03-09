@@ -32,6 +32,8 @@ export class PedidoListComponent implements OnInit {
 
     loading: boolean = false;
     avisoPdf: boolean = false;
+    exibirModalSucessoNovoPedido: boolean = false;
+    pedidoRecemCriadoId: number | null = null;
 
     constructor(
         private pedidoService: PedidoService,
@@ -44,6 +46,13 @@ export class PedidoListComponent implements OnInit {
         this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
         this.carregarSituacoes();
         this.carregarPedidos();
+
+        if (history.state && history.state.novoPedidoCriadoId) {
+            this.pedidoRecemCriadoId = history.state.novoPedidoCriadoId;
+            this.exibirModalSucessoNovoPedido = true;
+            // Limpa o state para evitar reabertura no refresh
+            window.history.replaceState({}, '');
+        }
     }
 
     carregarSituacoes(): void {
@@ -163,5 +172,13 @@ export class PedidoListComponent implements OnInit {
 
     fecharAvisoPdf(): void {
         this.avisoPdf = false;
+    }
+
+    fecharModalSucesso(baixarPdf: boolean): void {
+        this.exibirModalSucessoNovoPedido = false;
+        if (baixarPdf && this.pedidoRecemCriadoId) {
+            this.gerarPdf(this.pedidoRecemCriadoId);
+        }
+        this.pedidoRecemCriadoId = null;
     }
 }
