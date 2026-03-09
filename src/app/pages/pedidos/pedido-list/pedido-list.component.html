@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-md-3" *ngIf="isAdmin">
                 <label>Por Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (keyup.enter)="filtrarPedidos()"
+                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()"
                     placeholder="Nome do cliente" class="form-control">
             </div>
             <div class="col-md-2">
@@ -74,7 +74,13 @@
                     <td>{{ pedido.usuarioNome }}</td>
                     <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
-                    <td>{{ pedido.situacaoDescricao }}</td>
+                    <td>
+                        <span *ngIf="!isAdmin || pedido.cancelado">{{ pedido.situacaoDescricao }}</span>
+                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control" style="width: 140px; padding: 4px; display: inline-block;"
+                            [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)">
+                            <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                        </select>
+                    </td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td class="actions">
                         <button class="btn btn-primary btn-sm mx-1" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
@@ -84,7 +90,8 @@
                             (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado">
                             <i class="fa fa-pencil"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm mx-1" title="Cancelar" *ngIf="!pedido.cancelado"
+                        <button class="btn btn-danger btn-sm mx-1" title="Cancelar" 
+                            *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
                             (click)="cancelarPedido(pedido)">
                             <i class="fa fa-trash"></i>
                         </button>

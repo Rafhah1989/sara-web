@@ -140,8 +140,8 @@ export class PedidoListComponent implements OnInit {
 
     cancelarPedido(pedido: Pedido): void {
         const role = this.authService.getRoleDoToken();
-        if (role === 'CLIENTE' && (pedido.situacao === 'EM_PRODUCAO' || pedido.situacao === 'FINALIZADO')) {
-            alert('Apenas pedidos com situação Pendente ou Em Entrega podem ser cancelados por clientes.');
+        if (role === 'CLIENTE' && pedido.situacao !== 'PENDENTE' && pedido.situacao !== 'EM_PRODUCAO') {
+            alert('Apenas pedidos com situação Pendente ou Em Produção podem ser cancelados por clientes.');
             return;
         }
 
@@ -152,6 +152,22 @@ export class PedidoListComponent implements OnInit {
                 this.carregarPedidos();
             });
         }
+    }
+
+    alterarSituacao(pedido: Pedido, novaSituacao: string): void {
+        if (!this.isAdmin) return;
+        
+        this.pedidoService.alterarSituacao(pedido.id, novaSituacao).subscribe(() => {
+            pedido.situacao = novaSituacao;
+            const sitObj = this.situacoesPedido.find(s => s.codigo === novaSituacao);
+            if (sitObj) {
+                pedido.situacaoDescricao = sitObj.descricao;
+            }
+        }, error => {
+            console.error('Erro ao alterar situação', error);
+            alert('Erro ao alterar situação do pedido.');
+            this.carregarPedidos(); // Revert local changes by reloading
+        });
     }
 
     gerarPdf(id: number): void {

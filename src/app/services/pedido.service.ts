@@ -73,6 +73,10 @@ export class PedidoService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
+    alterarSituacao(id: number, situacao: string): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/${id}/situacao`, { situacao });
+    }
+
     gerarPdf(id: number): Observable<Blob> {
         return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
     }
