@@ -28,6 +28,7 @@ import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { CarrinhoComponent } from './pages/carrinho/carrinho.component';
 import { FormaPagamentoComponent } from './pages/forma-pagamento/forma-pagamento.component';
+import { ConfiguracaoComponent } from './pages/configuracao/configuracao.component';
 
 registerLocaleData(localePt);
 
@@ -41,6 +42,7 @@ const routes: Routes = [
   { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'formas-pagamento', component: FormaPagamentoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+  { path: 'configuracao', component: ConfiguracaoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'loja', component: LojaComponent, canActivate: [AuthGuard] }, { path: 'carrinho', component: CarrinhoComponent, canActivate: [AuthGuard] },
   { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
@@ -66,7 +68,8 @@ const routes: Routes = [
     LoginComponent,
     CarrinhoComponent,
     FormaPagamentoComponent,
-    SpinnerComponent
+    SpinnerComponent,
+    ConfiguracaoComponent
   ],
   imports: [
     BrowserModule,

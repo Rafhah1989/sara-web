@@ -1,0 +1,81 @@
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-header border-bottom">
+      <h2 class="mb-0"><i class="fa fa-cog mr-2"></i>Configurações do Sistema</h2>
+    </div>
+
+    <div class="card-body">
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="salvar()" #configForm="ngForm">
+        <h4 class="section-title">Servidor de E-mail (GMail)</h4>
+        <div class="row">
+          <div class="col-md-4 form-group">
+            <label for="mailHost">Host SMTP</label>
+            <input type="text" id="mailHost" name="mailHost" style="width: 80%;" [(ngModel)]="config.mailHost"
+              class="form-control" required placeholder="ex: smtp.gmail.com">
+          </div>
+          <div class="col-md-2 form-group" style="margin-top: 20px">
+            <label for="mailPort">Porta</label>
+            <input type="number" id="mailPort" name="mailPort" [(ngModel)]="config.mailPort" class="form-control"
+              required>
+          </div>
+          <div class="col-md-3 form-group" style="margin-top: 20px">
+            <label for="mailUsername">Usuário (E-mail)</label>
+            <input type="email" id="mailUsername" name="mailUsername" style="width: 80%"
+              [(ngModel)]="config.mailUsername" class="form-control" required placeholder="seu-email@gmail.com">
+          </div>
+          <div class="col-md-3 form-group" style="margin-top: 20px">
+            <label for="mailPassword">Senha de App</label>
+            <input type="password" id="mailPassword" name="mailPassword" style="width: 80%;"
+              [(ngModel)]="config.mailPassword" class="form-control" placeholder="Mantenha vazio para não alterar">
+          </div>
+        </div>
+
+        <div class="row mt-6" style="margin-top: 20px">
+          <div class="col-md-3 form-group pt-4">
+            <div class="checkbox-container">
+              <input type="checkbox" id="emailAtivo" name="emailAtivo" [(ngModel)]="config.emailAtivo">
+              <label class="font-weight-bold" for="emailAtivo">Envio de E-mail Ativo</label>
+            </div>
+          </div>
+          <div class="col-md-3 form-group pt-4">
+            <div class="checkbox-container">
+              <input type="checkbox" id="mailAuth" name="mailAuth" [(ngModel)]="config.mailAuth">
+              <label for="mailAuth">Autenticação SMTP</label>
+            </div>
+          </div>
+          <div class="col-md-3 form-group pt-4">
+            <div class="checkbox-container">
+              <input type="checkbox" id="mailStarttls" name="mailStarttls" [(ngModel)]="config.mailStarttls">
+              <label for="mailStarttls">Controle STARTTLS</label>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="section-title mt-4">Notificações</h4>
+        <div class="form-group">
+          <label for="emailsNotificacao">E-mails de Alerta (Administradores - Separar por
+            vírgula)</label>
+          <textarea id="emailsNotificacao" name="emailsNotificacao" style="width: 80%;"
+            [(ngModel)]="config.emailsNotificacao" class="form-control" rows="4"
+            placeholder="admin@empresa.com, vendas@empresa.com"></textarea>
+          <br /><small class="form-text text-muted">Estes endereços receberão notificações detalhadas de novos
+            pedidos.</small>
+        </div>
+
+        <div class="mt-4 text-right">
+          <button type="submit" class="btn btn-save" style="margin-top: 20px;"
+            [disabled]="!configForm.form.valid || loading">
+            <i class="fa fa-save mr-2"></i>Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
