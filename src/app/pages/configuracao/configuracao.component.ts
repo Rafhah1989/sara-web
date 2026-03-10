@@ -24,6 +24,11 @@ export class ConfiguracaoComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
 
+  // Toast Notification
+  exibirToast: boolean = false;
+  mensagemToast: string = '';
+  toastTimeout: any;
+
   constructor(private configuracaoService: ConfiguracaoService) { }
 
   ngOnInit(): void {
@@ -61,9 +66,8 @@ export class ConfiguracaoComponent implements OnInit {
       next: (data) => {
         this.config = data;
         this.config.mailPassword = '';
-        this.successMessage = 'Configurações salvas com sucesso!';
+        this.mostrarToast('Configurações salvas com sucesso!');
         this.loading = false;
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {
         console.error('Erro ao salvar configurações', err);
@@ -71,5 +75,18 @@ export class ConfiguracaoComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  mostrarToast(mensagem: string): void {
+      this.mensagemToast = mensagem;
+      this.exibirToast = true;
+      
+      if (this.toastTimeout) {
+          clearTimeout(this.toastTimeout);
+      }
+      
+      this.toastTimeout = setTimeout(() => {
+          this.exibirToast = false;
+      }, 3000);
   }
 }

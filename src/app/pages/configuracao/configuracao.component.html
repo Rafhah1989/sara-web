@@ -5,9 +5,11 @@
     </div>
 
     <div class="card-body">
-      <div *ngIf="successMessage" class="alert alert-success">
-        {{ successMessage }}
+      <!-- Toast Notification -->
+      <div class="toast-notification" *ngIf="exibirToast">
+        {{ mensagemToast }}
       </div>
+
       <div *ngIf="errorMessage" class="alert alert-danger">
         {{ errorMessage }}
       </div>
@@ -17,22 +19,22 @@
         <div class="row">
           <div class="col-md-4 form-group">
             <label for="mailHost">Host SMTP</label>
-            <input type="text" id="mailHost" name="mailHost" style="width: 80%;" [(ngModel)]="config.mailHost"
+            <input type="text" id="mailHost" name="mailHost" style="width: 20%;" [(ngModel)]="config.mailHost"
               class="form-control" required placeholder="ex: smtp.gmail.com">
           </div>
           <div class="col-md-2 form-group" style="margin-top: 20px">
             <label for="mailPort">Porta</label>
-            <input type="number" id="mailPort" name="mailPort" [(ngModel)]="config.mailPort" class="form-control"
-              required>
+            <input type="number" id="mailPort" name="mailPort" style="width: 10%;" [(ngModel)]="config.mailPort"
+              class="form-control" required>
           </div>
           <div class="col-md-3 form-group" style="margin-top: 20px">
             <label for="mailUsername">Usuário (E-mail)</label>
-            <input type="email" id="mailUsername" name="mailUsername" style="width: 80%"
+            <input type="email" id="mailUsername" name="mailUsername" style="width: 20%"
               [(ngModel)]="config.mailUsername" class="form-control" required placeholder="seu-email@gmail.com">
           </div>
           <div class="col-md-3 form-group" style="margin-top: 20px">
             <label for="mailPassword">Senha de App</label>
-            <input type="password" id="mailPassword" name="mailPassword" style="width: 80%;"
+            <input type="password" id="mailPassword" name="mailPassword" style="width: 20%;"
               [(ngModel)]="config.mailPassword" class="form-control" placeholder="Mantenha vazio para não alterar">
           </div>
         </div>
@@ -62,7 +64,7 @@
         <div class="form-group">
           <label for="emailsNotificacao">E-mails de Alerta (Administradores - Separar por
             vírgula)</label>
-          <textarea id="emailsNotificacao" name="emailsNotificacao" style="width: 80%;"
+          <textarea id="emailsNotificacao" name="emailsNotificacao" style="width: 40%;"
             [(ngModel)]="config.emailsNotificacao" class="form-control" rows="4"
             placeholder="admin@empresa.com, vendas@empresa.com"></textarea>
           <br /><small class="form-text text-muted">Estes endereços receberão notificações detalhadas de novos
@@ -70,7 +72,7 @@
         </div>
 
         <div class="mt-4 text-right">
-          <button type="submit" class="btn btn-save" style="margin-top: 20px;"
+          <button type="submit" class="btn btn-save" style="margin-bottom: 20px; margin-top: 20px;"
             [disabled]="!configForm.form.valid || loading">
             <i class="fa fa-save mr-2"></i>Salvar Alterações
           </button>

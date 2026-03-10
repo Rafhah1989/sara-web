@@ -109,8 +109,34 @@ textarea:focus {
   box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
 }
 
+
 input.error,
 select.error,
 textarea.error {
   border-color: #f44336 !important;
 }
+
+/* Toast Notification Area */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745; /* Fundo Verde */
+    color: white; /* Letras Brancas */
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    text-align: center;
+    animation: slideUpFadeIn 3s ease-in-out forwards;
+}
+
+@keyframes slideUpFadeIn {
+    0% { opacity: 0; bottom: 10px; }
+    10% { opacity: 1; bottom: 30px; }
+    90% { opacity: 1; bottom: 30px; }
+    100% { opacity: 0; bottom: 10px; }
+}
