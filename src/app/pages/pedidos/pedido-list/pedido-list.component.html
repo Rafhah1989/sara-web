@@ -83,17 +83,17 @@
                     </td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td class="actions">
-                        <button class="btn btn-primary btn-sm mx-1" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
+                        <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                             <i class="fa fa-file-pdf"></i>
                         </button>
-                        <button class="btn btn-warning btn-sm mx-1 text-white" title="Editar/Visualizar"
+                        <button class="btn-action btn-edit" title="Editar/Visualizar"
                             (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado">
-                            <i class="fa fa-pencil"></i>
+                            <i class="fa fa-pencil-alt"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm mx-1" title="Cancelar" 
+                        <button class="btn-action btn-cancel" title="Cancelar" 
                             *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
                             (click)="cancelarPedido(pedido)">
-                            <i class="fa fa-trash"></i>
+                            <i class="fa fa-trash-alt"></i>
                         </button>
                     </td>
                 </tr>

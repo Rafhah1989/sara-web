@@ -77,7 +77,61 @@
 
 .actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-action {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-action:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-action:disabled {
+    background-color: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-pdf {
+    background: linear-gradient(135deg, #f16609 0%, #f0892f 100%);
+}
+
+.btn-pdf:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+}
+
+.btn-edit:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #f06157 0%, #ee2432 100%);
+}
+
+.btn-cancel:hover:not(:disabled) {
+    filter: brightness(1.1);
 }
 
 .btn-icon {
@@ -128,7 +182,8 @@
 }
 
 /* Hover effects for Success Modal buttons */
-.btn-success, .btn-secondary {
+.btn-success,
+.btn-secondary {
     transition: all 0.3s ease !important;
     cursor: pointer !important;
 }
