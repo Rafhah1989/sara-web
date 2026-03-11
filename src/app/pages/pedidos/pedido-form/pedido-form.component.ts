@@ -341,10 +341,11 @@ export class PedidoFormComponent implements OnInit {
                     imagem: [p.imagem],
                     peso: [p.peso || 0]
                 });
-                this.itens.insert(0, itemForm);
+                
+                const index = this.findInsertionIndex(p.nome, p.tamanho, p.preco || 0);
+                this.itens.insert(index, itemForm);
             }
             
-            // resets modal qt if user stays inside or repositions
             p.quantidadeSelecionada = 0;
         });
 
@@ -355,14 +356,6 @@ export class PedidoFormComponent implements OnInit {
 
     buscarProduto(): void {
         if (this.termoBuscaProduto.length >= 3) {
-            // Tentar busca por código primeiro se for numérico
-            const codigo = Number(this.termoBuscaProduto);
-            if (!isNaN(codigo)) {
-                // Dummy call kept from previous code
-                // this.pedidoService.obterSugestaoFrete(codigo).subscribe(); 
-                // Actually I added search by code to ProdutoService in backend
-            }
-
             this.produtoService.buscarPorNome(this.termoBuscaProduto).subscribe(produtos => {
                 this.produtosFiltrados = produtos.filter(p => p.ativo);
                 this.showProdutosDropdown = this.produtosFiltrados.length > 0;
@@ -382,7 +375,7 @@ export class PedidoFormComponent implements OnInit {
             const itemForm = this.fb.group({
                 produtoId: [produto.id],
                 produtoNome: [produto.nome],
-                produtoCodigo: [produto.id], // ID as code fallback
+                produtoCodigo: [produto.id],
                 tamanho: [produto.tamanho],
                 quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' }, [Validators.required, Validators.min(0.01)]],
                 valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
@@ -390,12 +383,33 @@ export class PedidoFormComponent implements OnInit {
                 imagem: [produto.imagem],
                 peso: [produto.peso || 0]
             });
-            this.itens.insert(0, itemForm);
+            
+            const index = this.findInsertionIndex(produto.nome, produto.tamanho, valorInicial);
+            this.itens.insert(index, itemForm);
         }
 
         this.showProdutosDropdown = false;
         this.termoBuscaProduto = '';
         this.atualizarValorFrete();
+    }
+
+    private findInsertionIndex(nome: string, tamanho: number | undefined, valor: number): number {
+        const controls = this.itens.controls;
+        for (let i = 0; i < controls.length; i++) {
+            const item = controls[i].value;
+            const itemNome = item.produtoNome.toLowerCase();
+            const itemTamanho = item.tamanho || 0;
+            const itemValor = this.parseMoeda(item.valor);
+
+            if (nome.toLowerCase() < itemNome) return i;
+            if (nome.toLowerCase() === itemNome) {
+                if ((tamanho || 0) < itemTamanho) return i;
+                if ((tamanho || 0) === itemTamanho) {
+                    if (valor < itemValor) return i;
+                }
+            }
+        }
+        return controls.length;
     }
 
     removerItem(index: number): void {
@@ -542,7 +556,15 @@ export class PedidoFormComponent implements OnInit {
             // Load freight config for this user to enable dynamic updates during edit
             this.carregarConfiguracaoFrete(pedido.usuarioId);
 
-            pedido.produtos.forEach(p => {
+            pedido.produtos.sort((a, b) => {
+                const nomeA = a.produtoNome.toLowerCase();
+                const nomeB = b.produtoNome.toLowerCase();
+                if (nomeA < nomeB) return -1;
+                if (nomeA > nomeB) return 1;
+                if ((a.tamanho || 0) < (b.tamanho || 0)) return -1;
+                if ((a.tamanho || 0) > (b.tamanho || 0)) return 1;
+                return a.valor - b.valor;
+            }).forEach(p => {
                 const valorFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor);
 
                 const itemForm = this.fb.group({

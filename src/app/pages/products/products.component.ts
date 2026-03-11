@@ -14,6 +14,7 @@ export class ProductsComponent implements OnInit {
   filtroNome: string = '';
   modoEdicao: boolean = false;
   precoFMT: string = '';
+  viewMode: 'grid' | 'list' = 'grid';
 
   constructor(private produtoService: ProdutoService) { }
 
@@ -36,20 +37,43 @@ export class ProductsComponent implements OnInit {
 
   carregarProdutos(): void {
     this.produtoService.listarTodos().subscribe({
-      next: (data) => this.produtos = data,
+      next: (data) => {
+        this.produtos = data.sort((a, b) => a.nome.localeCompare(b.nome));
+      },
       error: (err) => console.error('Erro ao listar produtos', err)
     });
   }
 
   pesquisar(): void {
     if (this.filtroNome.trim()) {
-      this.produtoService.buscarPorNome(this.filtroNome).subscribe({
-        next: (data) => this.produtos = data,
-        error: (err) => console.error('Erro ao pesquisar produtos', err)
-      });
+      const termo = this.filtroNome.trim();
+      const codigo = Number(termo);
+
+      if (!isNaN(codigo)) {
+        // Busca híbrida: tenta por código, se não achar (ou em paralelo), busca por nome
+        this.produtoService.buscarPorCodigo(codigo).subscribe({
+          next: (prod) => {
+            if (prod) {
+              this.produtos = [prod];
+            } else {
+              this.buscarPorNome(termo);
+            }
+          },
+          error: () => this.buscarPorNome(termo)
+        });
+      } else {
+        this.buscarPorNome(termo);
+      }
     } else {
       this.carregarProdutos();
     }
+  }
+
+  private buscarPorNome(nome: string): void {
+    this.produtoService.buscarPorNome(nome).subscribe({
+      next: (data) => this.produtos = data,
+      error: (err) => console.error('Erro ao pesquisar produtos', err)
+    });
   }
 
   applyCurrencyMask(event: any): void {
@@ -99,13 +123,25 @@ export class ProductsComponent implements OnInit {
     window.scrollTo(0, 0);
   }
 
-  excluir(id?: number): void {
-    if (id && confirm('Tem certeza que deseja excluir este produto?')) {
-      this.produtoService.excluir(id).subscribe({
-        next: () => this.carregarProdutos(),
-        error: (err) => console.error('Erro ao excluir produto', err)
-      });
+  alternarAtivo(produto: Produto): void {
+    const novoStatus = !produto.ativo;
+    const acao = novoStatus ? 'ativar' : 'inativar';
+    if (confirm(`Deseja realmente ${acao} este produto?`)) {
+      produto.ativo = novoStatus;
+      if (produto.id) {
+        this.produtoService.alterar(produto.id, produto).subscribe({
+          next: () => this.carregarProdutos(),
+          error: (err) => {
+            console.error(`Erro ao ${acao} produto`, err);
+            produto.ativo = !novoStatus; // Reverte em caso de erro
+          }
+        });
+      }
     }
+  }
+
+  alternarVisualizacao(modo: 'grid' | 'list'): void {
+    this.viewMode = modo;
   }
 
   cancelar(): void {

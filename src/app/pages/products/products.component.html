@@ -65,32 +65,93 @@
 
     <hr class="divider">
 
-    <!-- Busca -->
-    <div class="search-container">
-        <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome..." (keyup.enter)="pesquisar()">
-        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
+    <!-- Busca e Alternância de Visualização -->
+    <div class="search-and-view-controls">
+        <div class="search-container">
+            <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome ou código..." (keyup.enter)="pesquisar()">
+            <button class="btn-gold" (click)="pesquisar()">
+                <i class="fa fa-search"></i> Pesquisar
+            </button>
+        </div>
+        <div class="view-toggle">
+            <button class="btn-view" [class.active]="viewMode === 'grid'" (click)="alternarVisualizacao('grid')" title="Grade">
+                <i class="fa fa-th-large"></i>
+            </button>
+            <button class="btn-view" [class.active]="viewMode === 'list'" (click)="alternarVisualizacao('list')" title="Lista">
+                <i class="fa fa-list"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- Lista de Produtos -->
-    <div class="product-grid">
+    <!-- Lista de Produtos (Grid) -->
+    <div class="product-grid" *ngIf="viewMode === 'grid'">
         <div class="product-card" *ngFor="let product of produtos">
             <div class="product-image-container">
                 <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome" class="product-img">
                 <div *ngIf="!product.imagem" class="product-image placeholder">Sem Imagem</div>
             </div>
             <div class="product-info">
-                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo }})</small></h3>
+                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo || product.id }})</small></h3>
                 <p>Tamanho: {{ product.tamanho }} cm</p>
                 <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
                 <p class="status" [class.inactive]="!product.ativo">
                     {{ product.ativo ? 'Disponível' : 'Indisponível' }}
                 </p>
                 <div class="card-actions">
-                    <button class="btn-edit" (click)="editar(product)">Editar</button>
-                    <button class="btn-delete" (click)="excluir(product.id)">Excluir</button>
+                    <button class="btn-edit" (click)="editar(product)">
+                        <i class="fa fa-edit"></i> Editar
+                    </button>
+                    <button [class]="product.ativo ? 'btn-deactivate' : 'btn-activate'" (click)="alternarAtivo(product)">
+                        <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
+                        {{ product.ativo ? 'Inativar' : 'Ativar' }}
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Lista de Produtos (Lista) -->
+    <div class="product-list-view" *ngIf="viewMode === 'list'">
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Tam.</th>
+                    <th>Preço</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let product of produtos" [class.row-inactive]="!product.ativo">
+                    <td class="col-thumb">
+                        <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome" class="product-thumb">
+                        <div *ngIf="!product.imagem" class="thumb-placeholder"><i class="fa fa-image"></i></div>
+                    </td>
+                    <td>#{{ product.codigo || product.id }}</td>
+                    <td class="col-nome">{{ product.nome }}</td>
+                    <td>{{ product.tamanho }}cm</td>
+                    <td class="col-preco">{{ product.preco | currency:'BRL' }}</td>
+                    <td>
+                        <span class="badge" [class.badge-active]="product.ativo" [class.badge-inactive]="!product.ativo">
+                            {{ product.ativo ? 'Ativo' : 'Inativo' }}
+                        </span>
+                    </td>
+                    <td class="list-actions">
+                        <div class="list-actions-container">
+                            <button class="btn-icon-edit" (click)="editar(product)" title="Editar">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button [class]="product.ativo ? 'btn-icon-deactivate' : 'btn-icon-activate'" (click)="alternarAtivo(product)" [title]="product.ativo ? 'Inativar' : 'Ativar'">
+                                <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div *ngIf="produtos.length === 0" class="no-products">
