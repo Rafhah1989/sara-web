@@ -110,7 +110,7 @@
             <div class="pagination-controls">
                 <button [disabled]="currentPage === 0"
                     (click)="currentPage = currentPage - 1; carregarPedidos()">Anterior</button>
-                <span>Página {{ currentPage + 1 }}</span>
+                <span>Página {{ currentPage + 1 }} de {{ totalPages }}</span>
                 <button [disabled]="(currentPage + 1) * pageSize >= totalElements"
                     (click)="currentPage = currentPage + 1; carregarPedidos()">Próxima</button>
             </div>

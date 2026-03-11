@@ -29,24 +29,38 @@ h6 {
 }
 
 .page-title-banner {
-  background-color: #000;
+  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
   width: 100%;
-  padding: 3rem 0;
-  margin-bottom: 3rem;
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid var(--primary-gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-title-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
 }
 
 .page-title-banner h1 {
   color: var(--primary-gold);
-  font-size: 3.5rem;
+  font-size: 2.2rem;
   margin: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--primary-gold);
   text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  letter-spacing: 3px;
 }
 
 a {

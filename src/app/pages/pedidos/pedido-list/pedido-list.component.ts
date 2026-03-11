@@ -29,6 +29,10 @@ export class PedidoListComponent implements OnInit {
     pageSizeOptions: number[] = [10, 20, 30, 40, 50];
     sortField: string = 'dataPedido';
     sortDir: string = 'desc';
+    
+    get totalPages(): number {
+        return Math.ceil(this.totalElements / this.pageSize);
+    }
 
     loading: boolean = false;
     avisoPdf: boolean = false;
