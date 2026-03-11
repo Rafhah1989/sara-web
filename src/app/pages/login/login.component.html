@@ -1,51 +1,67 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h2>Entrar no Sistema</h2>
-      <p>Bem-vindo ao Sara App</p>
+<div class="login-page-wrapper">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <h2>Acesse o Sistema</h2>
+        <p>Por favor, identifique-se para entrar no sistema Sara</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="cpfCnpj">CPF / CNPJ</label>
+          <div class="input-with-icon">
+            <i class="fas fa-id-card"></i>
+            <input 
+              type="text" 
+              id="cpfCnpj" 
+              formControlName="cpfCnpj" 
+              class="form-control" 
+              (input)="applyMask($event)"
+              [ngClass]="{ 'is-invalid': submitted && f['cpfCnpj'].errors }" 
+              maxlength="18"
+              placeholder="000.000.000-00"
+            />
+          </div>
+          <div *ngIf="submitted && f['cpfCnpj'].errors" class="invalid-feedback">
+            <div *ngIf="f['cpfCnpj'].errors['required']">CPF/CNPJ é obrigatório</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input 
+              type="password" 
+              id="senha" 
+              formControlName="senha" 
+              class="form-control" 
+              [ngClass]="{ 'is-invalid': submitted && f['senha'].errors }" 
+              placeholder="Digite sua senha"
+            />
+          </div>
+          <div *ngIf="submitted && f['senha'].errors" class="invalid-feedback">
+            <div *ngIf="f['senha'].errors['required']">Senha é obrigatória</div>
+          </div>
+        </div>
+
+        <div *ngIf="error" class="alert-error-container">
+          <i class="fas fa-circle-exclamation"></i>
+          <span>{{ error }}</span>
+        </div>
+
+        <button [disabled]="loading" class="btn-login-gold">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2"></span>
+          <span *ngIf="!loading">Entrar <i class="fas fa-arrow-right-to-bracket ml-2"></i></span>
+        </button>
+      </form>
+      
+      <div class="login-footer">
+        <p>© 2026 Sara App - Hadas Tecnologia</p>
+      </div>
     </div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="cpfCnpj">CPF / CNPJ</label>
-        <input 
-          type="text" 
-          id="cpfCnpj" 
-          formControlName="cpfCnpj" 
-          class="form-control" 
-          (input)="applyMask($event)"
-          [ngClass]="{ 'is-invalid': submitted && f['cpfCnpj'].errors }" 
-          maxlength="18"
-          placeholder="Digite seu CPF ou CNPJ"
-        />
-        <div *ngIf="submitted && f['cpfCnpj'].errors" class="invalid-feedback">
-          <div *ngIf="f['cpfCnpj'].errors['required']">CPF/CNPJ é obrigatório</div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="senha">Senha</label>
-        <input 
-          type="password" 
-          id="senha" 
-          formControlName="senha" 
-          class="form-control" 
-          [ngClass]="{ 'is-invalid': submitted && f['senha'].errors }" 
-          placeholder="Digite sua senha"
-        />
-        <div *ngIf="submitted && f['senha'].errors" class="invalid-feedback">
-          <div *ngIf="f['senha'].errors['required']">Senha é obrigatória</div>
-        </div>
-      </div>
-
-      <div *ngIf="error" class="alert alert-danger">
-        {{ error }}
-      </div>
-
-      <button [disabled]="loading" class="btn btn-primary btn-block">
-        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-        Entrar
-      </button>
-    </form>
   </div>
 </div>
