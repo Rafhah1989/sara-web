@@ -49,4 +49,8 @@ export class ProdutoService {
     buscarOutrosTamanhos(id: number): Observable<Produto[]> {
         return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`);
     }
+
+    gerarCatalogo(): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/catalogo`, { responseType: 'blob' });
+    }
 }

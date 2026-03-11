@@ -185,8 +185,9 @@
 <!-- Modal Inclusão Alternativa -->
 <div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
     <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-        <h2 class="cinzel-font color-primary-gold-dark text-left"
-            style="text-align: left; border-bottom: 2px solid #eee; padding-bottom: 15px;">Adicionar Produtos</h2>
+        <div class="d-flex justify-content-between align-items-center" style="border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+            <h2 class="cinzel-font color-primary-gold-dark text-left" style="margin: 0;">Adicionar Produtos</h2>
+        </div>
 
         <div class="mb-4 mt-2">
             <!-- Row 1: Nome -->
@@ -200,12 +201,25 @@
                 </div>
             </div>
             <!-- Row: Tamanho e Preço -->
-            <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 15px;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 15px; flex-wrap: wrap;">
 
-                <div style="flex: 0 0 220px;">
+                <div style="flex: 0 0 280px;">
                     <label style="font-weight: bold; display: block; margin-bottom: 6px;">Tamanho</label>
                     <input type="text" class="form-control" [(ngModel)]="filtroModalTamanho"
                         [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()" placeholder="cm">
+                    
+                    <!-- Botão Gerar Catálogo reposicionado com alinhamento horizontal forçado -->
+                    <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 15px; margin-top: 20px; white-space: nowrap;">
+                        <button type="button" class="btn-catalogo" (click)="gerarCatalogoPdf()" style="margin: 0;">
+                            <i class="fa fa-file-pdf"></i> Gerar Catálogo
+                        </button>
+                        <div class="tooltip-container" style="flex-shrink: 0;">
+                            <i class="fa fa-question-circle tooltip-trigger"></i>
+                            <div class="tooltip-box">
+                                O catálogo gera um PDF com todos os produtos disponíveis para que você possa imprimir e rascunhar as quantidades manualmente antes de lançar o pedido.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="flex: 0 0 320px;">
@@ -219,7 +233,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div style="align-self: flex-start; margin-top: 30px;">
                     <button class="btn btn-outline-secondary btn-sm" (click)="limparFiltrosModal()"
                         style="padding: 8px 12px; margin-left: 10px;">
                         <i class="fa fa-eraser"></i> Limpar Filtros

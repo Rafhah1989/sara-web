@@ -335,3 +335,73 @@ form {
     background-color: #e53935;
     /* Brighter, more vivid red */
 }
+
+/* Catálogo PDF Styles */
+.btn-catalogo {
+    background-color: #d4af37;
+    color: white;
+    border: 2px solid #000000; /* Borda preta solicitada */
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-catalogo:hover {
+    background-color: #b8962d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.tooltip-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.tooltip-trigger {
+    color: #333; /* Cor mais escura para combinar com a borda */
+    font-size: 1.3rem;
+    cursor: help;
+}
+
+.tooltip-box {
+    visibility: hidden;
+    width: 250px;
+    background-color: #000000; /* Preto sólido */
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 12px;
+    position: absolute;
+    z-index: 1000;
+    top: 50%;
+    left: 40px; /* Posicionar à direita do ícone */
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    white-space: normal; /* Garante que o texto quebre linhas */
+}
+
+.tooltip-box::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* Seta para a esquerda */
+    margin-top: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #000000 transparent transparent;
+}
+
+.tooltip-container:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}

@@ -657,4 +657,21 @@ export class PedidoFormComponent implements OnInit {
     fecharVisualizacaoImagem(): void {
         this.exibirVisualizacaoImagem = false;
     }
+
+    gerarCatalogoPdf(): void {
+        this.produtoService.gerarCatalogo().subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `catalogo-produtos.pdf`;
+                a.click();
+                alert('Catálogo gerado com sucesso!');
+            },
+            error: (err) => {
+                console.error('Erro ao gerar catálogo', err);
+                alert('Ocorreu um erro ao gerar o catálogo.');
+            }
+        });
+    }
 }
