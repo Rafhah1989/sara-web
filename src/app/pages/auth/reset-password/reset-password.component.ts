@@ -56,7 +56,10 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   salvar(): void {
-    if (this.resetForm.invalid) return;
+    if (this.resetForm.invalid) {
+      this.resetForm.markAllAsTouched();
+      return;
+    }
 
     const request = {
       token: this.token,
@@ -70,5 +73,10 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: (err) => this.erroMsg = err.error || 'Erro ao alterar senha.'
     });
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.resetForm.get(controlName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 }
