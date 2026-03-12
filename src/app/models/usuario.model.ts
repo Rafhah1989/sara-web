@@ -12,6 +12,9 @@ export interface Usuario {
     cidade: string;
     uf: string;
     cpfCnpj: string;
+    email: string;
+    token?: string;
+    dataExpiracao?: string;
     telefone: string;
     bairro: string;
     observacao?: string;

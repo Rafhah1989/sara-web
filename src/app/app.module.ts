@@ -29,12 +29,14 @@ import localePt from '@angular/common/locales/pt';
 import { CarrinhoComponent } from './pages/carrinho/carrinho.component';
 import { FormaPagamentoComponent } from './pages/forma-pagamento/forma-pagamento.component';
 import { ConfiguracaoComponent } from './pages/configuracao/configuracao.component';
+import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 
 registerLocaleData(localePt);
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'quem-somos', component: AboutComponent },
   { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'contato', component: ContactComponent },
@@ -69,7 +71,8 @@ const routes: Routes = [
     CarrinhoComponent,
     FormaPagamentoComponent,
     SpinnerComponent,
-    ConfiguracaoComponent
+    ConfiguracaoComponent,
+    ResetPasswordComponent
   ],
   imports: [
     BrowserModule,

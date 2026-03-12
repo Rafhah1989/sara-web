@@ -28,6 +28,12 @@
                         <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
                     </div>
                     <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" formControlName="email" [class.error]="isInvalid('email')"
+                            placeholder="exemplo@email.com">
+                        <span class="error-msg" *ngIf="isInvalid('email')">E-mail válido é obrigatório.</span>
+                    </div>
+                    <div class="form-group">
                         <label for="telefone">Telefone</label>
                         <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
                             [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
@@ -229,6 +235,7 @@
                     </td>
                     <td>
                         <button class="btn-edit" (click)="editar(user)" title="Editar">✏️</button>
+                        <button class="btn-info" (click)="reenviarConvite(user)" title="Reenviar Convite" style="margin: 0 5px; background: none; border: 1px solid #c5a059; border-radius: 4px; padding: 4px 8px; cursor: pointer;">📧</button>
                         <button class="btn-delete" (click)="desativar(user.id)" *ngIf="user.ativo"
                             title="Desativar">🚫</button>
                         <button class="btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo"

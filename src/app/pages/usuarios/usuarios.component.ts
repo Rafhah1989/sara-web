@@ -54,7 +54,8 @@ export class UsuariosComponent implements OnInit {
             setorId: [''],
             tabelaFreteId: [''],
             role: [Role.CLIENTE, Validators.required],
-            senha: ['', [Validators.pattern(/^\d{6}$/)]],
+            email: ['', [Validators.required, Validators.email]],
+            senha: [''],
             confirmarSenha: ['']
         }, { validator: this.passwordMatchValidator });
     }
@@ -189,20 +190,10 @@ export class UsuariosComponent implements OnInit {
         const confirmarSenha = this.userForm.get('confirmarSenha')?.value;
 
         // Regra customizada de senha
-        if (!this.modoEdicao) {
-            if (!senha || senha.length !== 6 || senha !== confirmarSenha) {
-                alert('Por favor, informe a senha');
-                this.userForm.get('senha')?.markAsTouched();
-                this.userForm.get('confirmarSenha')?.markAsTouched();
+        if (senha || confirmarSenha) {
+            if (senha !== confirmarSenha || (senha && senha.length !== 6)) {
+                alert('A senha deve ter 6 números e as confirmações devem ser iguais.');
                 return;
-            }
-        } else {
-            // Na edição, se preencher um, tem que preencher o outro e bater
-            if (senha || confirmarSenha) {
-                if (senha !== confirmarSenha || (senha && senha.length !== 6)) {
-                    alert('Por favor, informe a senha');
-                    return;
-                }
             }
         }
 
@@ -230,9 +221,26 @@ export class UsuariosComponent implements OnInit {
                 error: (err) => alert(err.error || 'Erro ao alterar usuário')
             });
         } else {
+            // Se criar sem senha, avisa sobre o e-mail
+            if (!senha) {
+                if (!confirm('Este usuário será criado sem senha. Um e-mail será enviado para que ele defina sua própria senha. Deseja continuar?')) {
+                    return;
+                }
+            }
+
             this.usuarioService.criar(usuario).subscribe({
                 next: () => this.finalizarAcao(),
                 error: (err) => alert(err.error || 'Erro ao criar usuário')
+            });
+        }
+    }
+
+    reenviarConvite(user: Usuario): void {
+        if (!user.id) return;
+        if (confirm(`Deseja reenviar o e-mail de convite para ${user.nome}? Uma nova senha provisória será gerada.`)) {
+            this.usuarioService.reenviarEmailConvite(user.id).subscribe({
+                next: () => alert('E-mail de convite enviado com sucesso!'),
+                error: (err) => alert('Erro ao reenviar convite: ' + (err.error || err.message))
             });
         }
     }

@@ -44,4 +44,16 @@ export class UsuarioService {
         const cleanCep = cep.replace(/\D/g, '');
         return this.http.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
     }
+
+    reenviarEmailConvite(id: number): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/reenviar-convite/${id}`, {});
+    }
+
+    validarToken(token: string): Observable<Usuario> {
+        return this.http.post<Usuario>(`${this.apiUrl}/validate-token`, token);
+    }
+
+    redefinirSenha(request: any): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/reset-password`, request);
+    }
 }
