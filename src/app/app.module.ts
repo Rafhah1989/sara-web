@@ -30,12 +30,14 @@ import { CarrinhoComponent } from './pages/carrinho/carrinho.component';
 import { FormaPagamentoComponent } from './pages/forma-pagamento/forma-pagamento.component';
 import { ConfiguracaoComponent } from './pages/configuracao/configuracao.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
+import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 
 registerLocaleData(localePt);
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'quem-somos', component: AboutComponent },
   { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
@@ -72,7 +74,8 @@ const routes: Routes = [
     FormaPagamentoComponent,
     SpinnerComponent,
     ConfiguracaoComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    ForgotPasswordComponent
   ],
   imports: [
     BrowserModule,

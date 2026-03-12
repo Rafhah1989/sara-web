@@ -69,8 +69,12 @@ export class PedidoService {
         return this.http.put<Pedido>(`${this.apiUrl}/${id}`, pedido);
     }
 
-    cancelar(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    cancelar(id: number, motivo?: string): Observable<void> {
+        let params = new HttpParams();
+        if (motivo) {
+            params = params.set('motivo', motivo);
+        }
+        return this.http.delete<void>(`${this.apiUrl}/${id}`, { params });
     }
 
     alterarSituacao(id: number, situacao: string): Observable<void> {

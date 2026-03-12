@@ -17,6 +17,8 @@ export class ResetPasswordComponent implements OnInit {
   tokenExpirado: boolean = false;
   sucesso: boolean = false;
   erroMsg: string = '';
+  showSenha: boolean = false;
+  showConfirmSenha: boolean = false;
 
   constructor(
     private fb: FormBuilder,

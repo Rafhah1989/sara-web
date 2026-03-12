@@ -175,9 +175,8 @@
                         <div class="input-wrapper">
                             <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
                                 [class.error]="isInvalid('senha')">
-                            <button type="button" class="eye-icon" (mousedown)="showSenha = true"
-                                (mouseup)="showSenha = false" (mouseleave)="showSenha = false">
-                                👁️
+                            <button type="button" class="eye-icon" (click)="showSenha = !showSenha">
+                                <i class="fas" [ngClass]="showSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
                         </div>
                     </div>
@@ -187,9 +186,8 @@
                             <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
                                 formControlName="confirmarSenha"
                                 [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
-                            <button type="button" class="eye-icon" (mousedown)="showConfirmSenha = true"
-                                (mouseup)="showConfirmSenha = false" (mouseleave)="showConfirmSenha = false">
-                                👁️
+                            <button type="button" class="eye-icon" (click)="showConfirmSenha = !showConfirmSenha">
+                                <i class="fas" [ngClass]="showConfirmSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
                         </div>
                     </div>

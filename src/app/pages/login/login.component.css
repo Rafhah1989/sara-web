@@ -194,3 +194,43 @@
     padding: 40px 25px;
   }
 }
+
+.forgot-password-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.forgot-password-link a {
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.forgot-password-link a:hover {
+    text-decoration: underline;
+}
+
+.eye-icon-login {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #444;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    z-index: 5;
+}
+
+.eye-icon-login i {
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.eye-icon-login:hover i {
+    opacity: 1;
+}

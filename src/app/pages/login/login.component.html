@@ -35,13 +35,16 @@
           <div class="input-with-icon">
             <i class="fas fa-lock"></i>
             <input 
-              type="password" 
+              [type]="showSenha ? 'text' : 'password'" 
               id="senha" 
               formControlName="senha" 
               class="form-control" 
               [ngClass]="{ 'is-invalid': submitted && f['senha'].errors }" 
               placeholder="Digite sua senha"
             />
+            <button type="button" class="eye-icon-login" (click)="showSenha = !showSenha">
+              <i class="fas" [ngClass]="showSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
           </div>
           <div *ngIf="submitted && f['senha'].errors" class="invalid-feedback">
             <div *ngIf="f['senha'].errors['required']">Senha é obrigatória</div>
@@ -57,6 +60,10 @@
           <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2"></span>
           <span *ngIf="!loading">Entrar <i class="fas fa-arrow-right-to-bracket ml-2"></i></span>
         </button>
+
+        <div class="forgot-password-link">
+          <a routerLink="/forgot-password">Esqueci/Alterar Senha</a>
+        </div>
       </form>
       
       <div class="login-footer">

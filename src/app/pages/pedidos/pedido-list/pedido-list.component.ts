@@ -38,6 +38,10 @@ export class PedidoListComponent implements OnInit {
     avisoPdf: boolean = false;
     exibirModalSucessoNovoPedido: boolean = false;
     pedidoRecemCriadoId: number | null = null;
+    
+    exibirModalCancelamento: boolean = false;
+    motivoCancelamento: string = '';
+    pedidoParaCancelar: Pedido | null = null;
 
     constructor(
         private pedidoService: PedidoService,
@@ -149,13 +153,25 @@ export class PedidoListComponent implements OnInit {
             return;
         }
 
-        const confirmacao = confirm(`Deseja realmente cancelar o pedido #${pedido.id}?\nCliente: ${pedido.usuarioNome}\nData: ${new Date(pedido.dataPedido).toLocaleDateString()}`);
-        if (confirmacao) {
-            this.pedidoService.cancelar(pedido.id).subscribe(() => {
-                alert('Pedido cancelado com sucesso!');
-                this.carregarPedidos();
-            });
-        }
+        this.pedidoParaCancelar = pedido;
+        this.motivoCancelamento = '';
+        this.exibirModalCancelamento = true;
+    }
+
+    confirmarCancelamento(): void {
+        if (!this.pedidoParaCancelar) return;
+
+        this.pedidoService.cancelar(this.pedidoParaCancelar.id, this.motivoCancelamento).subscribe(() => {
+            alert('Pedido cancelado com sucesso!');
+            this.fecharModalCancelamento();
+            this.carregarPedidos();
+        });
+    }
+
+    fecharModalCancelamento(): void {
+        this.exibirModalCancelamento = false;
+        this.pedidoParaCancelar = null;
+        this.motivoCancelamento = '';
     }
 
     alterarSituacao(pedido: Pedido, novaSituacao: string): void {

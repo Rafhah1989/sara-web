@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-md-3" *ngIf="isAdmin">
                 <label>Por Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()"
-                    placeholder="Nome do cliente" class="form-control">
+                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente"
+                    class="form-control">
             </div>
             <div class="col-md-2">
                 <label>Número do Pedido</label>
@@ -76,9 +76,11 @@
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
                     <td>
                         <span *ngIf="!isAdmin || pedido.cancelado">{{ pedido.situacaoDescricao }}</span>
-                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control" style="width: 140px; padding: 4px; display: inline-block;"
-                            [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)">
-                            <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control"
+                            style="width: 140px; padding: 4px; display: inline-block;" [ngModel]="pedido.situacao"
+                            (ngModelChange)="alterarSituacao(pedido, $event)">
+                            <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}
+                            </option>
                         </select>
                     </td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
@@ -86,11 +88,11 @@
                         <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                             <i class="fa fa-file-pdf"></i>
                         </button>
-                        <button class="btn-action btn-edit" title="Editar/Visualizar"
-                            (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado">
+                        <button class="btn-action btn-edit" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
+                            [disabled]="pedido.cancelado">
                             <i class="fa fa-pencil-alt"></i>
                         </button>
-                        <button class="btn-action btn-cancel" title="Cancelar" 
+                        <button class="btn-action btn-cancel" title="Cancelar"
                             *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
                             (click)="cancelarPedido(pedido)">
                             <i class="fa fa-trash-alt"></i>
@@ -115,6 +117,29 @@
                     (click)="currentPage = currentPage + 1; carregarPedidos()">Próxima</button>
             </div>
             <span>Total: {{ totalElements }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cancelamento de Pedido -->
+<div class="modal-overlay" *ngIf="exibirModalCancelamento">
+    <div class="modal-container" style="max-width: 500px;">
+        <h2 class="cinzel-font" style="margin-bottom: 20px; color: #d32f2f;">Cancelar Pedido #{{ pedidoParaCancelar?.id
+            }}</h2>
+        <p style="margin-bottom: 20px; font-weight: 500;">Deseja realmente cancelar este pedido?</p>
+        <p style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">Você pode informar um motivo abaixo (opcional):
+        </p>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <textarea [(ngModel)]="motivoCancelamento" class="form-control" rows="4"
+                placeholder="Ex: Desistência da compra, Erro no endereço..." style="resize: vertical;"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end" style="gap: 15px;">
+            <button class="btn-modal btn-modal-back" (click)="fecharModalCancelamento()">Voltar</button>
+            <button class="btn-modal btn-modal-cancel" (click)="confirmarCancelamento()">
+                <i class="fa fa-trash-alt"></i> Confirmar Cancelamento
+            </button>
         </div>
     </div>
 </div>

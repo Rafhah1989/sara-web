@@ -9,6 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class UsuarioService {
     private apiUrl = `${environment.apiUrl}/usuarios`;
+    private authUrl = `${environment.apiUrl}`;
 
     constructor(private http: HttpClient) { }
 
@@ -54,6 +55,10 @@ export class UsuarioService {
     }
 
     redefinirSenha(request: any): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/reset-password`, request);
+        return this.http.post<void>(`${this.authUrl}/reset-password`, request);
+    }
+
+    solicitarRecuperacaoSenha(cpfCnpj: string): Observable<void> {
+        return this.http.post<void>(`${this.authUrl}/forgot-password`, { cpfCnpj });
     }
 }
