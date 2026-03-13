@@ -146,6 +146,10 @@ export class PedidoListComponent implements OnInit {
         this.router.navigate(['/pedidos/editar', id]);
     }
 
+    visualizarPix(id: number): void {
+        this.router.navigate(['/pedidos/pix', id]);
+    }
+
     cancelarPedido(pedido: Pedido): void {
         const role = this.authService.getRoleDoToken();
         if (role === 'CLIENTE' && pedido.situacao !== 'PENDENTE' && pedido.situacao !== 'EM_PRODUCAO') {
@@ -200,6 +204,53 @@ export class PedidoListComponent implements OnInit {
             alert('Erro ao alterar status de pagamento do pedido.');
             this.carregarPedidos();
         });
+    }
+
+    verificarPagamentoManual(id: number): void {
+        if (!this.isAdmin) return;
+        this.loading = true;
+        this.pedidoService.verificarPagamentoManual(id).subscribe({
+            next: (res) => {
+                alert(`Status verificado: ${res.status || 'OK'}`);
+                this.carregarPedidos();
+            },
+            error: (err) => {
+                console.error('Erro ao verificar pagamento', err);
+                alert('Erro ao verificar status no Mercado Pago.');
+                this.loading = false;
+            }
+        });
+    }
+
+    verificarTodosPagamentosPendentes(): void {
+        const pendentes = this.pedidos.filter(p => !p.pago && p.pagamentoOnline);
+        if (pendentes.length === 0) {
+            alert('Não há pedidos PIX pendentes na lista atual.');
+            return;
+        }
+
+        if (confirm(`Deseja verificar o status de ${pendentes.length} pedido(s) PIX pendente(s)?`)) {
+            this.loading = true;
+            let processados = 0;
+            pendentes.forEach(p => {
+                this.pedidoService.verificarPagamentoManual(p.id).subscribe({
+                    next: () => {
+                        processados++;
+                        if (processados === pendentes.length) {
+                            alert('Verificação em lote concluída.');
+                            this.carregarPedidos();
+                        }
+                    },
+                    error: () => {
+                        processados++;
+                        if (processados === pendentes.length) {
+                            alert('Verificação em lote concluída com alguns erros.');
+                            this.carregarPedidos();
+                        }
+                    }
+                });
+            });
+        }
     }
 
     gerarPdf(id: number): void {

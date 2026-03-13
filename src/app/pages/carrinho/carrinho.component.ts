@@ -266,8 +266,11 @@ export class CarrinhoComponent implements OnInit {
               this.carrinhoService.limpar(usuarioId).subscribe({
                   next: () => {
                       this.fecharModalGerarPedido();
-                      // Navigation context passing for list success view
-                      this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: res.id } });
+                      if (novoPedido.pagamentoOnline) {
+                          this.router.navigate(['/pedidos/pix', res.id]);
+                      } else {
+                          this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: res.id } });
+                      }
                   },
                   error: (err) => console.error('Limpa carrinho erro', err)
               });

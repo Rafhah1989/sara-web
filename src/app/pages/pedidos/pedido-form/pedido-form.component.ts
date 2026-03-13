@@ -683,8 +683,17 @@ export class PedidoFormComponent implements OnInit {
                 a.href = url;
                 a.download = `pedido_${this.pedidoId}.pdf`;
                 a.click();
-                this.voltar();
+                this.posGeracaoSucesso();
             });
+        } else {
+            this.posGeracaoSucesso();
+        }
+    }
+
+    private posGeracaoSucesso(): void {
+        const formValue = this.pedidoForm.getRawValue();
+        if (formValue.pagamentoOnline && this.pedidoId) {
+            this.router.navigate(['/pedidos/pix', this.pedidoId]);
         } else {
             this.voltar();
         }

@@ -138,6 +138,14 @@
     filter: brightness(1.1);
 }
 
+.btn-pix {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.btn-sync {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
 .btn-icon {
     background: none;
     border: 1px solid #000;

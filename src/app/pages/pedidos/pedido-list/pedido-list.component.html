@@ -1,7 +1,12 @@
 <div class="container page-container">
     <div class="header-section">
         <h1 class="cinzel-font color-primary-gold-dark">Listagem de Pedidos</h1>
-        <button class="btn-gold" (click)="novoPedido()">Novo Pedido</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()">
+                <i class="fa fa-sync"></i> Sincronizar PIX
+            </button>
+            <button class="btn-gold" (click)="novoPedido()">Novo Pedido</button>
+        </div>
     </div>
 
     <div class="filter-section card">
@@ -97,6 +102,14 @@
                     <td class="actions">
                         <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                             <i class="fa fa-file-pdf"></i>
+                        </button>
+                        <button class="btn-action btn-pix" title="Visualizar PIX" 
+                            *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)">
+                            <i class="fa fa-qrcode"></i>
+                        </button>
+                        <button class="btn-action btn-sync" title="Sincronizar Mercado Pago" 
+                            *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)">
+                            <i class="fa fa-sync"></i>
                         </button>
                         <button class="btn-action btn-edit" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
                             [disabled]="pedido.cancelado">

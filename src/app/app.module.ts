@@ -23,6 +23,7 @@ import { SetorComponent } from './pages/setor/setor.component';
 import { PedidoListComponent } from './pages/pedidos/pedido-list/pedido-list.component';
 import { PedidoFormComponent } from './pages/pedidos/pedido-form/pedido-form.component';
 import { LojaComponent } from './pages/loja/loja.component';
+import { PixPaymentComponent } from './pages/pedidos/pix-payment/pix-payment.component';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -51,6 +52,7 @@ const routes: Routes = [
   { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
+  { path: 'pedidos/pix/:id', component: PixPaymentComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];
 
@@ -75,7 +77,8 @@ const routes: Routes = [
     SpinnerComponent,
     ConfiguracaoComponent,
     ResetPasswordComponent,
-    ForgotPasswordComponent
+    ForgotPasswordComponent,
+    PixPaymentComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,60 @@
+<div class="pix-container" *ngIf="!loading; else spinner">
+  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao">
+    <div class="pix-header">
+      <h2 class="cinzel-font color-primary-gold-dark">Pagamento via PIX</h2>
+      <p>Pedido <strong>#{{ pedidoId }}</strong> - Total: <strong>{{ totalPedido | currency:'BRL' }}</strong></p>
+    </div>
+
+    <div class="pix-content">
+      <div class="qr-code-section" *ngIf="pixQrCodeBase64">
+        <p class="section-title">Escaneie o QR Code abaixo:</p>
+        <div class="qr-code-wrapper">
+          <img [src]="'data:image/png;base64,' + pixQrCodeBase64" alt="QR Code PIX">
+        </div>
+      </div>
+
+      <div class="copy-paste-section" *ngIf="pixCopiaECola">
+        <p class="section-title">Ou use o código Copia e Cola:</p>
+        <div class="copy-input-group">
+          <input type="text" [value]="pixCopiaECola" readonly>
+          <button class="btn-copy" (click)="copiarPix()" title="Copiar código">
+            <i class="fa fa-copy"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pix-footer">
+      <p class="pix-instructions">
+        Após realizar o pagamento, você pode verificar o status do seu pedido na listagem.
+      </p>
+      <button class="btn-gold" (click)="irParaListagem()">Ir para Meus Pedidos</button>
+    </div>
+  </div>
+
+  <!-- Estado de Erro -->
+  <div class="pix-card shadow-card error-card animate-fade-in" *ngIf="!loading && erroGeracao">
+    <div class="error-content">
+      <i class="fa fa-exclamation-triangle error-icon"></i>
+      <h2 class="cinzel-font color-primary-gold-dark">Erro ao Gerar PIX</h2>
+      <p>Ocorreu um problema ao gerar os dados para pagamento PIX no momento.</p>
+      <p class="instruction">Por favor, tente visualizar novamente em alguns minutos ou finalize o pagamento na entrega.</p>
+      
+      <div class="actions">
+        <button class="btn-gold" (click)="irParaListagem()">
+          <i class="fa fa-list"></i> Voltar para Pedidos
+        </button>
+        <button class="btn-outline" (click)="carregarDadosPix()">
+          <i class="fa fa-sync"></i> Tentar Novamente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #spinner>
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando dados de pagamento...</p>
+  </div>
+</ng-template>

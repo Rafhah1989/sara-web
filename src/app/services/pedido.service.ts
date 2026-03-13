@@ -33,7 +33,7 @@ export interface PedidoProduto {
     valor: number;
     quantidade: number;
     desconto: number;
-    peso?: number; // Optional or required? DTO has it.
+    peso?: number;
     imagem: string;
     tamanho?: number;
 }
@@ -104,5 +104,13 @@ export class PedidoService {
 
     alterarStatusPago(id: number, pago: boolean): Observable<void> {
         return this.http.patch<void>(`${this.apiUrl}/${id}/status-pago`, { pago });
+    }
+
+    verificarPagamentoManual(id: number): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/mercadopago/verificar-pagamento/${id}`, {});
+    }
+
+    gerarPix(id: number): Observable<Pedido> {
+        return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pix`, {});
     }
 }
