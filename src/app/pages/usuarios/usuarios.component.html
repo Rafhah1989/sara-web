@@ -154,6 +154,16 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="metodoPagamentoAutorizado">Método de Pagamento Autorizado</label>
+                        <select id="metodoPagamentoAutorizado" formControlName="metodoPagamentoAutorizado">
+                            <option *ngFor="let metodo of metodosAutorizados" [value]="metodo.id">{{ metodo.descricao }}</option>
+                        </select>
+                        <span class="error-msg" *ngIf="isInvalid('metodoPagamentoAutorizado')">Obrigatório.</span>
+                    </div>
+                </div>
             </fieldset>
 
             <fieldset class="form-section">

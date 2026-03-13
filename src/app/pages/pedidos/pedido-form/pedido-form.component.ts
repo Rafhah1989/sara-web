@@ -9,6 +9,7 @@ import { Produto } from '../../../models/produto.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { MetodoPagamentoAutorizado } from '../../../models/metodo-pagamento-autorizado.enum';
 
 @Component({
     selector: 'app-pedido-form',
@@ -31,6 +32,7 @@ export class PedidoFormComponent implements OnInit {
     situacoesPedido: any[] = [];
     descontoUsuarioAtual: number = 0;
     isAdmin: boolean = false;
+    metodoPagamentoAutorizadoCliente?: MetodoPagamentoAutorizado;
 
     exibirSucesso: boolean = false;
     exibirVisualizacaoImagem: boolean = false;
@@ -74,6 +76,7 @@ export class PedidoFormComponent implements OnInit {
             situacao: ['PENDENTE'],
             observacao: [''],
             valorTotal: [{ value: 0, disabled: true }],
+            pagamentoOnline: [false],
             itens: this.fb.array([])
         });
     }
@@ -98,6 +101,10 @@ export class PedidoFormComponent implements OnInit {
                         usuarioNome: userNome
                     });
                     this.pedidoForm.get('usuarioNome')?.disable();
+                    this.usuarioService.buscarPorId(userId).subscribe(user => {
+                        this.metodoPagamentoAutorizadoCliente = user.metodoPagamentoAutorizado;
+                        this.verificarRegrasPagamentoOnline();
+                    });
                     this.carregarConfiguracaoFrete(userId);
                 }
             }
@@ -153,6 +160,8 @@ export class PedidoFormComponent implements OnInit {
             usuarioNome: usuario.nome,
             desconto: this.calcularDescontoTotal(this.pedidoForm.get('formaPagamentoId')?.value)
         }, { emitEvent: false });
+        this.metodoPagamentoAutorizadoCliente = usuario.metodoPagamentoAutorizado;
+        this.verificarRegrasPagamentoOnline();
         this.showUsuariosDropdown = false;
 
         // Fetch freight config regardless of mode (though in edit mode we might want to preserve existing? 
@@ -182,7 +191,32 @@ export class PedidoFormComponent implements OnInit {
     aoSelecionarFormaPagamento(id: number): void {
         const descT = this.calcularDescontoTotal(id);
         this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
+        this.verificarRegrasPagamentoOnline();
         this.calcularTotais();
+    }
+
+    verificarRegrasPagamentoOnline(): void {
+        const formaPagamentoId = this.pedidoForm.get('formaPagamentoId')?.value;
+        const forma = this.formasPagamento.find(f => f.id === formaPagamentoId);
+        const isPix = forma && forma.descricao?.toUpperCase() === 'PIX';
+
+        if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
+            this.pedidoForm.get('pagamentoOnline')?.setValue(true);
+        } else if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE) {
+            if (!isPix) {
+                this.pedidoForm.get('pagamentoOnline')?.setValue(false);
+            }
+        } else {
+            this.pedidoForm.get('pagamentoOnline')?.setValue(false);
+        }
+    }
+
+    deveMostrarCampoPagamentoOnline(): boolean {
+        const formaPagamentoId = this.pedidoForm.get('formaPagamentoId')?.value;
+        const forma = this.formasPagamento.find(f => f.id === formaPagamentoId);
+        const isPix = forma && forma.descricao?.toUpperCase() === 'PIX';
+
+        return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
     }
 
     calcularDescontoTotal(formaPagamentoId?: number): number {
@@ -543,7 +577,8 @@ export class PedidoFormComponent implements OnInit {
                 desconto: pedido.desconto,
                 frete: freteFormatted,
                 situacao: pedido.situacao,
-                observacao: pedido.observacao
+                observacao: pedido.observacao,
+                pagamentoOnline: pedido.pagamentoOnline
             }, { emitEvent: false });
 
             // Pulo do gato: Para não perder o valor original e a base de cálculo. 
@@ -555,6 +590,11 @@ export class PedidoFormComponent implements OnInit {
             
             // Load freight config for this user to enable dynamic updates during edit
             this.carregarConfiguracaoFrete(pedido.usuarioId);
+
+            this.usuarioService.buscarPorId(pedido.usuarioId).subscribe(user => {
+                this.metodoPagamentoAutorizadoCliente = user.metodoPagamentoAutorizado;
+                this.verificarRegrasPagamentoOnline();
+            });
 
             pedido.produtos.sort((a, b) => {
                 const nomeA = a.produtoNome.toLowerCase();
@@ -607,6 +647,7 @@ export class PedidoFormComponent implements OnInit {
             situacao: this.pedidoForm.get('situacao')?.value || 'PENDENTE',
             valorTotal: formValue.valorTotal,
             observacao: formValue.observacao,
+            pagamentoOnline: formValue.pagamentoOnline || false,
             produtos: formValue.itens.map((it: any) => ({
                 produtoId: it.produtoId,
                 valor: this.parseMoeda(it.valor), // Clean currency string

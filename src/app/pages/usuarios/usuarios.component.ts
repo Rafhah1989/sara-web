@@ -6,6 +6,7 @@ import { FreteService } from '../../services/frete.service';
 import { Usuario, Role } from '../../models/usuario.model';
 import { Setor } from '../../models/setor.model';
 import { Frete } from '../../models/frete.model';
+import { MetodoPagamentoAutorizado, MetodoPagamentoAutorizadoLabels } from '../../models/metodo-pagamento-autorizado.enum';
 
 @Component({
     selector: 'app-usuarios',
@@ -26,6 +27,10 @@ export class UsuariosComponent implements OnInit {
 
     roles = Object.values(Role);
     formasPagamento = [{ id: 'PIX', descricao: 'PIX' }, { id: 'DINHEIRO', descricao: 'Dinheiro' }];
+    metodosAutorizados = Object.values(MetodoPagamentoAutorizado).map(val => ({
+        id: val,
+        descricao: MetodoPagamentoAutorizadoLabels[val]
+    }));
     ufs = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
     constructor(
@@ -53,6 +58,7 @@ export class UsuariosComponent implements OnInit {
             modalidadeEntrega: [''],
             setorId: [''],
             tabelaFreteId: [''],
+            metodoPagamentoAutorizado: [MetodoPagamentoAutorizado.APENAS_NA_ENTREGA, Validators.required],
             role: [Role.CLIENTE, Validators.required],
             email: ['', [Validators.required, Validators.email]],
             senha: [''],

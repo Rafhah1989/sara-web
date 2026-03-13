@@ -190,6 +190,18 @@ export class PedidoListComponent implements OnInit {
         });
     }
 
+    alterarStatusPago(pedido: Pedido, pago: boolean): void {
+        if (!this.isAdmin) return;
+        
+        this.pedidoService.alterarStatusPago(pedido.id, pago).subscribe(() => {
+            pedido.pago = pago;
+        }, error => {
+            console.error('Erro ao alterar status de pagamento', error);
+            alert('Erro ao alterar status de pagamento do pedido.');
+            this.carregarPedidos();
+        });
+    }
+
     gerarPdf(id: number): void {
         this.avisoPdf = true;
         this.pedidoService.gerarPdf(id).subscribe(blob => {

@@ -64,6 +64,7 @@
                     </th>
                     <th>Valor Total</th>
                     <th>Situação</th>
+                    <th class="text-center">Pago</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -82,6 +83,15 @@
                             <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}
                             </option>
                         </select>
+                    </td>
+                    <td class="text-center">
+                        <i class="fa fa-lg" 
+                           [ngClass]="pedido.pago ? 'fa-check-circle' : 'fa-times-circle'"
+                           [style.color]="pedido.pago ? '#28a745' : '#dc3545'"
+                           [title]="pedido.pago ? 'Pago' : 'Pendente de Pagamento'"
+                           [style.cursor]="isAdmin ? 'pointer' : 'default'"
+                           (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)">
+                        </i>
                     </td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td class="actions">

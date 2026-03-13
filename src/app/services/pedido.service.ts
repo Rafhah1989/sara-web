@@ -17,6 +17,11 @@ export interface Pedido {
     situacao?: string;
     situacaoDescricao?: string;
     dataPedido: string;
+    pago: boolean;
+    pagamentoOnline: boolean;
+    mercadopagoPagamentoId?: string;
+    pixCopiaECola?: string;
+    pixQrCode?: string;
     produtos: PedidoProduto[];
 }
 
@@ -95,5 +100,9 @@ export class PedidoService {
 
     obterSituacoesPedido(): Observable<any[]> {
         return this.http.get<any[]>(`${environment.apiUrl}/situacoes-pedido`);
+    }
+
+    alterarStatusPago(id: number, pago: boolean): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/${id}/status-pago`, { pago });
     }
 }

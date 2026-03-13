@@ -75,6 +75,22 @@
                     </div>
                 </div>
             </div>
+
+            <div class="form-row" *ngIf="deveMostrarCampoPagamentoOnline()" style="margin-top: 20px;">
+                <div class="form-group" style="flex: 100%;">
+                    <div class="online-payment-confirm" style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline" style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                            <label for="pagamentoOnline" style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
+                                Pagamento Online via PIX (Gerar QR Code)
+                            </label>
+                        </div>
+                        <p style="margin: 8px 0 0 30px; font-size: 0.9rem; color: #666;">
+                            Ao marcar esta opção, o QR Code para pagamento será gerado imediatamente após salvar o pedido.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </fieldset>
 
         <!-- Itens do Pedido -->

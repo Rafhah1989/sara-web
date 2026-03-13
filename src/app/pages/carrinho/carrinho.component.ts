@@ -4,6 +4,7 @@ import { PedidoService } from '../../services/pedido.service';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
 import { Router } from '@angular/router';
+import { MetodoPagamentoAutorizado } from '../../models/metodo-pagamento-autorizado.enum';
 
 @Component({
   selector: 'app-carrinho',
@@ -25,6 +26,8 @@ export class CarrinhoComponent implements OnInit {
   descontoForma: number = 0;
   valorDescontoCalculado: number = 0;
   valorTotalGeral: number = 0;
+  pagamentoOnline: boolean = false;
+  metodoPagamentoAutorizadoCliente?: MetodoPagamentoAutorizado;
 
   exibirModalLimpar: boolean = false;
   exibirModalGerarPedido: boolean = false;
@@ -55,7 +58,9 @@ export class CarrinhoComponent implements OnInit {
     
     this.usuarioService.buscarPorId(usuarioId).subscribe(usuario => {
         this.descontoUsuario = usuario.desconto || 0;
+        this.metodoPagamentoAutorizadoCliente = usuario.metodoPagamentoAutorizado;
         this.carregarCarrinho(usuarioId);
+        this.verificarRegrasPagamentoOnline();
     });
 
     this.pedidoService.obterSugestaoFrete(usuarioId).subscribe(config => {
@@ -136,7 +141,30 @@ export class CarrinhoComponent implements OnInit {
       } else {
           this.descontoForma = 0;
       }
+      this.verificarRegrasPagamentoOnline();
       this.calcularTotais();
+  }
+
+  verificarRegrasPagamentoOnline(): void {
+      const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+      const isPix = fp && (fp.descricao?.toUpperCase() === 'PIX' || fp.nome?.toUpperCase() === 'PIX');
+
+      if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
+          this.pagamentoOnline = true;
+      } else if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE) {
+          if (!isPix) {
+              this.pagamentoOnline = false;
+          }
+      } else {
+          this.pagamentoOnline = false;
+      }
+  }
+
+  deveMostrarCampoPagamentoOnline(): boolean {
+      const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+      const isPix = fp && (fp.descricao?.toUpperCase() === 'PIX' || fp.nome?.toUpperCase() === 'PIX');
+
+      return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
   }
 
   atualizarQuantidade(item: CarrinhoResponseDTO, value: string): void {
@@ -224,6 +252,7 @@ export class CarrinhoComponent implements OnInit {
           frete: this.freteSugerido,
           valorTotal: this.valorTotalGeral,
           observacao: this.observacaoPedido,
+          pagamentoOnline: this.pagamentoOnline,
           situacao: 'PENDENTE',
           produtos: this.itensCarrinho.map(item => ({
               produtoId: item.produtoId,

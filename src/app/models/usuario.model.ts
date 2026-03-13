@@ -29,4 +29,5 @@ export interface Usuario {
     role: Role;
     senha?: string;
     ativo?: boolean;
+    metodoPagamentoAutorizado: import('./metodo-pagamento-autorizado.enum').MetodoPagamentoAutorizado;
 }

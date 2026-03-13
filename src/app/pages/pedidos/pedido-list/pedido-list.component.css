@@ -50,6 +50,10 @@
     text-align: left;
 }
 
+.text-center {
+    text-align: center !important;
+}
+
 .table th {
     background-color: #f8f8f8;
     font-weight: bold;
