@@ -22,6 +22,7 @@ export interface Pedido {
     mercadopagoPagamentoId?: string;
     pixCopiaECola?: string;
     pixQrCode?: string;
+    dataExpiracaoPix?: string;
     produtos: PedidoProduto[];
 }
 

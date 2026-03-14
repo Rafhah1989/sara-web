@@ -1,8 +1,13 @@
 <div class="pix-container" *ngIf="!loading; else spinner">
   <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao">
-    <div class="pix-header">
+    <div class="pix-header" style="text-align: center;">
       <h2 class="cinzel-font color-primary-gold-dark">Pagamento via PIX</h2>
       <p>Pedido <strong>#{{ pedidoId }}</strong> - Total: <strong>{{ totalPedido | currency:'BRL' }}</strong></p>
+      
+      <div class="pix-timer" *ngIf="tempoRestante" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
+        <i class="fa fa-clock-o"></i> 
+        <span> Expira em: <strong>{{ tempoRestante }}</strong></span>
+      </div>
     </div>
 
     <div class="pix-content">
@@ -58,3 +63,37 @@
     <p>Carregando dados de pagamento...</p>
   </div>
 </ng-template>
+
+<style>
+.pix-timer {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #555;
+  border: 1px solid #ddd;
+  min-width: 180px;
+}
+
+.pix-timer.expiring {
+  color: #dc3545;
+  background-color: #fff5f5;
+  border-color: #ffc9c9;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.pix-timer i {
+  margin-right: 8px;
+}
+</style>
+
