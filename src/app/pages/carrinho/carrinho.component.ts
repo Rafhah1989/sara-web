@@ -147,10 +147,13 @@ export class CarrinhoComponent implements OnInit {
 
   verificarRegrasPagamentoOnline(): void {
       const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
-      const isPix = fp && (fp.descricao?.toUpperCase() === 'PIX' || fp.nome?.toUpperCase() === 'PIX');
+      const isPix = fp && (
+          (fp.descricao && fp.descricao.toUpperCase().includes('PIX')) || 
+          (fp.nome && fp.nome.toUpperCase().includes('PIX'))
+      );
 
       if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
-          this.pagamentoOnline = true;
+          this.pagamentoOnline = isPix ? true : false;
       } else if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE) {
           if (!isPix) {
               this.pagamentoOnline = false;
@@ -162,7 +165,10 @@ export class CarrinhoComponent implements OnInit {
 
   deveMostrarCampoPagamentoOnline(): boolean {
       const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
-      const isPix = fp && (fp.descricao?.toUpperCase() === 'PIX' || fp.nome?.toUpperCase() === 'PIX');
+      const isPix = fp && (
+          (fp.descricao && fp.descricao.toUpperCase().includes('PIX')) || 
+          (fp.nome && fp.nome.toUpperCase().includes('PIX'))
+      );
 
       return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
   }

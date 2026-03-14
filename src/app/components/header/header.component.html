@@ -22,7 +22,7 @@
                         <li><a routerLink="/configuracao" routerLinkActive="active" (click)="fecharDropdown()">Configurações</a></li>
                     </ul>
                 </li>
-                <li><a routerLink="/contato" routerLinkActive="active">Contato</a></li>
+
                 <li *ngIf="!isAutenticado"><a routerLink="/login" routerLinkActive="active">Entrar</a></li>
                 <li *ngIf="isAutenticado">
                     <a routerLink="/carrinho" routerLinkActive="active" class="cart-link">

@@ -16,7 +16,6 @@ import { FooterComponent } from './components/footer/footer.component';
 import { HomeComponent } from './pages/home/home.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ProductsComponent } from './pages/products/products.component';
-import { ContactComponent } from './pages/contact/contact.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { FreteComponent } from './pages/frete/frete.component';
 import { SetorComponent } from './pages/setor/setor.component';
@@ -42,7 +41,6 @@ const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'quem-somos', component: AboutComponent },
   { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'contato', component: ContactComponent },
   { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
@@ -64,7 +62,6 @@ const routes: Routes = [
     HomeComponent,
     AboutComponent,
     ProductsComponent,
-    ContactComponent,
     UsuariosComponent,
     FreteComponent,
     SetorComponent,
@@ -85,7 +82,7 @@ const routes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'pt-BR' },
