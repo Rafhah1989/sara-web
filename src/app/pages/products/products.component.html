@@ -50,7 +50,12 @@
             </div>
 
             <div class="image-preview" *ngIf="produtoAtual.imagem">
-                <p>Prévia da Imagem:</p>
+                <div class="preview-header">
+                    <p>Prévia da Imagem:</p>
+                    <button type="button" class="btn-remove-img" (click)="removerImagem()" title="Remover Imagem">
+                        <i class="fa fa-times-circle"></i> Remover
+                    </button>
+                </div>
                 <img [src]="produtoAtual.imagem" alt="Preview">
             </div>
 

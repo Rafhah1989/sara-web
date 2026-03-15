@@ -59,6 +59,34 @@
     border-radius: 4px;
 }
 
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.btn-remove-img {
+    background: #f28b82;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-remove-img:hover {
+    background: #e53935;
+    transform: scale(1.05);
+}
+
+
 .form-actions {
     display: flex;
     gap: 1rem;

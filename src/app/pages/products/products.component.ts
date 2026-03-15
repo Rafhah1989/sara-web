@@ -171,4 +171,11 @@ export class ProductsComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
+
+  removerImagem(): void {
+    this.produtoAtual.imagem = '';
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
 }
