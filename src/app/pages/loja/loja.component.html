@@ -97,8 +97,17 @@
                     </div>
                 </div>
             </div>
+            <div #infinitoSentinel class="sentinel"></div>
 
-            <div *ngIf="produtos.length === 0" class="no-products">
+            <div *ngIf="carregando" class="loading-spinner">
+                <i class="fa fa-spinner fa-spin"></i> Carregando mais produtos...
+            </div>
+
+            <div *ngIf="fimDosProdutos && produtos.length > 0" class="end-of-catalog">
+                <p>Você chegou ao final do catálogo.</p>
+            </div>
+
+            <div *ngIf="!carregando && produtos.length === 0" class="no-products">
                 <p>Nenhum produto encontrado com estes filtros.</p>
             </div>
         </main>

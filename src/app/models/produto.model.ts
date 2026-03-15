@@ -7,4 +7,5 @@ export interface Produto {
     codigo?: number;
     ativo: boolean;
     imagem: string; // Base64
+    temImagem?: boolean;
 }

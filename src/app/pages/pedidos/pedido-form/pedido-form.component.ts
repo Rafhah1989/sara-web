@@ -236,8 +236,14 @@ export class PedidoFormComponent implements OnInit {
         this.filtroModalPrecoMin = '';
         this.filtroModalPrecoMax = '';
         
-        this.produtoService.listarTodos().subscribe(produtos => {
-            this.produtosModal = produtos.filter(p => p.ativo).map(p => ({
+        // Se já carregou antes, não precisa baixar tudo de novo (Cache)
+        if (this.produtosModal && this.produtosModal.length > 0) {
+            this.filtrarProdutosModal();
+            return;
+        }
+
+        this.produtoService.listarAtivos().subscribe(produtos => {
+            this.produtosModal = produtos.map(p => ({
                 ...p,
                 quantidadeSelecionada: 0
             }));
@@ -373,6 +379,7 @@ export class PedidoFormComponent implements OnInit {
                     valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
                     total: [{ value: 0, disabled: true }],
                     imagem: [p.imagem],
+                    temImagem: [p.temImagem],
                     peso: [p.peso || 0]
                 });
                 
@@ -699,9 +706,25 @@ export class PedidoFormComponent implements OnInit {
         }
     }
 
-    visualizarImagem(url: string): void {
-        this.imagemUrlVisualizacao = url;
-        this.exibirVisualizacaoImagem = true;
+    visualizarImagem(produto: any): void {
+        const id = produto.id || produto.produtoId;
+        this.imagemUrlVisualizacao = ''; // Reset previous image
+        
+        if (!produto.imagem && (produto.temImagem || id)) {
+            this.produtoService.buscarPorId(id).subscribe({
+                next: (p) => {
+                    produto.imagem = p.imagem;
+                    this.imagemUrlVisualizacao = p.imagem || '';
+                    this.exibirVisualizacaoImagem = true;
+                },
+                error: () => {
+                    this.exibirVisualizacaoImagem = true;
+                }
+            });
+        } else {
+            this.imagemUrlVisualizacao = produto.imagem || '';
+            this.exibirVisualizacaoImagem = true;
+        }
     }
 
     fecharVisualizacaoImagem(): void {

@@ -147,8 +147,8 @@
                             <td>{{ item.get('total')?.value | currency:'BRL' }}</td>
                             <td class="actions">
                                 <button type="button" class="btn btn-info btn-sm mx-1 text-white"
-                                    (click)="visualizarImagem(item.get('imagem')?.value)"
-                                    *ngIf="item.get('imagem')?.value && item.get('imagem')?.value !== ''"
+                                    (click)="visualizarImagem(item.value)"
+                                    *ngIf="item.get('temImagem')?.value || item.get('imagem')?.value"
                                     title="Ver Imagem">
                                     <i class="fa fa-image"></i>
                                 </button>
@@ -190,8 +190,12 @@
 
 <!-- Modal Imagem -->
 <div class="modal-overlay image-modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
-    <div class="modal-content image-modal" (click)="$event.stopPropagation()">
-        <img [src]="imagemUrlVisualizacao" alt="Produto" class="img-preview">
+    <div class="modal-content image-modal" (click)="$event.stopPropagation()" style="text-align: center;">
+        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao" alt="Produto" class="img-preview">
+        <div *ngIf="!imagemUrlVisualizacao" style="padding: 40px; background: #f9f9f9; border-radius: 8px;">
+            <i class="fa fa-image-slash" style="font-size: 4rem; color: #ddd; display: block; margin-bottom: 15px;"></i>
+            <span style="color: #999; font-weight: bold; font-family: 'Cinzel', serif;">Produto sem imagem cadastrada</span>
+        </div>
         <div style="margin-top: 20px;">
             <button class="btn btn-secondary" (click)="fecharVisualizacaoImagem()">Fechar</button>
         </div>
@@ -285,13 +289,11 @@
                                             p.nome }}</td>
                                         <td class="text-center"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">
-                                            <button class="btn btn-info text-white" *ngIf="p.imagem"
-                                                (click)="visualizarImagem(p.imagem)" title="Ver Imagem"
+                                            <button class="btn btn-info text-white"
+                                                (click)="visualizarImagem(p)" title="Ver Imagem"
                                                 style="padding: 2px 6px; font-size: 0.8rem; line-height: 1;">
                                                 <i class="fa fa-image"></i>
                                             </button>
-                                            <i class="fa fa-image text-muted" *ngIf="!p.imagem" title="Sem Imagem"
-                                                style="font-size: 0.9rem;"></i>
                                         </td>
                                         <td class="text-center"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">

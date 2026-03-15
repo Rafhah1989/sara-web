@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Produto } from '../models/produto.model';
 import { environment } from '../../environments/environment';
@@ -14,6 +14,14 @@ export class ProdutoService {
 
     listarTodos(): Observable<Produto[]> {
         return this.http.get<Produto[]>(this.apiUrl);
+    }
+
+    listarAtivos(): Observable<Produto[]> {
+        return this.http.get<Produto[]>(`${this.apiUrl}/ativos`);
+    }
+
+    buscarPorId(id: number): Observable<Produto> {
+        return this.http.get<Produto>(`${this.apiUrl}/${id}`);
     }
 
     buscarPorNome(nome: string): Observable<Produto[]> {
@@ -36,14 +44,20 @@ export class ProdutoService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
-    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number): Observable<Produto[]> {
+    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number, page: number = 0, size: number = 30, skipSpinner: boolean = true): Observable<any> {
         let params = new HttpParams();
         if (nome) params = params.set('nome', nome);
         if (tamanho) params = params.set('tamanho', tamanho.toString());
         if (precoMin) params = params.set('precoMin', precoMin.toString());
         if (precoMax) params = params.set('precoMax', precoMax.toString());
+        params = params.set('page', page.toString());
+        params = params.set('size', size.toString());
 
-        return this.http.get<Produto[]>(`${this.apiUrl}/loja`, { params });
+        let headers = new HttpHeaders();
+        if (skipSpinner) {
+            headers = headers.set('X-Skip-Spinner', 'true');
+        }
+        return this.http.get<any>(`${this.apiUrl}/loja`, { params, headers });
     }
 
     buscarOutrosTamanhos(id: number): Observable<Produto[]> {

@@ -373,3 +373,25 @@
 }
 
 
+
+.loading-spinner, .end-of-catalog {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 1.1rem;
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+.loading-spinner i {
+    color: var(--primary-gold, #D4AF37);
+    margin-right: 10px;
+}
+
+.end-of-catalog p {
+    font-family: 'Cinzel', serif;
+    color: #888;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: 10px;
+}

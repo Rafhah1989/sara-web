@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Produto } from '../../models/produto.model';
@@ -13,7 +13,10 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './loja.component.html',
   styleUrls: ['./loja.component.css']
 })
-export class LojaComponent implements OnInit {
+export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  @ViewChild('infinitoSentinel') sentinel!: ElementRef;
+  private observer!: IntersectionObserver;
 
   produtos: Produto[] = [];
   filtroNome: string = '';
@@ -25,6 +28,12 @@ export class LojaComponent implements OnInit {
 
   ordenacao: 'nome' | 'tamanho' | 'preco' = 'nome';
   itensPorLinha: 3 | 4 | 5 = 3;
+
+  // Pagination
+  paginaAtual: number = 0;
+  tamanhoPagina: number = 30;
+  carregando: boolean = false;
+  fimDosProdutos: boolean = false;
 
   quantidades: { [produtoId: number]: number } = {};
   nomeSubject = new Subject<string>();
@@ -58,6 +67,34 @@ export class LojaComponent implements OnInit {
 
   ngOnInit(): void {
     this.pesquisar();
+  }
+
+  ngAfterViewInit(): void {
+    this.setupIntersectionObserver();
+  }
+
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  private setupIntersectionObserver(): void {
+    const options = {
+      root: null,
+      rootMargin: '10px',
+      threshold: 0.1
+    };
+
+    this.observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !this.carregando && !this.fimDosProdutos && this.produtos.length > 0) {
+        this.pesquisar(false);
+      }
+    }, options);
+
+    if (this.sentinel) {
+      this.observer.observe(this.sentinel.nativeElement);
+    }
   }
 
   onNomeChange(event: any): void {
@@ -114,26 +151,54 @@ export class LojaComponent implements OnInit {
     });
   }
 
-  pesquisar(): void {
+  pesquisar(novaBusca: boolean = true): void {
+    if (this.carregando) return;
+    
+    if (novaBusca) {
+      this.paginaAtual = 0;
+      this.produtos = [];
+      this.fimDosProdutos = false;
+    }
+
+    if (this.fimDosProdutos) return;
+
+    this.carregando = true;
     const nomeBusca = this.filtroNome.length >= 3 ? this.filtroNome : undefined;
+    
     this.produtoService.buscarParaLoja(
       nomeBusca, 
       this.filtroTamanho, 
       this.filtroPrecoMin, 
-      this.filtroPrecoMax
+      this.filtroPrecoMax,
+      this.paginaAtual,
+      this.tamanhoPagina,
+      !novaBusca // skipSpinner if not a new search
     ).subscribe({
-      next: (data) => {
-        this.produtos = data;
-        this.ordenarProdutos();
-        this.produtos.forEach(p => {
+      next: (page) => {
+        const novosProdutos = page.content;
+        this.produtos = [...this.produtos, ...novosProdutos];
+        
+        if (novosProdutos.length < this.tamanhoPagina) {
+          this.fimDosProdutos = true;
+        }
+
+        novosProdutos.forEach((p: Produto) => {
           if (!this.quantidades[p.id!]) {
             this.quantidades[p.id!] = 1;
           }
         });
+        
+        this.carregando = false;
+        this.paginaAtual++;
       },
-      error: (err) => console.error('Erro ao buscar produtos da loja', err)
+      error: (err) => {
+        console.error('Erro ao buscar produtos da loja', err);
+        this.carregando = false;
+      }
     });
   }
+
+
 
   limparFiltros(): void {
     this.filtroNome = '';
@@ -142,7 +207,7 @@ export class LojaComponent implements OnInit {
     this.filtroPrecoMax = undefined;
     this.filtroPrecoMinFMT = '';
     this.filtroPrecoMaxFMT = '';
-    this.pesquisar();
+    this.pesquisar(true);
   }
 
   adicionarAoCarrinho(produto: Produto): void {
