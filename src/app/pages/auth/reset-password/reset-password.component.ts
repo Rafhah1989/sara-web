@@ -27,7 +27,7 @@ export class ResetPasswordComponent implements OnInit {
     private usuarioService: UsuarioService
   ) {
     this.resetForm = this.fb.group({
-      novaSenha: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+      novaSenha: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
       confirmarSenha: ['', Validators.required]
     }, { validator: this.passwordMatchValidator });
   }
