@@ -10,7 +10,7 @@ export class SpinnerInterceptor implements HttpInterceptor {
   constructor(private spinnerService: SpinnerService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (request.headers.has('X-Skip-Spinner')) {
+    if (request.headers.has('X-Skip-Spinner') || request.params.has('skipSpinner')) {
       return next.handle(request);
     }
 

@@ -52,12 +52,11 @@ export class ProdutoService {
         if (precoMax) params = params.set('precoMax', precoMax.toString());
         params = params.set('page', page.toString());
         params = params.set('size', size.toString());
-
-        let headers = new HttpHeaders();
         if (skipSpinner) {
-            headers = headers.set('X-Skip-Spinner', 'true');
+            params = params.set('skipSpinner', 'true');
         }
-        return this.http.get<any>(`${this.apiUrl}/loja`, { params, headers });
+
+        return this.http.get<any>(`${this.apiUrl}/loja`, { params });
     }
 
     buscarOutrosTamanhos(id: number): Observable<Produto[]> {
