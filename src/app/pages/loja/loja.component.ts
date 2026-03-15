@@ -74,31 +74,11 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.setupIntersectionObserver();
+    // Carregamento agora é progressivo automático disparado pelo ngOnInit -> pesquisar()
   }
 
   ngOnDestroy(): void {
-    if (this.observer) {
-      this.observer.disconnect();
-    }
-  }
-
-  private setupIntersectionObserver(): void {
-    const options = {
-      root: null,
-      rootMargin: '10px',
-      threshold: 0.1
-    };
-
-    this.observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !this.carregando && !this.fimDosProdutos && this.produtos.length > 0) {
-        this.pesquisar(false);
-      }
-    }, options);
-
-    if (this.sentinel) {
-      this.observer.observe(this.sentinel.nativeElement);
-    }
+    // Observer removido
   }
 
   onNomeChange(event: any): void {
@@ -156,15 +136,22 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   pesquisar(novaBusca: boolean = true): void {
-    if (this.carregando) return;
+    if (this.carregando && !novaBusca) return; // Permitir disparar próxima se for progresso
     
     if (novaBusca) {
       this.paginaAtual = 0;
       this.produtos = [];
       this.fimDosProdutos = false;
+      this.carregando = true; // Forçar carregamento inicial
     }
 
-    if (this.fimDosProdutos) return;
+    if (this.fimDosProdutos) {
+       this.carregando = false;
+       return;
+    }
+
+    // Se já estiver carregando uma página de progresso, não duplica
+    if (this.carregando && !novaBusca) return;
 
     this.carregando = true;
     const nomeBusca = this.filtroNome.length >= 3 ? this.filtroNome : undefined;
@@ -184,6 +171,14 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
         
         if (novosProdutos.length < this.tamanhoPagina) {
           this.fimDosProdutos = true;
+          this.carregando = false;
+        } else {
+          this.paginaAtual++;
+          // Carregar próxima página automaticamente após pequeno delay para não travar a UI
+          setTimeout(() => {
+            this.carregando = false; // Reset para permitir a próxima
+            this.pesquisar(false);
+          }, 500);
         }
 
         novosProdutos.forEach((p: Produto) => {
@@ -191,9 +186,6 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
             this.quantidades[p.id!] = 1;
           }
         });
-        
-        this.carregando = false;
-        this.paginaAtual++;
       },
       error: (err) => {
         console.error('Erro ao buscar produtos da loja', err);
