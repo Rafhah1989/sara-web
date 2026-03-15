@@ -139,6 +139,12 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.card-image-wrapper:hover {
+    background-color: #ededed;
 }
 
 .card-image-wrapper img {
@@ -394,4 +400,20 @@
     border-top: 1px solid #eee;
     padding-top: 20px;
     margin-top: 10px;
+}
+
+/* Modal de Zoom */
+.modal-content-zoom {
+    animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

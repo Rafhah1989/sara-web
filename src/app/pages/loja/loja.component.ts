@@ -49,6 +49,10 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   mensagemToast: string = '';
   toastTimeout: any;
 
+  // Image Visualization Modal
+  exibirVisualizacaoImagem: boolean = false;
+  imagemUrlVisualizacao: string = '';
+
   constructor(
     private produtoService: ProdutoService,
     private carrinhoService: CarrinhoService,
@@ -346,5 +350,17 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toastTimeout = setTimeout(() => {
           this.exibirToast = false;
       }, 3000);
+  }
+
+  abrirVisualizacaoImagem(url?: string): void {
+      if (url) {
+          this.imagemUrlVisualizacao = url;
+          this.exibirVisualizacaoImagem = true;
+      }
+  }
+
+  fecharVisualizacaoImagem(): void {
+      this.exibirVisualizacaoImagem = false;
+      this.imagemUrlVisualizacao = '';
   }
 }

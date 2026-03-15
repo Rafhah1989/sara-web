@@ -79,7 +79,8 @@
                 Selecione seus Produtos</h2>
             <div class="vitrine-grid" [ngStyle]="{'grid-template-columns': 'repeat(' + itensPorLinha + ', 1fr)'}">
                 <div class="vitrine-card" *ngFor="let product of produtos">
-                    <div class="card-image-wrapper">
+                    <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)" 
+                        title="Clique para ampliar">
                         <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome">
                         <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
                     </div>
@@ -147,4 +148,17 @@
 <!-- Toast Notification -->
 <div class="toast-notification" *ngIf="exibirToast">
     {{ mensagemToast }}
+</div>
+
+<!-- Modal de Visualização de Imagem (Zoom) -->
+<div class="modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()" 
+    style="background: rgba(0,0,0,0.85); cursor: zoom-out;">
+    <div class="modal-content-zoom" (click)="$event.stopPropagation()" style="position: relative; max-width: 90vw; max-height: 90vh;">
+        <img [src]="imagemUrlVisualizacao" alt="Visualização" 
+            style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;">
+        <button (click)="fecharVisualizacaoImagem()" 
+            style="position: absolute; top: -15px; right: -15px; background: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+            <i class="fa fa-times" style="font-size: 1.2rem; color: #333;"></i>
+        </button>
+    </div>
 </div>
