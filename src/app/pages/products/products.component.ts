@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Produto } from '../../models/produto.model';
 import { ProdutoService } from '../../services/produto.service';
 
@@ -9,6 +9,7 @@ import { ProdutoService } from '../../services/produto.service';
 })
 export class ProductsComponent implements OnInit {
 
+  @ViewChild('fileInput') fileInput!: ElementRef;
   produtos: Produto[] = [];
   produtoAtual: Produto = this.getNovoProduto();
   filtroNome: string = '';
@@ -151,6 +152,9 @@ export class ProductsComponent implements OnInit {
   finalizarAcao(): void {
     this.produtoAtual = this.getNovoProduto();
     this.modoEdicao = false;
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 
   onFileSelected(event: any): void {
@@ -159,6 +163,10 @@ export class ProductsComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.produtoAtual.imagem = e.target.result;
+        // Limpa o valor para permitir selecionar o mesmo arquivo novamente
+        if (this.fileInput) {
+          this.fileInput.nativeElement.value = '';
+        }
       };
       reader.readAsDataURL(file);
     }
