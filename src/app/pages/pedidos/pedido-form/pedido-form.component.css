@@ -402,7 +402,92 @@ form {
     border-color: transparent #000000 transparent transparent;
 }
 
-.tooltip-container:hover .tooltip-box {
-    visibility: visible;
-    opacity: 1;
+
+.modal-footer-fixed {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.footer-summary {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.summary-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #444;
+}
+
+.summary-value i {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.summary-value.gold {
+    color: #c5a059;
+    font-size: 1.4rem;
+}
+
+.summary-value.gold i {
+    color: #c5a059;
+}
+
+.summary-divider {
+    width: 1px;
+    height: 30px;
+    background: #eee;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.footer-actions button {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 25px;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+    .modal-footer-fixed {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    .footer-summary {
+        justify-content: space-around;
+    }
 }

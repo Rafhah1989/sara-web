@@ -259,15 +259,14 @@
                         <!-- Corpo do Quadro com Scroll Interno -->
                         <div style="flex: 1; overflow-y: auto;">
                             <table class="table table-bordered mb-0"
-                                style="width: 100%; border-collapse: collapse; text-align: center;">
+                                style="width: 90%; margin: 0 auto; border-collapse: collapse; text-align: center;">
                                 <thead style="position: sticky; top: 0; background: #f4f4f4; z-index: 10;">
                                     <tr style="font-size: 0.85rem;">
                                         <th width="60" class="text-center"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Cód.</th>
-                                        <th class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">Nome
-                                        </th>
-                                        <th width="150" class="text-center"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">Ver Imagem</th>
+                                        <th width="150" class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">Nome</th>
+                                        <th width="45" class="text-center"
+                                            style="padding: 4px 8px; border: 1px solid #ccc;">Img</th>
                                         <th width="80" class="text-center"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Qtd.</th>
                                         <th width="100" class="text-right"
@@ -335,20 +334,29 @@
             </div>
         </div>
 
-        <!-- Rodapé Fixo -->
+        <!-- Rodapé Fixo Modernizado -->
         <div class="modal-footer-fixed">
-            <div class="d-flex align-items-center" style="gap: 15px;">
-                <div class="total-badge">
-                    Itens: {{ totalModalAlternativoQtd }}
+            <div class="footer-summary">
+                <div class="summary-item">
+                    <span class="summary-label">ITENS</span>
+                    <div class="summary-value">
+                        <i class="fa fa-shopping-cart"></i>
+                        <span>{{ totalModalAlternativoQtd }}</span>
+                    </div>
                 </div>
-                <div class="total-price-badge">
-                    Total: {{ totalModalAlternativo | currency:'BRL' }}
+                <div class="summary-divider"></div>
+                <div class="summary-item highlight">
+                    <span class="summary-label">TOTAL GERAL</span>
+                    <div class="summary-value gold">
+                        <i class="fa fa-wallet"></i>
+                        <span>{{ totalModalAlternativo | currency:'BRL' }}</span>
+                    </div>
                 </div>
             </div>
-            <div class="d-flex justify-content-end" style="gap: 10px;">
+            <div class="footer-actions">
                 <button type="button" class="btn-loja-cancelar" (click)="fecharModalProdutosAlternativo()">Cancelar</button>
-                <button type="button" class="btn-loja-add" (click)="adicionarProdutosModal()" style="margin: 0;">
-                    <i class="fa fa-check text-white" style="margin-right: 5px;"></i> Adicionar
+                <button type="button" class="btn-loja-add" (click)="adicionarProdutosModal()">
+                    <i class="fa fa-check"></i> Adicionar
                 </button>
             </div>
         </div>
