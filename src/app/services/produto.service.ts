@@ -44,7 +44,7 @@ export class ProdutoService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
-    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number, page: number = 0, size: number = 30, skipSpinner: boolean = true): Observable<any> {
+    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number, page: number = 0, size: number = 30, skipSpinner: boolean = true, sort: string = 'nome'): Observable<any> {
         let params = new HttpParams();
         if (nome) params = params.set('nome', nome);
         if (tamanho) params = params.set('tamanho', tamanho.toString());
@@ -52,6 +52,7 @@ export class ProdutoService {
         if (precoMax) params = params.set('precoMax', precoMax.toString());
         params = params.set('page', page.toString());
         params = params.set('size', size.toString());
+        params = params.set('sort', sort + ',asc');
         if (skipSpinner) {
             params = params.set('skipSpinner', 'true');
         }

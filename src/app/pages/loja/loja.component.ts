@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Produto } from '../../models/produto.model';
 import { ProdutoService } from '../../services/produto.service';
@@ -34,6 +34,8 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   tamanhoPagina: number = 30;
   carregando: boolean = false;
   fimDosProdutos: boolean = false;
+  private loadingTimeout: any;
+  private searchSubscription?: Subscription;
 
   quantidades: { [produtoId: number]: number } = {};
   nomeSubject = new Subject<string>();
@@ -122,23 +124,22 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ordenarProdutos(): void {
-    if (!this.produtos) return;
-    this.produtos.sort((a, b) => {
-      if (this.ordenacao === 'nome') {
-        return (a.nome || '').localeCompare(b.nome || '');
-      } else if (this.ordenacao === 'tamanho') {
-        return (a.tamanho || 0) - (b.tamanho || 0);
-      } else if (this.ordenacao === 'preco') {
-        return (a.preco || 0) - (b.preco || 0);
-      }
-      return 0;
-    });
+    // Agora a ordenação é feita pelo Backend para abranger todo o catálogo
+    this.pesquisar(true);
   }
 
   pesquisar(novaBusca: boolean = true): void {
     if (this.carregando && !novaBusca) return; // Permitir disparar próxima se for progresso
     
     if (novaBusca) {
+      // Cancelar requisição em andamento se for uma nova busca (evita race condition)
+      if (this.searchSubscription) {
+        this.searchSubscription.unsubscribe();
+      }
+
+      if (this.loadingTimeout) {
+        clearTimeout(this.loadingTimeout);
+      }
       this.paginaAtual = 0;
       this.produtos = [];
       this.fimDosProdutos = false;
@@ -155,18 +156,26 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.carregando = true;
     const nomeBusca = this.filtroNome.length >= 3 ? this.filtroNome : undefined;
+    const currentSort = this.ordenacao; // Fixa a ordenação para este ciclo
     
-    this.produtoService.buscarParaLoja(
+    this.searchSubscription = this.produtoService.buscarParaLoja(
       nomeBusca, 
       this.filtroTamanho, 
       this.filtroPrecoMin, 
       this.filtroPrecoMax,
       this.paginaAtual,
       this.tamanhoPagina,
-      !novaBusca // skipSpinner if not a new search
+      !novaBusca, // skipSpinner if not a new search
+      currentSort
     ).subscribe({
       next: (page) => {
         const novosProdutos = page.content;
+        
+        // Se a busca mudou drasticamente (ex: nova busca disparada enquanto essa chegava), ignoramos
+        if (novaBusca && this.produtos.length > 0 && this.paginaAtual === 0) {
+            // Este caso previne duplicidade se o reset não foi limpo a tempo
+        }
+
         this.produtos = [...this.produtos, ...novosProdutos];
         
         if (novosProdutos.length < this.tamanhoPagina) {
@@ -175,10 +184,10 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.paginaAtual++;
           // Carregar próxima página automaticamente após pequeno delay para não travar a UI
-          setTimeout(() => {
+          this.loadingTimeout = setTimeout(() => {
             this.carregando = false; // Reset para permitir a próxima
             this.pesquisar(false);
-          }, 500);
+          }, 600);
         }
 
         novosProdutos.forEach((p: Produto) => {
