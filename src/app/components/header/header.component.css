@@ -102,16 +102,210 @@
     vertical-align: middle;
 }
 
+/* Responsividade e Elementos de Exibição Condicional */
+.show-mobile {
+    display: none;
+}
+
+.hide-mobile {
+    display: block;
+}
+
 @media (max-width: 768px) {
     .header-container {
-        flex-direction: column;
-        gap: 1rem;
+        padding: 0 1.5rem;
+        gap: 0;
+    }
+
+    .logo-img {
+        height: 60px;
+    }
+
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: block !important;
     }
 
     .main-nav ul {
-        gap: 1rem;
-        font-size: 0.8rem;
+        gap: 1.2rem;
     }
+
+    .api-message {
+        display: none; /* Esconde saudação em mobile para ganhar espaço */
+    }
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 40px;
+    z-index: 1003;
+}
+
+.hamburger-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--primary-gold);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+.hamburger-btn.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Mobile Drawer */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    backdrop-filter: blur(2px);
+}
+
+.mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--secondary-dark);
+    z-index: 1002;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-drawer.open {
+    right: 0;
+}
+
+.drawer-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(0,0,0,0.2);
+}
+
+.drawer-logo {
+    height: 50px;
+}
+
+.close-drawer {
+    background: none;
+    border: none;
+    color: var(--primary-gold);
+    font-size: 2.5rem;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-info-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--primary-gold);
+}
+
+.user-info-mobile i {
+    font-size: 1.8rem;
+}
+
+.user-info-mobile span {
+    font-weight: 600;
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+
+.drawer-nav {
+    padding: 1rem 0;
+    overflow-y: auto;
+}
+
+.drawer-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.drawer-nav a, .tree-header {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: var(--text-light);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.drawer-nav a:hover, .drawer-nav a.active {
+    color: var(--primary-gold);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.logout-mobile {
+    color: #ff6b6b !important;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.logout-mobile i {
+    margin-right: 10px;
+}
+
+/* Tree/Acordeon em Mobile */
+.tree-header {
+    cursor: pointer;
+    color: var(--primary-gold);
+}
+
+.tree-submenu {
+    list-style: none;
+    padding: 0;
+    background: rgba(0,0,0,0.15);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.tree-submenu.expanded {
+    max-height: 500px;
+    transition: max-height 0.5s ease-in;
+}
+
+.tree-submenu a {
+    padding: 0.8rem 2.5rem;
+    font-size: 0.85rem;
+    text-transform: none;
 }
 
 .api-message {

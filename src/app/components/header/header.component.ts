@@ -10,10 +10,15 @@ import { Subscription } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   welcomeMessage: string = 'Bem-vindo Usuário';
+  userName: string = 'Usuário';
   dropdownAberto: boolean = false;
   isAutenticado: boolean = false;
   isAdmin: boolean = false;
   quantidadeCarrinho: number = 0;
+
+  // Mobile Menu State
+  mobileMenuAberto: boolean = false;
+  adminTreeAberto: boolean = false;
 
   private authSub!: Subscription;
   private carrinhoSub!: Subscription;
@@ -33,12 +38,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
         // Tenta pegar o CPF/CNPJ ou nome que vem do token pra exibir na UI.
         const subject = this.authService.getSubjectDoToken();
         const usuarioId = this.authService.getUsuarioIdDoToken();
-        this.welcomeMessage = `Bem-vindo(a) ${subject ? subject : 'Usuário'}`;
+        this.userName = subject ? subject : 'Usuário';
+        this.welcomeMessage = `Bem-vindo(a) ${this.userName}`;
 
         if (usuarioId) {
           this.carrinhoService.atualizarContagem(usuarioId);
         }
       } else {
+        this.userName = 'Usuário';
         this.welcomeMessage = 'Bem-vindo Usuário';
         this.carrinhoService.limparContagem();
       }
@@ -81,5 +88,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   fecharDropdown(): void {
     this.dropdownAberto = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuAberto = !this.mobileMenuAberto;
+    if (!this.mobileMenuAberto) {
+      this.adminTreeAberto = false; // Fecha a árvore ao fechar o menu
+    }
+  }
+
+  fecharMobileMenu(): void {
+    this.mobileMenuAberto = false;
+    this.adminTreeAberto = false;
+  }
+
+  toggleAdminTree(event: Event): void {
+    event.stopPropagation();
+    this.adminTreeAberto = !this.adminTreeAberto;
   }
 }

@@ -8,10 +8,10 @@
         <nav class="main-nav">
             <ul>
                 <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a></li>
-                <li><a routerLink="/quem-somos" routerLinkActive="active">Quem Somos</a></li>
+                <li class="hide-mobile"><a routerLink="/quem-somos" routerLinkActive="active">Quem Somos</a></li>
                 <li *ngIf="isAutenticado"><a routerLink="/loja" routerLinkActive="active">Loja</a></li>
                 <li *ngIf="isAutenticado"><a routerLink="/pedidos" routerLinkActive="active">Pedidos</a></li>
-                <li *ngIf="isAutenticado && isAdmin" class="dropdown" (mouseleave)="fecharDropdown()">
+                <li *ngIf="isAutenticado && isAdmin" class="dropdown hide-mobile" (mouseleave)="fecharDropdown()">
                     <a href="javascript:void(0)" class="dropdown-toggle"
                         (click)="toggleDropdown($event)">Administrador</a>
                     <ul class="dropdown-menu" *ngIf="dropdownAberto">
@@ -30,10 +30,58 @@
                         <span class="cart-badge" *ngIf="quantidadeCarrinho > 0">{{ quantidadeCarrinho }}</span>
                     </a>
                 </li>
-                <li *ngIf="isAutenticado"><a href="javascript:void(0)" (click)="logout($event)">Sair</a></li>
+                <li *ngIf="isAutenticado" class="hide-mobile"><a href="javascript:void(0)" (click)="logout($event)">Sair</a></li>
+                
+                <!-- Botão Menu Mobile (Visível apenas em Mobile) -->
+                <li class="show-mobile">
+                    <button class="hamburger-btn" (click)="toggleMobileMenu()" [class.active]="mobileMenuAberto" aria-label="Menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </li>
             </ul>
         </nav>
-        <div class="api-message" *ngIf="isAutenticado && welcomeMessage">
+
+        <!-- Overlay e Menu Lateral Mobile -->
+        <div class="mobile-menu-overlay" *ngIf="mobileMenuAberto" (click)="fecharMobileMenu()"></div>
+        <div class="mobile-drawer" [class.open]="mobileMenuAberto">
+            <div class="drawer-header">
+                <div class="user-info-mobile" *ngIf="isAutenticado">
+                    <i class="fa fa-user-circle"></i>
+                    <span>{{ userName }}</span>
+                </div>
+                <img *ngIf="!isAutenticado" src="assets/sara_logo.PNG" alt="Sara Logo" class="drawer-logo">
+                <button class="close-drawer" (click)="fecharMobileMenu()">&times;</button>
+            </div>
+            <nav class="drawer-nav">
+                <ul>
+                    <li><a routerLink="/quem-somos" routerLinkActive="active" (click)="fecharMobileMenu()">Quem Somos</a></li>
+                    
+                    <!-- Administrador (Tree View em Mobile) -->
+                    <li *ngIf="isAutenticado && isAdmin" class="drawer-tree">
+                        <div class="tree-header" (click)="toggleAdminTree($event)">
+                            Administrador
+                            <i class="fa" [ngClass]="adminTreeAberto ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        </div>
+                        <ul class="tree-submenu" [class.expanded]="adminTreeAberto">
+                            <li><a routerLink="/produtos" routerLinkActive="active" (click)="fecharMobileMenu()">Produtos</a></li>
+                            <li><a routerLink="/usuarios" routerLinkActive="active" (click)="fecharMobileMenu()">Usuários</a></li>
+                            <li><a routerLink="/formas-pagamento" routerLinkActive="active" (click)="fecharMobileMenu()">Formas de Pagamento</a></li>
+                            <li><a routerLink="/setores" routerLinkActive="active" (click)="fecharMobileMenu()">Setores</a></li>
+                            <li><a routerLink="/configuracao" routerLinkActive="active" (click)="fecharMobileMenu()">Configurações</a></li>
+                        </ul>
+                    </li>
+
+                    <li *ngIf="isAutenticado">
+                        <a href="javascript:void(0)" (click)="logout($event); fecharMobileMenu()" class="logout-mobile">
+                            <i class="fa fa-sign-out"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="api-message hide-mobile" *ngIf="isAutenticado && welcomeMessage">
             {{ welcomeMessage }}
         </div>
     </div>
