@@ -225,7 +225,15 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
        return;
     }
     
-    // Check for other sizes before adding
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // No mobile, adiciona direto sem sugerir tamanhos para fluxo mais rápido
+        this.processarAdicaoUnitaria(usuarioId, produto, this.quantidades[produto.id!] || 1).subscribe();
+        return;
+    }
+
+    // Desktop: Check for other sizes before adding
     this.produtoService.buscarOutrosTamanhos(produto.id!).subscribe({
         next: (outros) => {
             if (outros && outros.length > 0) {

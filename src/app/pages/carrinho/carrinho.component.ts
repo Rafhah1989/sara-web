@@ -173,8 +173,8 @@ export class CarrinhoComponent implements OnInit {
       return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
   }
 
-  atualizarQuantidade(item: CarrinhoResponseDTO, value: string): void {
-      const novaQtd = parseInt(value, 10);
+  atualizarQuantidade(item: CarrinhoResponseDTO, value: string | number): void {
+      const novaQtd = typeof value === 'string' ? parseInt(value, 10) : value;
       if (novaQtd <= 0 || isNaN(novaQtd)) return;
       
       const usuarioId = this.authService.getUsuarioIdDoToken();

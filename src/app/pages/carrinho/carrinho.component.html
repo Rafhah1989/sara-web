@@ -27,17 +27,33 @@
 
                 <div class="tamanho-card-body">
                     <div class="carrinho-item" *ngFor="let item of grupo.itens">
-                        <div class="item-imagem">
-                            <img *ngIf="item.produtoImagem" [src]="item.produtoImagem" [alt]="item.produtoNome">
-                            <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
+                        <div class="item-main-info">
+                            <div class="item-imagem">
+                                <img *ngIf="item.produtoImagem" [src]="item.produtoImagem" [alt]="item.produtoNome">
+                                <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
+                            </div>
+
+                            <div class="item-details">
+                                <h5 class="item-nome">{{ item.produtoNome }}</h5>
+                                <span class="item-preco">{{ item.produtoPreco | currency:'BRL':'symbol':'1.2-2' }}</span>
+                                
+                                <!-- Mobile specific: Actions integrated in details -->
+                                <div class="mobile-item-actions show-mobile">
+                                    <div class="qtd-control">
+                                        <button class="btn-qty" (click)="atualizarQuantidade(item, item.quantidade! - 1)" [disabled]="item.quantidade! <= 1">-</button>
+                                        <input type="number" min="1" [ngModel]="item.quantidade"
+                                            (change)="atualizarQuantidade(item, $any($event.target).value)" readonly>
+                                        <button class="btn-qty" (click)="atualizarQuantidade(item, item.quantidade! + 1)">+</button>
+                                    </div>
+                                    <button class="btn-remover-mobile" (click)="removerItem(item.produtoId)">
+                                        <i class="fa fa-trash"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="item-info">
-                            <h5 class="item-nome">{{ item.produtoNome }}</h5>
-                            <span class="item-preco">{{ item.produtoPreco | currency:'BRL':'symbol':'1.2-2' }}</span>
-                        </div>
-
-                        <div class="item-actions">
+                        <!-- Desktop specific: Actions on the right -->
+                        <div class="item-actions hide-mobile">
                             <div class="qtd-control">
                                 <label>Qtd:</label>
                                 <input type="number" min="1" [ngModel]="item.quantidade"
