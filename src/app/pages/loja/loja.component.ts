@@ -55,6 +55,9 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   exibirVisualizacaoImagem: boolean = false;
   imagemUrlVisualizacao: string = '';
 
+  // Mobile Filters
+  exibirFiltrosMobile: boolean = false;
+
   constructor(
     private produtoService: ProdutoService,
     private carrinhoService: CarrinhoService,
@@ -363,5 +366,9 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   fecharVisualizacaoImagem(): void {
       this.exibirVisualizacaoImagem = false;
       this.imagemUrlVisualizacao = '';
+  }
+
+  toggleFiltrosMobile(): void {
+      this.exibirFiltrosMobile = !this.exibirFiltrosMobile;
   }
 }

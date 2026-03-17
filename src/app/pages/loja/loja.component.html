@@ -43,7 +43,60 @@
 
         <!-- Vitrine de Produtos -->
         <main class="loja-vitrine">
-            <div
+            
+            <!-- NOVO: Cabeçalho Mobile (Filtro Nome + Botão Filtros) -->
+            <div class="mobile-filters-header show-mobile">
+                <div class="mobile-search-row">
+                    <div class="mobile-search-container">
+                        <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)" 
+                            placeholder="Buscar produto..." class="mobile-input-search">
+                        <i class="fa fa-search"></i>
+                    </div>
+                    <button class="mobile-btn-filters" (click)="toggleFiltrosMobile()" type="button">
+                        <i class="fa fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOVO: Drawer/Menu de Filtros Mobile -->
+            <div class="mobile-filters-drawer" [class.open]="exibirFiltrosMobile">
+                <div class="drawer-header">
+                    <h3>Filtros & Ordenação</h3>
+                    <button class="close-drawer" (click)="toggleFiltrosMobile()">&times;</button>
+                </div>
+                <div class="drawer-content">
+                    <div class="filter-group">
+                        <label><i class="fa fa-arrows-h"></i> Tamanho (cm)</label>
+                        <input type="number" class="modern-input input-w80" [(ngModel)]="filtroTamanho" (change)="pesquisar()">
+                    </div>
+                    
+                    <div class="filter-group section-divider">
+                        <label><i class="fa fa-tag"></i> Faixa de Preço</label>
+                        <div class="price-inputs">
+                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMinFMT" (input)="applyCurrencyMask($event, 'min')" placeholder="Mín R$">
+                            <span class="price-separator">até</span>
+                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMaxFMT" (input)="applyCurrencyMask($event, 'max')" placeholder="Máx R$">
+                        </div>
+                    </div>
+
+                    <div class="filter-group section-divider">
+                        <label><i class="fa fa-sort-amount-desc"></i> Ordenar por</label>
+                        <select class="modern-select select-w60" [(ngModel)]="ordenacao" (change)="ordenarProdutos()">
+                            <option value="nome">Nome</option>
+                            <option value="tamanho">Tamanho</option>
+                            <option value="preco">Preço</option>
+                        </select>
+                    </div>
+
+                    <div class="drawer-footer">
+                        <button class="btn-clear-modern" (click)="limparFiltros(); toggleFiltrosMobile()">Limpar Tudo</button>
+                        <button class="btn-apply-modern" (click)="toggleFiltrosMobile()">Aplicar Filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles Desktop (Ocultar em Mobile) -->
+            <div class="desktop-controls hide-mobile"
                 style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 24px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee;">
                 <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
                     <label style="margin: 0; font-weight: 600; color: #555; white-space: nowrap;">Ordenar por:</label>
