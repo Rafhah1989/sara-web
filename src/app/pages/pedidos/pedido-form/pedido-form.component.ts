@@ -37,6 +37,7 @@ export class PedidoFormComponent implements OnInit {
     exibirSucesso: boolean = false;
     exibirVisualizacaoImagem: boolean = false;
     imagemUrlVisualizacao: string = '';
+    avisoPdf: boolean = false;
 
     // Modal Alternativo State
     exibirModalProdutosAlternativo: boolean = false;
@@ -681,13 +682,27 @@ export class PedidoFormComponent implements OnInit {
         this.router.navigate(['/pedidos']);
     }
 
+    fecharAvisoPdf(): void {
+        this.avisoPdf = false;
+    }
+
     confirmarPdf(sim: boolean): void {
         this.exibirSucesso = false;
         if (sim && this.pedidoId) {
-            this.pedidoService.gerarPdf(this.pedidoId).subscribe(blob => {
-                const url = window.URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                this.posGeracaoSucesso();
+            this.avisoPdf = true;
+            this.pedidoService.gerarPdf(this.pedidoId).subscribe({
+                next: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    this.avisoPdf = false;
+                    this.posGeracaoSucesso();
+                },
+                error: (err) => {
+                    console.error('Erro ao gerar PDF', err);
+                    alert('Erro ao gerar PDF. Tente novamente.');
+                    this.avisoPdf = false;
+                    this.posGeracaoSucesso();
+                }
             });
         } else {
             this.posGeracaoSucesso();
@@ -729,15 +744,18 @@ export class PedidoFormComponent implements OnInit {
     }
 
     gerarCatalogoPdf(): void {
+        this.avisoPdf = true;
         this.produtoService.gerarCatalogo().subscribe({
             next: (blob) => {
                 const url = window.URL.createObjectURL(blob);
                 window.open(url, '_blank');
+                this.avisoPdf = false;
                 alert('Catálogo gerado com sucesso!');
             },
             error: (err) => {
                 console.error('Erro ao gerar catálogo', err);
                 alert('Ocorreu um erro ao gerar o catálogo.');
+                this.avisoPdf = false;
             }
         });
     }

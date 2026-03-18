@@ -364,3 +364,12 @@
         </div>
     </div>
 </div>
+
+<!-- Frame de Aviso PDF -->
+<div class="modal-overlay" *ngIf="avisoPdf">
+    <div class="modal-content">
+        <h2 class="cinzel-font">Gerando PDF</h2>
+        <p>O PDF do pedido está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize a abertura de janelas (pop-ups) no seu navegador.</p>
+        <button class="btn btn-primary" (click)="fecharAvisoPdf()">OK</button>
+    </div>
+</div>
