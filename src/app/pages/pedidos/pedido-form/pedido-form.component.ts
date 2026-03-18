@@ -686,10 +686,7 @@ export class PedidoFormComponent implements OnInit {
         if (sim && this.pedidoId) {
             this.pedidoService.gerarPdf(this.pedidoId).subscribe(blob => {
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `pedido_${this.pedidoId}.pdf`;
-                a.click();
+                window.open(url, '_blank');
                 this.posGeracaoSucesso();
             });
         } else {
@@ -735,10 +732,7 @@ export class PedidoFormComponent implements OnInit {
         this.produtoService.gerarCatalogo().subscribe({
             next: (blob) => {
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `catalogo-produtos.pdf`;
-                a.click();
+                window.open(url, '_blank');
                 alert('Catálogo gerado com sucesso!');
             },
             error: (err) => {
