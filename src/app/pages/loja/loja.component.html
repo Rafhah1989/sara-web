@@ -161,7 +161,7 @@
                             <div class="qtd-control">
                                 <button class="btn-qty" (click)="decrementarQtd(product.id!)"
                                     [disabled]="(quantidades[product.id!] || 1) <= 1">-</button>
-                                <input type="number" [(ngModel)]="quantidades[product.id!]" readonly>
+                                <input type="number" [(ngModel)]="quantidades[product.id!]">
                                 <button class="btn-qty" (click)="incrementarQtd(product.id!)">+</button>
                             </div>
                         </div>
