@@ -498,6 +498,51 @@
     font-style: italic;
 }
 
+/* Novo: Estilos para Filtros de Tamanho em Chips */
+.chips-container, .chips-container-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.chip, .chip-mobile {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background: #fdfdfd;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    text-align: center;
+}
+
+.chip:hover, .chip-mobile:hover {
+    border-color: var(--primary-gold);
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.chip.active, .chip-mobile.active {
+    background: var(--primary-gold);
+    color: #000; /* Texto preto para contrastar com o dourado */
+    border-color: var(--primary-gold);
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(212, 175, 55, 0.3);
+}
+
+/* Ajuste específico para mobile para não ficarem colados */
+.chips-container-mobile {
+    padding: 5px 0;
+}
+
 .drawer-footer {
     margin-top: 15px;
     display: flex;

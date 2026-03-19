@@ -73,16 +73,19 @@
     <!-- Busca e Alternância de Visualização -->
     <div class="search-and-view-controls">
         <div class="search-container">
-            <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome ou código..." (keyup.enter)="pesquisar()">
+            <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome ou código..."
+                (keyup.enter)="pesquisar()">
             <button class="btn-gold" (click)="pesquisar()">
                 <i class="fa fa-search"></i> Pesquisar
             </button>
         </div>
         <div class="view-toggle">
-            <button class="btn-view" [class.active]="viewMode === 'grid'" (click)="alternarVisualizacao('grid')" title="Grade">
+            <button class="btn-view" [class.active]="viewMode === 'grid'" (click)="alternarVisualizacao('grid')"
+                title="Grade">
                 <i class="fa fa-th-large"></i>
             </button>
-            <button class="btn-view" [class.active]="viewMode === 'list'" (click)="alternarVisualizacao('list')" title="Lista">
+            <button class="btn-view" [class.active]="viewMode === 'list'" (click)="alternarVisualizacao('list')"
+                title="Lista">
                 <i class="fa fa-list"></i>
             </button>
         </div>
@@ -98,7 +101,8 @@
             <div class="product-info">
                 <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo || product.id }})</small></h3>
                 <p>Tamanho: {{ product.tamanho }} cm</p>
-                <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+                <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong>
+                </p>
                 <p class="status" [class.inactive]="!product.ativo">
                     {{ product.ativo ? 'Disponível' : 'Indisponível' }}
                 </p>
@@ -106,7 +110,8 @@
                     <button class="btn-edit" (click)="editar(product)">
                         <i class="fa fa-edit"></i> Editar
                     </button>
-                    <button [class]="product.ativo ? 'btn-deactivate' : 'btn-activate'" (click)="alternarAtivo(product)">
+                    <button [class]="product.ativo ? 'btn-deactivate' : 'btn-activate'"
+                        (click)="alternarAtivo(product)">
                         <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
                         {{ product.ativo ? 'Inativar' : 'Ativar' }}
                     </button>
@@ -140,7 +145,8 @@
                     <td>{{ product.tamanho }}cm</td>
                     <td class="col-preco">{{ product.preco | currency:'BRL' }}</td>
                     <td>
-                        <span class="badge" [class.badge-active]="product.ativo" [class.badge-inactive]="!product.ativo">
+                        <span class="badge" [class.badge-active]="product.ativo"
+                            [class.badge-inactive]="!product.ativo">
                             {{ product.ativo ? 'Ativo' : 'Inativo' }}
                         </span>
                     </td>
@@ -149,7 +155,8 @@
                             <button class="btn-icon-edit" (click)="editar(product)" title="Editar">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button [class]="product.ativo ? 'btn-icon-deactivate' : 'btn-icon-activate'" (click)="alternarAtivo(product)" [title]="product.ativo ? 'Inativar' : 'Ativar'">
+                            <button [class]="product.ativo ? 'btn-icon-deactivate' : 'btn-icon-activate'"
+                                (click)="alternarAtivo(product)" [title]="product.ativo ? 'Inativar' : 'Ativar'">
                                 <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
                             </button>
                         </div>

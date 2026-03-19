@@ -15,8 +15,13 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>Tamanho (cm)</label>
-                <input type="number" [(ngModel)]="filtroTamanho" (change)="pesquisar()">
+                <label>Tamanhos</label>
+                <div class="chips-container">
+                    <div class="chip" *ngFor="let t of tamanhosDisponiveis" [class.active]="isTamanhoSelecionado(t)"
+                        (click)="toggleTamanho(t)">
+                        {{ t }} cm
+                    </div>
+                </div>
             </div>
 
             <fieldset class="filter-fieldset">
@@ -43,12 +48,12 @@
 
         <!-- Vitrine de Produtos -->
         <main class="loja-vitrine">
-            
+
             <!-- NOVO: Cabeçalho Mobile (Filtro Nome + Botão Filtros) -->
             <div class="mobile-filters-header show-mobile">
                 <div class="mobile-search-row">
                     <div class="mobile-search-container">
-                        <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)" 
+                        <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
                             placeholder="Buscar produto..." class="mobile-input-search">
                         <i class="fa fa-search"></i>
                     </div>
@@ -67,16 +72,23 @@
                 </div>
                 <div class="drawer-content">
                     <div class="filter-group">
-                        <label><i class="fa fa-arrows-h"></i> Tamanho (cm)</label>
-                        <input type="number" class="modern-input input-w80" [(ngModel)]="filtroTamanho" (change)="pesquisar()">
+                        <label><i class="fa fa-arrows-h"></i> Selecione os Tamanhos</label>
+                        <div class="chips-container-mobile">
+                            <div class="chip-mobile" *ngFor="let t of tamanhosDisponiveis"
+                                [class.active]="isTamanhoSelecionado(t)" (click)="toggleTamanho(t)">
+                                {{ t }}cm
+                            </div>
+                        </div>
                     </div>
-                    
+
                     <div class="filter-group section-divider">
                         <label><i class="fa fa-tag"></i> Faixa de Preço</label>
                         <div class="price-inputs">
-                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMinFMT" (input)="applyCurrencyMask($event, 'min')" placeholder="Mín R$">
+                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMinFMT"
+                                (input)="applyCurrencyMask($event, 'min')" placeholder="Mín R$">
                             <span class="price-separator">até</span>
-                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMaxFMT" (input)="applyCurrencyMask($event, 'max')" placeholder="Máx R$">
+                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMaxFMT"
+                                (input)="applyCurrencyMask($event, 'max')" placeholder="Máx R$">
                         </div>
                     </div>
 
@@ -90,7 +102,8 @@
                     </div>
 
                     <div class="drawer-footer">
-                        <button class="btn-clear-modern" (click)="limparFiltros(); toggleFiltrosMobile()">Limpar Tudo</button>
+                        <button class="btn-clear-modern" (click)="limparFiltros(); toggleFiltrosMobile()">Limpar
+                            Tudo</button>
                         <button class="btn-apply-modern" (click)="toggleFiltrosMobile()">Aplicar Filtros</button>
                     </div>
                 </div>
@@ -133,7 +146,7 @@
                 Selecione seus Produtos</h2>
             <div class="vitrine-grid" [ngStyle]="{'grid-template-columns': 'repeat(' + itensPorLinha + ', 1fr)'}">
                 <div class="vitrine-card" *ngFor="let product of produtos">
-                    <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)" 
+                    <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)"
                         title="Clique para ampliar">
                         <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome">
                         <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
@@ -146,7 +159,8 @@
 
                         <div class="card-actions">
                             <div class="qtd-control">
-                                <button class="btn-qty" (click)="decrementarQtd(product.id!)" [disabled]="(quantidades[product.id!] || 1) <= 1">-</button>
+                                <button class="btn-qty" (click)="decrementarQtd(product.id!)"
+                                    [disabled]="(quantidades[product.id!] || 1) <= 1">-</button>
                                 <input type="number" [(ngModel)]="quantidades[product.id!]" readonly>
                                 <button class="btn-qty" (click)="incrementarQtd(product.id!)">+</button>
                             </div>
@@ -155,7 +169,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div *ngIf="carregando" class="loading-spinner">
                 <i class="fa fa-spinner fa-spin"></i> Carregando mais produtos...
             </div>
@@ -207,12 +221,13 @@
 </div>
 
 <!-- Modal de Visualização de Imagem (Zoom) -->
-<div class="modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()" 
+<div class="modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()"
     style="background: rgba(0,0,0,0.85); cursor: zoom-out;">
-    <div class="modal-content-zoom" (click)="$event.stopPropagation()" style="position: relative; max-width: 90vw; max-height: 90vh;">
-        <img [src]="imagemUrlVisualizacao" alt="Visualização" 
+    <div class="modal-content-zoom" (click)="$event.stopPropagation()"
+        style="position: relative; max-width: 90vw; max-height: 90vh;">
+        <img [src]="imagemUrlVisualizacao" alt="Visualização"
             style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;">
-        <button (click)="fecharVisualizacaoImagem()" 
+        <button (click)="fecharVisualizacaoImagem()"
             style="position: absolute; top: -15px; right: -15px; background: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
             <i class="fa fa-times" style="font-size: 1.2rem; color: #333;"></i>
         </button>

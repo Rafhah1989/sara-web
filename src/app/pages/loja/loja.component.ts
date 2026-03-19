@@ -20,7 +20,8 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   produtos: Produto[] = [];
   filtroNome: string = '';
-  filtroTamanho?: number;
+  filtrosTamanhos: number[] = [];
+  tamanhosDisponiveis: number[] = [];
   filtroPrecoMin?: number;
   filtroPrecoMax?: number;
   filtroPrecoMinFMT: string = '';
@@ -75,7 +76,14 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.carregarTamanhos();
     this.pesquisar();
+  }
+
+  carregarTamanhos(): void {
+    this.produtoService.getTamanhosAtivos().subscribe(t => {
+      this.tamanhosDisponiveis = t;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -163,7 +171,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     
     this.searchSubscription = this.produtoService.buscarParaLoja(
       nomeBusca, 
-      this.filtroTamanho, 
+      this.filtrosTamanhos, 
       this.filtroPrecoMin, 
       this.filtroPrecoMax,
       this.paginaAtual,
@@ -210,7 +218,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   limparFiltros(): void {
     this.filtroNome = '';
-    this.filtroTamanho = undefined;
+    this.filtrosTamanhos = [];
     this.filtroPrecoMin = undefined;
     this.filtroPrecoMax = undefined;
     this.filtroPrecoMinFMT = '';
@@ -378,6 +386,20 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleFiltrosMobile(): void {
       this.exibirFiltrosMobile = !this.exibirFiltrosMobile;
+  }
+
+  toggleTamanho(tamanho: number): void {
+    const index = this.filtrosTamanhos.indexOf(tamanho);
+    if (index > -1) {
+      this.filtrosTamanhos.splice(index, 1);
+    } else {
+      this.filtrosTamanhos.push(tamanho);
+    }
+    this.pesquisar(true);
+  }
+
+  isTamanhoSelecionado(tamanho: number): boolean {
+    return this.filtrosTamanhos.includes(tamanho);
   }
 
   incrementarQtd(id: number): void {

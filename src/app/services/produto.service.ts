@@ -44,21 +44,41 @@ export class ProdutoService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
-    buscarParaLoja(nome?: string, tamanho?: number, precoMin?: number, precoMax?: number, page: number = 0, size: number = 30, skipSpinner: boolean = true, sort: string = 'nome'): Observable<any> {
-        let params = new HttpParams();
-        if (nome) params = params.set('nome', nome);
-        if (tamanho) params = params.set('tamanho', tamanho.toString());
-        if (precoMin) params = params.set('precoMin', precoMin.toString());
-        if (precoMax) params = params.set('precoMax', precoMax.toString());
-        params = params.set('page', page.toString());
-        params = params.set('size', size.toString());
-        params = params.set('sort', sort + ',asc');
-        if (skipSpinner) {
-            params = params.set('skipSpinner', 'true');
-        }
+    buscarParaLoja(
+    nome?: string,
+    tamanhos?: number[],
+    precoMin?: number,
+    precoMax?: number,
+    pagina: number = 0,
+    tamanho: number = 30,
+    skipSpinner: boolean = false,
+    sort: string = 'nome'
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('page', pagina.toString())
+      .set('size', tamanho.toString())
+      .set('sort', sort);
 
-        return this.http.get<any>(`${this.apiUrl}/loja`, { params });
+    if (nome) params = params.set('nome', nome);
+
+    if (tamanhos && tamanhos.length > 0) {
+      tamanhos.forEach(t => {
+        params = params.append('tamanhos', t.toString());
+      });
     }
+
+    if (precoMin) params = params.set('precoMin', precoMin.toString());
+    if (precoMax) params = params.set('precoMax', precoMax.toString());
+
+    return this.http.get<any>(`${this.apiUrl}/loja`, {
+      params,
+      headers: skipSpinner ? { 'X-Skip-Spinner': 'true' } : {}
+    });
+  }
+
+  getTamanhosAtivos(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.apiUrl}/tamanhos`);
+  }
 
     buscarOutrosTamanhos(id: number): Observable<Produto[]> {
         return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`);
