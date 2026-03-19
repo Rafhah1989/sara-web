@@ -23,7 +23,7 @@ export interface Pedido {
     pixCopiaECola?: string;
     pixQrCode?: string;
     dataExpiracaoPix?: string;
-    produtos: PedidoProduto[];
+    produtos?: PedidoProduto[];
 }
 
 export interface PedidoProduto {
@@ -37,6 +37,7 @@ export interface PedidoProduto {
     peso?: number;
     imagem: string;
     tamanho?: number;
+    temImagem?: boolean;
 }
 
 @Injectable({

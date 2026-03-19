@@ -60,6 +60,7 @@
 
             <!-- NOVO: Drawer/Menu de Filtros Mobile -->
             <div class="mobile-filters-drawer" [class.open]="exibirFiltrosMobile">
+                <div class="drawer-handle" (click)="toggleFiltrosMobile()"></div>
                 <div class="drawer-header">
                     <h3>Filtros & Ordenação</h3>
                     <button class="close-drawer" (click)="toggleFiltrosMobile()">&times;</button>
@@ -144,8 +145,11 @@
                         <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
 
                         <div class="card-actions">
-                            <label>Qtd:</label>
-                            <input type="number" min="1" [(ngModel)]="quantidades[product.id!]">
+                            <div class="qtd-control">
+                                <button class="btn-qty" (click)="decrementarQtd(product.id!)" [disabled]="(quantidades[product.id!] || 1) <= 1">-</button>
+                                <input type="number" [(ngModel)]="quantidades[product.id!]" readonly>
+                                <button class="btn-qty" (click)="incrementarQtd(product.id!)">+</button>
+                            </div>
                         </div>
                         <button class="btn-add" (click)="adicionarAoCarrinho(product)">Adicionar</button>
                     </div>

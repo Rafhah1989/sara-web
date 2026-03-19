@@ -379,4 +379,15 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleFiltrosMobile(): void {
       this.exibirFiltrosMobile = !this.exibirFiltrosMobile;
   }
+
+  incrementarQtd(id: number): void {
+    this.quantidades[id] = (this.quantidades[id] || 1) + 1;
+  }
+
+  decrementarQtd(id: number): void {
+    const atual = this.quantidades[id] || 1;
+    if (atual > 1) {
+      this.quantidades[id] = atual - 1;
+    }
+  }
 }

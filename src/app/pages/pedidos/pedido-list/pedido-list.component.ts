@@ -258,7 +258,7 @@ export class PedidoListComponent implements OnInit {
         this.pedidoService.gerarPdf(id).subscribe(blob => {
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
-            this.avisoPdf = false;
+            // Mantém o aviso aberto conforme solicitado pelo usuário
         }, error => {
             console.error('Erro ao gerar PDF', error);
             alert('Erro ao gerar PDF. Tente novamente.');

@@ -38,6 +38,7 @@ export class PedidoFormComponent implements OnInit {
     exibirVisualizacaoImagem: boolean = false;
     imagemUrlVisualizacao: string = '';
     avisoPdf: boolean = false;
+    pendenteRedirecionamento: boolean = false;
 
     // Modal Alternativo State
     exibirModalProdutosAlternativo: boolean = false;
@@ -684,23 +685,28 @@ export class PedidoFormComponent implements OnInit {
 
     fecharAvisoPdf(): void {
         this.avisoPdf = false;
+        if (this.pendenteRedirecionamento) {
+            this.pendenteRedirecionamento = false;
+            this.posGeracaoSucesso();
+        }
     }
 
     confirmarPdf(sim: boolean): void {
         this.exibirSucesso = false;
         if (sim && this.pedidoId) {
             this.avisoPdf = true;
+            this.pendenteRedirecionamento = true;
             this.pedidoService.gerarPdf(this.pedidoId).subscribe({
                 next: (blob) => {
                     const url = window.URL.createObjectURL(blob);
                     window.open(url, '_blank');
-                    this.avisoPdf = false;
-                    this.posGeracaoSucesso();
+                    // Mantém o aviso aberto e aguarda o fechamento manual para redirecionar
                 },
                 error: (err) => {
                     console.error('Erro ao gerar PDF', err);
                     alert('Erro ao gerar PDF. Tente novamente.');
                     this.avisoPdf = false;
+                    this.pendenteRedirecionamento = false;
                     this.posGeracaoSucesso();
                 }
             });
@@ -749,8 +755,7 @@ export class PedidoFormComponent implements OnInit {
             next: (blob) => {
                 const url = window.URL.createObjectURL(blob);
                 window.open(url, '_blank');
-                this.avisoPdf = false;
-                alert('Catálogo gerado com sucesso!');
+                // Mantém o aviso aberto conforme solicitado
             },
             error: (err) => {
                 console.error('Erro ao gerar catálogo', err);

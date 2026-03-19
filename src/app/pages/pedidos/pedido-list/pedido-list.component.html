@@ -99,27 +99,29 @@
                         </i>
                     </td>
                     <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
-                    <td class="actions">
-                        <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
-                            <i class="fa fa-file-pdf"></i>
-                        </button>
-                        <button class="btn-action btn-pix" title="Visualizar PIX" 
-                            *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)">
-                            <i class="fa fa-qrcode"></i>
-                        </button>
-                        <button class="btn-action btn-sync" title="Sincronizar Mercado Pago" 
-                            *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)">
-                            <i class="fa fa-sync"></i>
-                        </button>
-                        <button class="btn-action btn-edit" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
-                            [disabled]="pedido.cancelado">
-                            <i class="fa fa-pencil-alt"></i>
-                        </button>
-                        <button class="btn-action btn-cancel" title="Cancelar"
-                            *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
-                            (click)="cancelarPedido(pedido)">
-                            <i class="fa fa-trash-alt"></i>
-                        </button>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
+                                <i class="fa fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-action btn-pix" title="Visualizar PIX" 
+                                *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)">
+                                <i class="fa fa-qrcode"></i>
+                            </button>
+                            <button class="btn-action btn-sync" title="Sincronizar Mercado Pago" 
+                                *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)">
+                                <i class="fa fa-sync"></i>
+                            </button>
+                            <button class="btn-action btn-edit" title="Editar/Visualizar" (click)="editarPedido(pedido.id)"
+                                [disabled]="pedido.cancelado">
+                                <i class="fa fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn-action btn-cancel" title="Cancelar"
+                                *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
+                                (click)="cancelarPedido(pedido)">
+                                <i class="fa fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 <tr *ngIf="pedidos.length === 0 && !loading">
