@@ -18,7 +18,7 @@ export interface Usuario {
     telefone: string;
     bairro: string;
     observacao?: string;
-    padre?: string;
+    paroco?: string;
     secretario?: string;
     tesoureiro?: string;
     formaPagamento?: string;

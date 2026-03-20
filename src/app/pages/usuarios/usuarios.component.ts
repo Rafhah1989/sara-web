@@ -50,7 +50,7 @@ export class UsuariosComponent implements OnInit {
             cpfCnpj: ['', [Validators.required]],
             telefone: ['', [Validators.required]],
             observacao: [''],
-            padre: [''],
+            paroco: [''],
             secretario: [''],
             tesoureiro: [''],
             formaPagamento: [''],
