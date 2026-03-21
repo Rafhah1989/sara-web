@@ -481,13 +481,74 @@ form {
     letter-spacing: 0.5px;
 }
 
-@media (max-width: 600px) {
-    .modal-footer-fixed {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-    }
-    .footer-summary {
-        justify-content: space-around;
-    }
+/* Modal Filters Layout */
+.modal-filters-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.modal-filters-row label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.modal-filters-row .form-control {
+    height: 32px;
+    font-size: 0.9rem;
+    padding: 4px 10px;
+}
+
+.filter-item-name { flex: 2; min-width: 200px; }
+.filter-item-size { flex: 0.5; min-width: 80px; }
+.filter-item-price { flex: 1.5; min-width: 180px; }
+
+.price-inputs {
+    display: flex;
+    gap: 5px;
+}
+
+.modal-filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+
+/* Quantity Control */
+.qtd-control { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 0 !important; width: fit-content !important; margin: 0 auto !important; }
+
+.btn-qty { background-color: #f8f9fa !important; border: 1px solid #ced4da !important; width: 28px !important; height: 32px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; }
+.btn-qty:hover { background-color: #e2e6ea !important; }
+
+.input-qtd-mobile { width: 45px !important; text-align: center !important; border-radius: 0 !important; margin: 0 !important; height: 32px !important; padding: 0 !important; font-size: 0.9rem !important; border: 1px solid #ced4da !important; border-left: none !important; border-right: none !important; box-sizing: border-box !important; }
+
+.valor-input-mobile { width: 95px !important; height: 32px !important; padding: 2px 5px !important; font-size: 0.85rem !important; box-sizing: border-box !important; }
+
+@media (max-width: 768px) {
+  .page-container { padding: 1rem; }
+  .form-section { padding: 1rem; }
+  .items-list table { font-size: 0.8rem !important; }
+  .items-list th, .items-list td { padding: 6px 2px !important; vertical-align: middle !important; }
+  
+  .input-qtd-mobile { width: 32px !important; height: 28px !important; font-size: 0.8rem !important; }
+  .btn-qty { width: 24px !important; height: 28px !important; display: flex !important; }
+  .valor-input-mobile { width: 68px !important; height: 28px !important; font-size: 0.75rem !important; padding: 2px !important; }
+  
+  .qtd-control { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; }
+  
+  .actions { display: table-cell !important; vertical-align: middle !important; text-align: center !important; white-space: nowrap !important; padding: 4px !important; }
+  .actions button { display: inline-flex !important; flex-direction: row !important; margin: 0 2px !important; padding: 4px 5px !important; height: 28px !important; align-items: center !important; justify-content: center !important; }
+  
+  .large-modal { width: 100% !important; height: 100% !important; border-radius: 0 !important; }
+  .modal-footer-fixed { flex-direction: column; gap: 10px; padding: 10px; }
+  .footer-summary { justify-content: space-around; gap: 5px; }
+  .footer-actions { flex-direction: row; }
+  .footer-actions button { flex: 1; height: 38px; }
 }

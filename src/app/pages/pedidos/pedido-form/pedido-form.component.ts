@@ -86,13 +86,14 @@ export class PedidoFormComponent implements OnInit {
 
     ngOnInit(): void {
         const id = this.route.snapshot.params['id'];
+        this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
+
         if (id) {
             this.modoEdicao = true;
             this.pedidoId = id;
             this.carregarPedido(id);
         } else {
             // New order
-            this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
             if (!this.isAdmin) {
                 // If CLIENTE, auto-fill and disable client selection
                 const userId = this.authService.getUsuarioIdDoToken();
@@ -113,12 +114,15 @@ export class PedidoFormComponent implements OnInit {
             }
         }
 
-        this.setupBuscaUsuarios();
+        // Only search users if ADMIN
+        if (this.isAdmin) {
+            this.setupBuscaUsuarios();
+        }
+        
         this.carregarFormasPagamento();
         this.carregarSituacoes();
         
         // Disable fields for CLIENTE globally
-        this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
         if (!this.isAdmin) {
             this.pedidoForm.get('desconto')?.disable();
             this.pedidoForm.get('frete')?.disable();
@@ -461,6 +465,22 @@ export class PedidoFormComponent implements OnInit {
         this.atualizarValorFrete();
     }
 
+    incrementarQtd(index: number): void {
+        const item = this.itens.at(index);
+        const qtd = Number(item.get('quantidade')?.value) || 0;
+        item.get('quantidade')?.setValue(qtd + 1);
+        this.onItemChange();
+    }
+
+    decrementarQtd(index: number): void {
+        const item = this.itens.at(index);
+        const qtd = Number(item.get('quantidade')?.value) || 0;
+        if (qtd > 1) {
+            item.get('quantidade')?.setValue(qtd - 1);
+            this.onItemChange();
+        }
+    }
+
     applyMoedaMask(event: any, controlIndex: number): void {
         const input = event.target;
         let value = input.value.replace(/\D/g, '');
@@ -501,9 +521,7 @@ export class PedidoFormComponent implements OnInit {
     }
 
     atualizarValorFrete(): void {
-        console.log('--- atualizarValorFrete CHAMADO ---');
         if (!this.freteConfig) {
-            console.log('Frete Config NÃO carregar ou nulo');
             this.calcularTotais();
             return;
         }
@@ -522,12 +540,6 @@ export class PedidoFormComponent implements OnInit {
         if (this.freteConfig.quantidadeFaixa && this.freteConfig.valorFaixa) {
             let pesoParaCalculo = pesoTotal;
 
-            console.log('--- Cálculo de Frete ---');
-            console.log('Peso Total:', pesoTotal);
-            console.log('Minimo Faixa:', this.freteConfig.minimoFaixa);
-            console.log('Qtd Faixa:', this.freteConfig.quantidadeFaixa);
-            console.log('Valor Faixa:', this.freteConfig.valorFaixa);
-
             // Check for minimum threshold
             if (this.freteConfig.minimoFaixa && pesoTotal > this.freteConfig.minimoFaixa) {
                 pesoParaCalculo = pesoTotal - this.freteConfig.minimoFaixa;
@@ -537,8 +549,6 @@ export class PedidoFormComponent implements OnInit {
                 // Ex: 1000g / 1000 = 1 -> Ceil = 1.
                 // Ex: 1001g / 1000 = 1.001 -> Ceil = 2.
                 const faixas = Math.ceil(pesoParaCalculo / this.freteConfig.quantidadeFaixa);
-                console.log('Peso Excedente:', pesoParaCalculo);
-                console.log('Faixas Calculadas:', faixas);
 
                 freteCalculado += (faixas * this.freteConfig.valorFaixa);
             } else if (!this.freteConfig.minimoFaixa) {

@@ -127,29 +127,39 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Cód.</th>
+                            <th class="hide-mobile">Cód.</th>
                             <th>Produto</th>
-                            <th>Tamanho</th>
+                            <th class="hide-mobile">Tamanho</th>
                             <th width="100">Qtd</th>
-                            <th width="120">Valor (R$)</th>
-                            <th>Total</th>
+                            <th width="100">Valor (R$)</th>
+                            <th class="hide-mobile">Total</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody formArrayName="itens">
                         <tr *ngFor="let item of itens.controls; let i = index" [formGroupName]="i">
-                            <td>{{ item.get('produtoCodigo')?.value }}</td>
-                            <td>{{ item.get('produtoNome')?.value }}</td>
-                            <td>{{ item.get('tamanho')?.value }}</td>
+                            <td class="hide-mobile">{{ item.get('produtoCodigo')?.value }}</td>
                             <td>
-                                <input type="number" formControlName="quantidade" (input)="onItemChange()"
-                                    class="form-control small" style="width: 80px;">
+                                {{ item.get('produtoNome')?.value }}
+                                <span class="show-mobile-inline" style="font-size: 0.8rem; color: #666;">
+                                    ({{ item.get('tamanho')?.value }}cm)
+                                </span>
+                            </td>
+                            <td class="hide-mobile">{{ item.get('tamanho')?.value }}</td>
+                            <td>
+                                <div class="qtd-control">
+                                    <button type="button" class="btn-qty show-mobile" (click)="decrementarQtd(i)"
+                                        [disabled]="(item.get('quantidade')?.value || 1) <= 1">-</button>
+                                    <input type="number" formControlName="quantidade" (input)="onItemChange()"
+                                        class="form-control small input-qtd-mobile">
+                                    <button type="button" class="btn-qty show-mobile" (click)="incrementarQtd(i)">+</button>
+                                </div>
                             </td>
                             <td>
                                 <input type="text" formControlName="valor" (input)="applyMoedaMask($event, i)"
-                                    class="form-control small" style="width: 100px;">
+                                    class="form-control small valor-input-mobile">
                             </td>
-                            <td>{{ item.get('total')?.value | currency:'BRL' }}</td>
+                            <td class="hide-mobile">{{ item.get('total')?.value | currency:'BRL' }}</td>
                             <td class="actions">
                                 <button type="button" class="btn btn-info btn-sm mx-1 text-white"
                                     (click)="visualizarImagem(item.value)"
@@ -216,38 +226,37 @@
 
         <div class="mb-2 mt-1">
             <!-- Linha única de filtros compacta -->
-            <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid #eee;">
+            <div class="modal-filters-row">
                 
-                <div style="flex: 2; min-width: 200px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.9rem;">Nome</label>
+                <div class="filter-item-name">
+                    <label>Nome</label>
                     <input type="text" class="form-control" [(ngModel)]="filtroModalNome"
                         [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()"
-                        placeholder="Buscar produto..." style="height: 32px; font-size: 0.9rem;">
+                        placeholder="Buscar produto...">
                 </div>
 
-                <div style="flex: 0.5; min-width: 80px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.9rem;">Tam.</label>
+                <div class="filter-item-size hide-mobile">
+                    <label>Tam.</label>
                     <input type="text" class="form-control" [(ngModel)]="filtroModalTamanho"
-                        [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()" placeholder="cm" style="height: 32px; font-size: 0.9rem;">
+                        [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()" placeholder="cm">
                 </div>
 
-                <div style="flex: 1.5; min-width: 180px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.9rem;">Preço (R$)</label>
-                    <div style="display: flex; gap: 5px;">
+                <div class="filter-item-price hide-mobile">
+                    <label>Preço (R$)</label>
+                    <div class="price-inputs">
                         <input type="text" class="form-control" [value]="filtroModalPrecoMin"
-                            (input)="applyFiltroMoedaMaskMin($event)" placeholder="Mín" style="height: 32px; font-size: 0.9rem;">
+                            (input)="applyFiltroMoedaMaskMin($event)" placeholder="Mín">
                         <input type="text" class="form-control" [value]="filtroModalPrecoMax"
-                            (input)="applyFiltroMoedaMaskMax($event)" placeholder="Máx" style="height: 32px; font-size: 0.9rem;">
+                            (input)="applyFiltroMoedaMaskMax($event)" placeholder="Máx">
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 8px;">
-                    <button type="button" class="btn-catalogo" (click)="gerarCatalogoPdf()" style="margin: 0; padding: 5px 10px; font-size: 0.85rem;">
-                        <i class="fa fa-file-pdf"></i> Catálogo
+                <div class="modal-filter-actions">
+                    <button type="button" class="btn-catalogo" (click)="gerarCatalogoPdf()">
+                        <i class="fa fa-file-pdf"></i> <span>Catálogo</span>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="limparFiltrosModal()"
-                        style="padding: 5px 10px; font-size: 0.85rem;">
-                        <i class="fa fa-eraser"></i> Limpar
+                    <button class="btn btn-outline-secondary btn-sm btn-clear-modal" (click)="limparFiltrosModal()">
+                        <i class="fa fa-eraser"></i> <span>Limpar</span>
                     </button>
                 </div>
             </div>
@@ -271,28 +280,28 @@
                                 style="width: 90%; margin: 0 auto; border-collapse: collapse; text-align: center;">
                                 <thead style="position: sticky; top: 0; background: #f4f4f4; z-index: 10;">
                                     <tr style="font-size: 0.85rem;">
-                                        <th width="60" class="text-center"
+                                        <th width="60" class="text-center hide-mobile"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Cód.</th>
                                         <th width="150" class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">Nome</th>
-                                        <th width="45" class="text-center"
+                                        <th width="45" class="text-center hide-mobile"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Img</th>
                                         <th width="80" class="text-center"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Qtd.</th>
                                         <th width="100" class="text-right"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">V. Unit.</th>
-                                        <th width="100" class="text-right"
+                                        <th width="100" class="text-right hide-mobile"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let p of grupo.produtos" style="font-size: 0.85rem;">
-                                        <td class="text-center"
+                                        <td class="text-center hide-mobile"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
                                             p.id }}</td>
                                         <td class="text-left"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; text-align: left !important;">{{
                                             p.nome }}</td>
-                                        <td class="text-center"
+                                        <td class="text-center hide-mobile"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">
                                             <button class="btn btn-info text-white"
                                                 (click)="visualizarImagem(p)" title="Ver Imagem"
@@ -310,7 +319,7 @@
                                         <td class="text-right"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
                                             p.preco | currency:'BRL' }}</td>
-                                        <td class="text-right"
+                                        <td class="text-right hide-mobile"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
                                             {{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}
                                         </td>
@@ -318,14 +327,14 @@
                                 </tbody>
                                 <tfoot>
                                     <tr style="background: #f4f4f4; font-size: 0.85rem;">
-                                        <td colspan="3" class="text-right" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold;">
+                                        <td class="text-right" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold;">
                                             Total {{ grupo.tamanho }}cm:
                                         </td>
                                         <td class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; text-align: left !important;">
                                             {{ calcularQtdGrupo(grupo) }}
                                         </td>
-                                        <td style="border: 1px solid #ccc;"></td>
-                                        <td class="text-right" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
+                                        <td class="hide-mobile" style="border: 1px solid #ccc;"></td>
+                                        <td class="text-right hide-mobile" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
                                             {{ calcularTotalGrupo(grupo) | currency:'BRL' }}
                                         </td>
                                     </tr>
