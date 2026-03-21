@@ -39,6 +39,7 @@ export class PedidoFormComponent implements OnInit {
     imagemUrlVisualizacao: string = '';
     avisoPdf: boolean = false;
     pendenteRedirecionamento: boolean = false;
+    notaFiscalPath?: string;
 
     // Modal Alternativo State
     exibirModalProdutosAlternativo: boolean = false;
@@ -590,6 +591,8 @@ export class PedidoFormComponent implements OnInit {
                 pagamentoOnline: pedido.pagamentoOnline
             }, { emitEvent: false });
 
+            this.notaFiscalPath = pedido.notaFiscalPath;
+
             // Pulo do gato: Para não perder o valor original e a base de cálculo. 
             // Como a API não traz o "desconto padrão do usuário" no responseDTO do pedido, 
             // nós assumimos que o desconto salvo já é a representação real do momento atual.
@@ -762,6 +765,21 @@ export class PedidoFormComponent implements OnInit {
                 alert('Ocorreu um erro ao gerar o catálogo.');
                 this.avisoPdf = false;
             }
+        });
+    }
+
+    visualizarNotaFiscal(): void {
+        if (!this.notaFiscalPath || !this.pedidoId) return;
+
+        this.pedidoService.visualizarNotaFiscal(this.pedidoId).subscribe(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                alert('O navegador bloqueou a abertura da nota fiscal. Por favor, autorize pop-ups para este site.');
+            }
+        }, error => {
+            console.error('Erro ao visualizar nota fiscal', error);
+            alert('Erro ao carregar a nota fiscal para visualização.');
         });
     }
 }

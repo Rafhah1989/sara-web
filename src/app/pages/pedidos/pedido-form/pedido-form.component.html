@@ -5,6 +5,11 @@
         </a>
         <h1 class="cinzel-font color-primary-gold-dark">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}
         </h1>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="button" class="btn btn-info text-white" *ngIf="modoEdicao && notaFiscalPath" (click)="visualizarNotaFiscal()">
+                <i class="fa fa-file-invoice"></i> Ver Nota Fiscal
+            </button>
+        </div>
     </div>
 
     <form [formGroup]="pedidoForm" (ngSubmit)="salvar()" class="pedido-form">

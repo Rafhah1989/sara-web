@@ -23,6 +23,7 @@ export interface Pedido {
     pixCopiaECola?: string;
     pixQrCode?: string;
     dataExpiracaoPix?: string;
+    notaFiscalPath?: string;
     produtos?: PedidoProduto[];
 }
 
@@ -114,5 +115,23 @@ export class PedidoService {
 
     gerarPix(id: number): Observable<Pedido> {
         return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pix`, {});
+    }
+
+    uploadNotaFiscal(id: number, file: File, notificar: boolean): Observable<void> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<void>(`${this.apiUrl}/${id}/nota-fiscal?notificar=${notificar}`, formData);
+    }
+
+    enviarEmailNotaFiscal(id: number): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/nota-fiscal/notificar`, {});
+    }
+
+    excluirNotaFiscal(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}/nota-fiscal`);
+    }
+
+    visualizarNotaFiscal(id: number): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/${id}/nota-fiscal`, { responseType: 'blob' });
     }
 }

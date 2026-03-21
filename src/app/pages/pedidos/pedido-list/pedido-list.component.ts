@@ -43,6 +43,13 @@ export class PedidoListComponent implements OnInit {
     motivoCancelamento: string = '';
     pedidoParaCancelar: Pedido | null = null;
 
+    exibirModalNotaFiscal: boolean = false;
+    pedidoParaNotaFiscal: Pedido | null = null;
+    arquivoSelecionado: File | null = null;
+    uploadingNotaFiscal: boolean = false;
+    isDragging: boolean = false;
+    notificarCliente: boolean = true;
+
     constructor(
         private pedidoService: PedidoService,
         private usuarioService: UsuarioService,
@@ -276,5 +283,132 @@ export class PedidoListComponent implements OnInit {
             this.gerarPdf(this.pedidoRecemCriadoId);
         }
         this.pedidoRecemCriadoId = null;
+    }
+
+    abrirModalNotaFiscal(pedido: Pedido): void {
+        this.pedidoParaNotaFiscal = pedido;
+        this.arquivoSelecionado = null;
+        this.notificarCliente = true; // Default checked
+        this.exibirModalNotaFiscal = true;
+    }
+
+    fecharModalNotaFiscal(): void {
+        this.exibirModalNotaFiscal = false;
+        this.pedidoParaNotaFiscal = null;
+        this.arquivoSelecionado = null;
+    }
+
+    onFileSelected(event: any): void {
+        const file = event.target.files[0];
+        if (file) {
+            this.handleFile(file);
+        }
+    }
+
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = true;
+    }
+
+    onDragLeave(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+    }
+
+    onDrop(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+
+        const files = event.dataTransfer?.files;
+        if (files && files.length > 0) {
+            this.handleFile(files[0]);
+        }
+    }
+
+    private handleFile(file: File): void {
+        if (file.type !== 'application/pdf') {
+            alert('Por favor, selecione apenas arquivos PDF.');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('O arquivo deve ter no máximo 10 MB.');
+            return;
+        }
+        this.arquivoSelecionado = file;
+    }
+
+    salvarNotaFiscal(): void {
+        if (!this.pedidoParaNotaFiscal || !this.arquivoSelecionado) return;
+
+        this.uploadingNotaFiscal = true;
+        this.pedidoService.uploadNotaFiscal(this.pedidoParaNotaFiscal.id, this.arquivoSelecionado, this.notificarCliente).subscribe({
+            next: () => {
+                alert(this.notificarCliente ? 'Nota Fiscal anexada e e-mail enviado!' : 'Nota Fiscal anexada com sucesso!');
+                this.carregarPedidos();
+                this.fecharModalNotaFiscal();
+                this.uploadingNotaFiscal = false;
+            },
+            error: (err) => {
+                console.error('Erro ao fazer upload da nota fiscal', err);
+                alert('Erro ao anexar Nota Fiscal. Verifique se o arquivo é um PDF válido.');
+                this.uploadingNotaFiscal = false;
+            }
+        });
+    }
+
+    excluirNotaFiscal(): void {
+        if (!this.pedidoParaNotaFiscal) return;
+
+        if (confirm('Tem certeza que deseja excluir esta Nota Fiscal deste pedido?')) {
+            this.uploadingNotaFiscal = true;
+            this.pedidoService.excluirNotaFiscal(this.pedidoParaNotaFiscal.id).subscribe({
+                next: () => {
+                    alert('Nota Fiscal excluída com sucesso!');
+                    this.carregarPedidos();
+                    this.fecharModalNotaFiscal();
+                    this.uploadingNotaFiscal = false;
+                },
+                error: (err) => {
+                    console.error('Erro ao excluir nota fiscal', err);
+                    alert('Erro ao excluir Nota Fiscal.');
+                    this.uploadingNotaFiscal = false;
+                }
+            });
+        }
+    }
+
+    reenviarEmailNotaFiscal(): void {
+        if (!this.pedidoParaNotaFiscal) return;
+
+        this.uploadingNotaFiscal = true;
+        this.pedidoService.enviarEmailNotaFiscal(this.pedidoParaNotaFiscal.id).subscribe({
+            next: () => {
+                alert('E-mail de notificação reenviado com sucesso!');
+                this.uploadingNotaFiscal = false;
+            },
+            error: (err) => {
+                console.error('Erro ao reenviar e-mail', err);
+                alert('Erro ao reenviar e-mail de notificação.');
+                this.uploadingNotaFiscal = false;
+            }
+        });
+    }
+
+    visualizarNotaFiscal(pedido: Pedido): void {
+        if (!pedido.notaFiscalPath) return;
+
+        this.pedidoService.visualizarNotaFiscal(pedido.id).subscribe(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                alert('O navegador bloqueou a abertura da nota fiscal. Por favor, autorize pop-ups para este site.');
+            }
+        }, error => {
+            console.error('Erro ao visualizar nota fiscal', error);
+            alert('Erro ao carregar a nota fiscal para visualização.');
+        });
     }
 }

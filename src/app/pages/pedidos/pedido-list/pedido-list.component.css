@@ -146,6 +146,14 @@
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
 
+.btn-invoice {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.btn-upload-invoice {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+}
+
 .btn-icon {
     background: none;
     border: 1px solid #000;
@@ -241,35 +249,49 @@
     transform: translateY(-2px);
 }
 
-/* Hover effects for Success Modal buttons */
-.btn-success,
-.btn-secondary {
-    transition: all 0.3s ease !important;
-    cursor: pointer !important;
+.file-input-wrapper {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    text-align: center;
 }
 
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: #fff;
+.file-input-wrapper:hover {
+    border-color: #6f42c1;
 }
 
-.btn-success:hover {
-    background-color: #218838 !important;
-    border-color: #1e7e34 !important;
-    color: #fff !important;
-    filter: brightness(0.9);
+.file-info {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: #fff;
+.btn-outline {
+    background: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s;
 }
 
-.btn-secondary:hover {
-    background-color: #5a6268 !important;
-    border-color: #545b62 !important;
-    color: #fff !important;
-    filter: brightness(0.9);
+.btn-outline:hover {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
 }
