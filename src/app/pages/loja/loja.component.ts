@@ -11,7 +11,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-loja',
   templateUrl: './loja.component.html',
-  styleUrls: ['./loja.component.css']
+  styleUrls: [
+    './loja.component.css',
+    './loja-vitrine.css',
+    './loja-filtros.css'
+  ]
 })
 export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 

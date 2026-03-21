@@ -153,4 +153,103 @@ textarea.error {
     10% { opacity: 1; bottom: 30px; }
     90% { opacity: 1; bottom: 30px; }
     100% { opacity: 0; bottom: 10px; }
-}
+}
+
+/* Global Modals & Overlays */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-container {
+    background: #fff;
+    border-radius: 4px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    color: #3b6b91; /* Cor padrão para títulos de modal */
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.modal-body {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.modal-content-zoom {
+    animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Generic Buttons for Modals */
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+    background: #f4f4f4;
+    color: #333;
+}
+
+.btn-confirmar {
+    background: #3b6b91;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-confirmar:hover {
+    background: #4CAF50;
+}
+
+/* Global Utilities */
+.loading-spinner {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 1.1rem;
+    width: 100%;
+}
+
+.loading-spinner i {
+    color: var(--primary-gold, #D4AF37);
+    margin-right: 10px;
+}
