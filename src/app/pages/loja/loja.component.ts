@@ -69,7 +69,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     private authService: AuthService
   ) {
     this.nomeSubject.pipe(
-      debounceTime(300),
+      debounceTime(600),
       distinctUntilChanged()
     ).subscribe(nome => {
       this.filtroNome = nome;

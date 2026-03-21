@@ -1,15 +1,20 @@
 <div class="container page-container">
     <div class="header-section">
         <h1 class="cinzel-font color-primary-gold-dark">Listagem de Pedidos</h1>
-        <div style="display: flex; gap: 10px;">
+        <div class="header-actions">
+            <!-- Botão de Filtros Mobile -->
+            <button class="mobile-btn-filters show-mobile" (click)="abrirFiltrosMobile()">
+                <i class="fa fa-filter"></i>
+            </button>
             <button class="btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()">
-                <i class="fa fa-sync"></i> Sincronizar PIX
+                <i class="fa fa-sync"></i> <span class="hide-mobile">Sincronizar PIX</span>
             </button>
             <button class="btn-gold" (click)="novoPedido()">Novo Pedido</button>
         </div>
     </div>
 
-    <div class="filter-section card">
+    <!-- Filtros Desktop -->
+    <div class="filter-section card hide-mobile">
         <div class="row">
             <div class="col-md-3" *ngIf="isAdmin">
                 <label>Por Cliente</label>
@@ -54,6 +59,50 @@
         </div>
     </div>
 
+    <!-- Drawer de Filtros Mobile (80% largura) -->
+    <div class="mobile-filters-drawer show-mobile" [class.open]="exibirFiltrosMobile">
+        <div class="drawer-handle"></div>
+        <div class="drawer-header">
+            <h3><i class="fa fa-filter"></i> Filtros</h3>
+            <button class="close-drawer" (click)="fecharFiltrosMobile()">&times;</button>
+        </div>
+        <div class="drawer-content">
+            <div class="filter-group" *ngIf="isAdmin">
+                <label><i class="fa fa-user"></i> Cliente</label>
+                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome" class="modern-input">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa fa-hashtag"></i> Número</label>
+                <input type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="Ex: 123" class="modern-input" style="max-width: 70% !important;">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa fa-calendar"></i> Início</label>
+                <input type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()" class="modern-input" style="max-width: 60% !important;">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa fa-calendar"></i> Fim</label>
+                <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="modern-input" style="max-width: 60% !important;">
+            </div>
+            <div class="filter-group">
+                <label><i class="fa fa-info-circle"></i> Situação</label>
+                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="modern-select">
+                    <option value="">Todas</option>
+                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <div class="form-check" style="display: flex; align-items: center; gap: 10px; padding: 5px 0;">
+                    <input class="form-check-input" type="checkbox" id="exibirCanceladosMob" [(ngModel)]="exibirCancelados" (change)="filtrarPedidos()" style="width: 22px; height: 22px;">
+                    <label class="form-check-label" for="exibirCanceladosMob" style="margin-bottom: 0;">Exibir Cancelados</label>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-clear-modern" (click)="limparFiltros()">Limpar Filtros</button>
+            <button class="btn-apply-modern" (click)="fecharFiltrosMobile()">Aplicar Filtros</button>
+        </div>
+    </div>
+
     <div class="table-section card">
         <table class="table">
             <thead>
@@ -61,7 +110,7 @@
                     <th (click)="alternarOrdenacao('id')" class="sortable">
                         Número <i class="fa" [ngClass]="getSortIcon('id')"></i>
                     </th>
-                    <th (click)="alternarOrdenacao('usuario.nome')" class="sortable">
+                    <th (click)="alternarOrdenacao('usuario.nome')" class="sortable hide-mobile">
                         Cliente <i class="fa" [ngClass]="getSortIcon('usuario.nome')"></i>
                     </th>
                     <th (click)="alternarOrdenacao('dataPedido')" class="sortable">
@@ -70,21 +119,20 @@
                     <th>Valor Total</th>
                     <th>Situação</th>
                     <th class="text-center">Pago</th>
-                    <th>Status</th>
+                    <th class="hide-mobile">Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let pedido of pedidos" [class.pedido-cancelado]="pedido.cancelado">
                     <td>{{ pedido.id }}</td>
-                    <td>{{ pedido.usuarioNome }}</td>
+                    <td class="hide-mobile">{{ pedido.usuarioNome }}</td>
                     <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
                     <td>
                         <span *ngIf="!isAdmin || pedido.cancelado">{{ pedido.situacaoDescricao }}</span>
-                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control"
-                            style="width: 140px; padding: 4px; display: inline-block;" [ngModel]="pedido.situacao"
-                            (ngModelChange)="alterarSituacao(pedido, $event)">
+                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control select-situacao-tabela"
+                            [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)">
                             <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}
                             </option>
                         </select>
@@ -97,9 +145,10 @@
                             (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)">
                         </i>
                     </td>
-                    <td>{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
+                    <td class="hide-mobile">{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td>
-                        <div class="actions">
+                        <!-- Ações Desktop -->
+                        <div class="actions hide-mobile">
                             <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                                 <i class="fa fa-file-pdf"></i>
                             </button>
@@ -129,6 +178,23 @@
                                 (click)="visualizarNotaFiscal(pedido)">
                                 <i class="fa fa-file-invoice"></i>
                             </button>
+                        </div>
+
+                        <!-- Ações Mobile (Menu Sanduíche) -->
+                        <div class="mobile-actions show-mobile">
+                            <button class="btn-sandwich" (click)="alternarMenuAcoes(pedido.id, $event)">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <div class="actions-menu" *ngIf="itemMenuAberto === pedido.id">
+                                <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF</button>
+                                <button *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)"><i class="fa fa-qrcode"></i> PIX</button>
+                                <button *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)"><i class="fa fa-sync"></i> Sync MP</button>
+                                <button (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado"><i class="fa fa-pencil-alt"></i> Detalhes</button>
+                                <button *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))" 
+                                    (click)="cancelarPedido(pedido)" class="text-danger"><i class="fa fa-trash-alt"></i> Cancelar</button>
+                                <button *ngIf="isAdmin && !pedido.cancelado" (click)="abrirModalNotaFiscal(pedido)"><i class="fa fa-file-upload"></i> Nota Fiscal</button>
+                                <button *ngIf="pedido.notaFiscalPath" (click)="visualizarNotaFiscal(pedido)"><i class="fa fa-file-invoice"></i> Ver Nota</button>
+                            </div>
                         </div>
                     </td>
                 </tr>

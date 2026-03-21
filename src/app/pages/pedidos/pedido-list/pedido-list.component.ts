@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { PedidoService, Pedido } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
 import { Usuario } from '../../../models/usuario.model';
@@ -20,6 +20,8 @@ export class PedidoListComponent implements OnInit {
     filtroDataFim: string = '';
     filtroSituacao: string = '';
     exibirCancelados: boolean = false;
+    exibirFiltrosMobile: boolean = false;
+    itemMenuAberto: number | null = null;
     
     situacoesPedido: any[] = [];
 
@@ -143,6 +145,29 @@ export class PedidoListComponent implements OnInit {
         this.filtroDataFim = '';
         this.filtroSituacao = '';
         this.filtrarPedidos();
+        this.fecharFiltrosMobile();
+    }
+
+    abrirFiltrosMobile(): void {
+        this.exibirFiltrosMobile = true;
+    }
+
+    fecharFiltrosMobile(): void {
+        this.exibirFiltrosMobile = false;
+    }
+
+    alternarMenuAcoes(pedidoId: number, event: Event): void {
+        event.stopPropagation();
+        if (this.itemMenuAberto === pedidoId) {
+            this.itemMenuAberto = null;
+        } else {
+            this.itemMenuAberto = pedidoId;
+        }
+    }
+
+    @HostListener('document:click')
+    clickFora(): void {
+        this.itemMenuAberto = null;
     }
 
     novoPedido(): void {

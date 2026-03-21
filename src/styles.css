@@ -253,3 +253,22 @@ textarea.error {
     color: var(--primary-gold, #D4AF37);
     margin-right: 10px;
 }
+
+/* Global Responsive Utilities */
+.show-mobile {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .show-mobile {
+        display: block !important;
+    }
+    
+    .show-mobile-inline {
+        display: inline-block !important;
+    }
+    
+    .hide-mobile {
+        display: none !important;
+    }
+}

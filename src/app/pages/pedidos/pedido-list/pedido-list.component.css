@@ -295,3 +295,324 @@
 .btn-danger:hover {
     background: #c82333;
 }
+
+.select-situacao-tabela {
+    width: 140px;
+    padding: 4px;
+    display: inline-block;
+}
+
+/* --- Mobile Adjustments --- */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Mobile Actions Layout (Sandwich Menu) */
+.mobile-actions {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-sandwich {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #333;
+}
+
+.actions-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    z-index: 1000 !important;
+    min-width: 180px;
+    overflow: hidden;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.actions-menu button {
+    width: 100%;
+    padding: 12px 15px;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    color: #333;
+    font-family: inherit;
+}
+
+.actions-menu button:last-child {
+    border-bottom: none;
+}
+
+.actions-menu button:hover:not(:disabled) {
+    background: #f8f9fa;
+}
+
+.actions-menu button i {
+    width: 16px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.actions-menu .text-danger {
+    color: #dc3545;
+}
+
+/* Mobile Filter Drawer (80% largura) */
+.mobile-filters-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80vw;
+    height: 100vh;
+    background: #ffffff !important;
+    z-index: 10001;
+    box-shadow: -10px 0 25px rgba(0,0,0,0.15);
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-filters-drawer.open {
+    right: 0;
+}
+
+/* Overlay dark background when opened */
+.mobile-filters-drawer.open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: -1;
+}
+
+.drawer-header {
+    padding: 24px 20px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+}
+
+.drawer-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--primary-gold-dark, #AA8C2C);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.close-drawer {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+}
+
+.drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px 20px 100px 20px !important; /* Extra bottom padding for absolute footer */
+    background: #ffffff !important;
+    overflow-x: hidden !important;
+    min-height: 0;
+}
+
+.filter-group {
+    margin-bottom: 22px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label i {
+    color: var(--primary-gold, #D4AF37);
+    width: 16px;
+    text-align: center;
+}
+
+.modern-input, .modern-select {
+    width: 100% !important;
+    padding: 12px 15px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    background: #fafafa !important;
+    color: #333 !important;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
+    margin: 0 !important;
+}
+
+.modern-input:focus, .modern-select:focus {
+    border-color: var(--primary-gold, #D4AF37) !important;
+    background: #ffffff !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15) !important;
+}
+
+.drawer-footer {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    padding: 15px 20px !important;
+    border-top: 1px solid #eee !important;
+    display: flex !important;
+    gap: 15px !important;
+    background: #ffffff !important;
+    flex-shrink: 0 !important;
+    z-index: 10 !important;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05) !important;
+}
+
+.btn-clear-modern, .btn-apply-modern {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: transform 0.1s active;
+}
+
+.btn-clear-modern {
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+    color: #666;
+}
+
+.btn-apply-modern {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
+}
+
+.btn-apply-modern:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 10px 5px;
+    }
+
+    .header-section {
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .header-section h1 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .mobile-btn-filters {
+        background: #fff;
+        border: 1px solid #000;
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .table th, .table td {
+        padding: 6px 4px;
+        font-size: 0.75rem;
+    }
+
+    .btn-gold {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Paginação Mobile mais compacta */
+    .pagination-footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+
+    .pagination-footer select {
+        padding: 5px 8px !important;
+        font-size: 0.8rem !important;
+        width: auto !important;
+        height: auto !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+    }
+
+    .pagination-controls {
+        gap: 8px;
+    }
+
+    .pagination-controls button {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Refinando seletores do filtro mobile */
+    .modern-select {
+        padding: 8px 10px !important;
+        font-size: 0.85rem !important;
+        height: auto !important;
+    }
+
+    .modern-input {
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .drawer-header {
+        padding: 15px 20px;
+    }
+
+    .drawer-header h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Added .text-right inside media query as per instruction */
+    .text-right { text-align: right !important; }
+}
+@media (max-width: 768px) { .select-situacao-tabela { width: 105px !important; padding: 2px 4px !important; font-size: 0.75rem !important; height: auto !important; } }

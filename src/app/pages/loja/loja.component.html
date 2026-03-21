@@ -6,7 +6,7 @@
     <div class="loja-layout">
 
         <!-- Sidebar Filtros -->
-        <aside class="loja-sidebar card">
+        <aside class="loja-sidebar card hide-mobile">
             <h2>Filtros</h2>
             <div class="form-group">
                 <label>Nome do Produto</label>
@@ -64,7 +64,7 @@
             </div>
 
             <!-- NOVO: Drawer/Menu de Filtros Mobile -->
-            <div class="mobile-filters-drawer" [class.open]="exibirFiltrosMobile">
+            <div class="mobile-filters-drawer show-mobile" [class.open]="exibirFiltrosMobile">
                 <div class="drawer-handle" (click)="toggleFiltrosMobile()"></div>
                 <div class="drawer-header">
                     <h3>Filtros & Ordenação</h3>
@@ -227,14 +227,10 @@
 </div>
 
 <!-- Modal de Visualização de Imagem (Zoom) -->
-<div class="modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()"
-    style="background: rgba(0,0,0,0.85); cursor: zoom-out;">
-    <div class="modal-content-zoom" (click)="$event.stopPropagation()"
-        style="position: relative; max-width: 90vw; max-height: 90vh;">
-        <img [src]="imagemUrlVisualizacao" alt="Visualização"
-            style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;">
-        <button (click)="fecharVisualizacaoImagem()"
-            style="position: absolute; top: -15px; right: -15px; background: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+<div class="modal-overlay zoom-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
+    <div class="modal-content-zoom zoom-modal-container" (click)="$event.stopPropagation()">
+        <img [src]="imagemUrlVisualizacao" alt="Visualização" class="zoom-modal-content">
+        <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn">
             <i class="fa fa-times" style="font-size: 1.2rem; color: #333;"></i>
         </button>
     </div>
