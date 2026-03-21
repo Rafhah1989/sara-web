@@ -117,7 +117,7 @@
                         Data <i class="fa" [ngClass]="getSortIcon('dataPedido')"></i>
                     </th>
                     <th>Valor Total</th>
-                    <th>Situação</th>
+                    <th class="hide-mobile">Situação</th>
                     <th class="text-center">Pago</th>
                     <th class="hide-mobile">Status</th>
                     <th>Ações</th>
@@ -129,7 +129,7 @@
                     <td class="hide-mobile">{{ pedido.usuarioNome }}</td>
                     <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
-                    <td>
+                    <td class="hide-mobile">
                         <span *ngIf="!isAdmin || pedido.cancelado">{{ pedido.situacaoDescricao }}</span>
                         <select *ngIf="isAdmin && !pedido.cancelado" class="form-control select-situacao-tabela"
                             [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)">
