@@ -13,7 +13,7 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private readonly TOKEN_NAME = 'sara_token';
   private inactivityTimer: any;
-  private readonly INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutos
+  private readonly INACTIVITY_LIMIT_MS = 120 * 60 * 1000; // 2 horas (120 minutos)
 
   // Subject para emitir o estado de login
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.isAutenticado());
