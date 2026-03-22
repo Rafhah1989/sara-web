@@ -252,6 +252,9 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
        return;
     }
     
+    // Início imediato do spinner no botão
+    this.produtosSendoAdicionados.add(produto.id!);
+    
     const isMobile = window.innerWidth <= 768;
     
     if (isMobile) {
@@ -264,6 +267,9 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     this.produtoService.buscarOutrosTamanhos(produto.id!, true).subscribe({
         next: (outros) => {
             if (outros && outros.length > 0) {
+                // Se vai mostrar modal, remove o spinner do botão principal para não confundir
+                this.produtosSendoAdicionados.delete(produto.id!);
+                
                 this.produtoOriginalSelecionado = produto;
                 // Ordenar as sugestões de forma decrescente pelo tamanho
                 outros.sort((a, b) => (b.tamanho || 0) - (a.tamanho || 0));
