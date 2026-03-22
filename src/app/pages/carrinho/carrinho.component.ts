@@ -33,6 +33,10 @@ export class CarrinhoComponent implements OnInit {
   exibirModalGerarPedido: boolean = false;
   observacaoPedido: string = '';
   
+  // Zoom de Imagem
+  exibirVisualizacaoImagem: boolean = false;
+  imagemUrlVisualizacao: string = '';
+
   // Toast Notification
   exibirToast: boolean = false;
   mensagemToast: string = '';
@@ -310,5 +314,17 @@ export class CarrinhoComponent implements OnInit {
           
           return (a.produtoTamanho || 0) - (b.produtoTamanho || 0);
       });
+  }
+
+  abrirVisualizacaoImagem(imagem: string): void {
+      if (imagem) {
+          this.imagemUrlVisualizacao = imagem;
+          this.exibirVisualizacaoImagem = true;
+      }
+  }
+
+  fecharVisualizacaoImagem(): void {
+      this.exibirVisualizacaoImagem = false;
+      this.imagemUrlVisualizacao = '';
   }
 }

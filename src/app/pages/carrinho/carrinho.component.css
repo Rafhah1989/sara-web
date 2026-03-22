@@ -482,3 +482,86 @@
     margin-top: 25px;
 }
 
+/* ================== ZOOM DE IMAGEM (ESTILO EXCLUSIVO) ================== */
+.zoom-overlay-exclusive {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999999 !important;
+    cursor: zoom-out;
+    animation: fadeInZoom 0.25s ease-out;
+}
+
+.zoom-modal-container-exclusive {
+    position: relative;
+    max-width: 70%;  /* Ocupando 70% da tela conforme solicitado */
+    max-height: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: scaleInZoom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zoom-img-exclusive {
+    max-width: 100%;
+    max-height: 70vh; /* Ocupando 70% da altura da tela */
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+    object-fit: contain;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.zoom-close-btn-exclusive {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background: #fff;
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    color: #ff0000; /* Vermelho conforme solicitado */
+    font-size: 1.8rem;
+    transition: all 0.2s;
+}
+
+.zoom-close-btn-exclusive:hover {
+    transform: scale(1.1);
+    background: #eee;
+}
+
+@keyframes fadeInZoom {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleInZoom {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .zoom-modal-container-exclusive {
+        width: 90vw; /* No mobile deixamos um pouco maior para visibilidade */
+        max-width: 95%;
+    }
+    .zoom-close-btn-exclusive {
+        top: 10px;
+        right: 10px;
+        width: 54px;
+        height: 54px;
+        font-size: 1.5rem;
+    }
+}

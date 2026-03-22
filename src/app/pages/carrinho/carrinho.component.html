@@ -1,3 +1,13 @@
+<!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
+<div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
+    <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
+        <img [src]="imagemUrlVisualizacao" alt="Visualização" class="zoom-img-exclusive">
+        <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+</div>
+
 <div class="page-title-banner">
     <h1>Carrinho de Compras</h1>
 </div>
@@ -28,7 +38,7 @@
                 <div class="tamanho-card-body">
                     <div class="carrinho-item" *ngFor="let item of grupo.itens">
                         <div class="item-main-info">
-                            <div class="item-imagem">
+                            <div class="item-imagem" (click)="abrirVisualizacaoImagem(item.produtoImagem)" style="cursor: zoom-in" title="Clique para ampliar">
                                 <img *ngIf="item.produtoImagem" [src]="item.produtoImagem" [alt]="item.produtoNome">
                                 <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
                             </div>
