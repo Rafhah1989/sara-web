@@ -44,6 +44,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   private searchSubscription?: Subscription;
 
   quantidades: { [produtoId: number]: number } = {};
+  produtosSendoAdicionados: Set<number> = new Set();
   nomeSubject = new Subject<string>();
 
   // Modal Attributes
@@ -51,6 +52,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   produtoOriginalSelecionado?: Produto;
   sugestoesTamanhos: Produto[] = [];
   quantidadesSugestao: { [produtoId: number]: number } = {};
+  carregandoModalSugestao: boolean = false;
 
   // Toast Notification
   exibirToast: boolean = false;
@@ -259,7 +261,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Desktop: Check for other sizes before adding
-    this.produtoService.buscarOutrosTamanhos(produto.id!).subscribe({
+    this.produtoService.buscarOutrosTamanhos(produto.id!, true).subscribe({
         next: (outros) => {
             if (outros && outros.length > 0) {
                 this.produtoOriginalSelecionado = produto;
@@ -284,12 +286,15 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   processarAdicaoUnitaria(usuarioId: number, produto: Produto, qtd: number): Observable<any> {
       return new Observable(observer => {
+          this.produtosSendoAdicionados.add(produto.id!);
+          
           this.carrinhoService.adicionar({
             usuarioId: usuarioId,
             produtoId: produto.id!,
             quantidade: qtd
-          }).subscribe({
+          }, true).subscribe({ // true = skip global spinner
             next: (res) => {
+              this.produtosSendoAdicionados.delete(produto.id!);
               if (observer.closed) return;
               this.mostrarToast('Carrinho atualizado');
               observer.next(res);
@@ -302,12 +307,21 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
                      usuarioId: usuarioId,
                      produtoId: produto.id!,
                      quantidade: qtd
-                 }).subscribe(() => {
-                     this.mostrarToast('Carrinho atualizado');
-                     observer.next(null);
-                     observer.complete();
+                 }, true).subscribe({ // true = skip global spinner
+                    next: () => {
+                        this.produtosSendoAdicionados.delete(produto.id!);
+                        this.mostrarToast('Carrinho atualizado');
+                        observer.next(null);
+                        observer.complete();
+                    },
+                    error: (e) => {
+                        this.produtosSendoAdicionados.delete(produto.id!);
+                        this.mostrarToast(`Erro ao atualizar ${produto.nome}.`);
+                        observer.error(e);
+                    }
                  });
               } else {
+                this.produtosSendoAdicionados.delete(produto.id!);
                 this.mostrarToast(`Erro ao adicionar ${produto.nome}.`);
                 observer.error(err);
               }
@@ -335,14 +349,19 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   fecharModalSugestao(): void {
       this.exibirModalSugestao = false;
+      this.carregandoModalSugestao = false;
   }
 
   adicionarApenasOriginal(): void {
       if (this.produtoOriginalSelecionado) {
           const usuarioId = this.authService.getUsuarioIdDoToken();
           if (usuarioId) {
+             this.carregandoModalSugestao = true;
              this.processarAdicaoUnitaria(usuarioId, this.produtoOriginalSelecionado, this.quantidades[this.produtoOriginalSelecionado.id!] || 1)
-                 .subscribe(() => this.fecharModalSugestao());
+                 .subscribe({
+                     next: () => this.fecharModalSugestao(),
+                     error: () => this.carregandoModalSugestao = false
+                 });
           }
       }
   }
@@ -352,6 +371,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       const usuarioId = this.authService.getUsuarioIdDoToken();
       if (!usuarioId) return;
 
+      this.carregandoModalSugestao = true;
       const adicoes = [];
       const qtdOriginal = this.quantidades[this.produtoOriginalSelecionado.id!] || 1;
       
@@ -370,9 +390,12 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
           }
       });
 
-      forkJoin(adicoes).subscribe(() => {
-          this.mostrarToast('Carrinho atualizado');
-          this.fecharModalSugestao();
+      forkJoin(adicoes).subscribe({
+          next: () => {
+              this.mostrarToast('Carrinho atualizado');
+              this.fecharModalSugestao();
+          },
+          error: () => this.carregandoModalSugestao = false
       });
   }
 
@@ -651,7 +674,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       quantidade: p.quantidadeSelecionada!
     }));
 
-    this.carrinhoService.adicionarLote(dtos).subscribe({
+    this.carrinhoService.adicionarLote(dtos, true).subscribe({
       next: () => {
         this.mostrarToast('Itens adicionados ao carrinho');
         this.fecharModalProdutosAlternativo();

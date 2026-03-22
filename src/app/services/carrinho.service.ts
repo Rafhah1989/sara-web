@@ -35,8 +35,8 @@ export class CarrinhoService {
 
   constructor(private http: HttpClient) {}
 
-  atualizarContagem(idUsuario: number): void {
-      this.buscarPorUsuario(idUsuario).subscribe({
+  atualizarContagem(idUsuario: number, skipSpinner: boolean = false): void {
+      this.buscarPorUsuario(idUsuario, skipSpinner).subscribe({
           next: (itens) => {
               // Os itens únicos compõem o tamanho da lista que retorna do usuario
               this.quantidadeItensUnicosSubject.next(itens.length);
@@ -49,24 +49,27 @@ export class CarrinhoService {
       this.quantidadeItensUnicosSubject.next(0);
   }
 
-  adicionar(dto: CarrinhoRequestDTO): Observable<CarrinhoResponseDTO> {
-    return this.http.post<CarrinhoResponseDTO>(this.apiUrl, dto).pipe(
-      tap(() => this.atualizarContagem(dto.usuarioId))
+  adicionar(dto: CarrinhoRequestDTO, skipSpinner: boolean = false): Observable<CarrinhoResponseDTO> {
+    const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
+    return this.http.post<CarrinhoResponseDTO>(this.apiUrl, dto, { headers }).pipe(
+      tap(() => this.atualizarContagem(dto.usuarioId, skipSpinner))
     );
   }
 
-  adicionarLote(dtos: CarrinhoRequestDTO[]): Observable<CarrinhoResponseDTO[]> {
-    return this.http.post<CarrinhoResponseDTO[]>(`${this.apiUrl}/lote`, dtos).pipe(
+  adicionarLote(dtos: CarrinhoRequestDTO[], skipSpinner: boolean = false): Observable<CarrinhoResponseDTO[]> {
+    const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
+    return this.http.post<CarrinhoResponseDTO[]>(`${this.apiUrl}/lote`, dtos, { headers }).pipe(
       tap(() => {
         if (dtos.length > 0) {
-          this.atualizarContagem(dtos[0].usuarioId);
+          this.atualizarContagem(dtos[0].usuarioId, skipSpinner);
         }
       })
     );
   }
 
-  atualizarQuantidade(idUsuario: number, idProduto: number, dto: CarrinhoRequestDTO): Observable<CarrinhoResponseDTO> {
-    return this.http.put<CarrinhoResponseDTO>(`${this.apiUrl}/${idUsuario}/${idProduto}`, dto);
+  atualizarQuantidade(idUsuario: number, idProduto: number, dto: CarrinhoRequestDTO, skipSpinner: boolean = false): Observable<CarrinhoResponseDTO> {
+    const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
+    return this.http.put<CarrinhoResponseDTO>(`${this.apiUrl}/${idUsuario}/${idProduto}`, dto, { headers });
   }
 
   remover(idUsuario: number, idProduto: number): Observable<void> {
@@ -81,7 +84,8 @@ export class CarrinhoService {
     );
   }
 
-  buscarPorUsuario(idUsuario: number): Observable<CarrinhoResponseDTO[]> {
-    return this.http.get<CarrinhoResponseDTO[]>(`${this.apiUrl}/usuario/${idUsuario}`);
+  buscarPorUsuario(idUsuario: number, skipSpinner: boolean = false): Observable<CarrinhoResponseDTO[]> {
+    const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
+    return this.http.get<CarrinhoResponseDTO[]>(`${this.apiUrl}/usuario/${idUsuario}`, { headers });
   }
 }

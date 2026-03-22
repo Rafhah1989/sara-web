@@ -80,8 +80,9 @@ export class ProdutoService {
     return this.http.get<number[]>(`${this.apiUrl}/tamanhos`);
   }
 
-    buscarOutrosTamanhos(id: number): Observable<Produto[]> {
-        return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`);
+    buscarOutrosTamanhos(id: number, skipSpinner: boolean = false): Observable<Produto[]> {
+        const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
+        return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`, { headers });
     }
 
     gerarCatalogo(): Observable<Blob> {
