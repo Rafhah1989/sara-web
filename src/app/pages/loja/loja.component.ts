@@ -52,8 +52,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   produtoOriginalSelecionado?: Produto;
   sugestoesTamanhos: Produto[] = [];
   quantidadesSugestao: { [produtoId: number]: number } = {};
-  carregandoModalSugestao: boolean = false;
-
+  
   // Toast Notification
   exibirToast: boolean = false;
   mensagemToast: string = '';
@@ -355,38 +354,36 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   fecharModalSugestao(): void {
       this.exibirModalSugestao = false;
-      this.carregandoModalSugestao = false;
   }
 
   adicionarApenasOriginal(): void {
       if (this.produtoOriginalSelecionado) {
           const usuarioId = this.authService.getUsuarioIdDoToken();
           if (usuarioId) {
-             this.carregandoModalSugestao = true;
              this.processarAdicaoUnitaria(usuarioId, this.produtoOriginalSelecionado, this.quantidades[this.produtoOriginalSelecionado.id!] || 1)
-                 .subscribe({
-                     next: () => this.fecharModalSugestao(),
-                     error: () => this.carregandoModalSugestao = false
-                 });
+                 .subscribe();
+             this.fecharModalSugestao();
           }
+      } else {
+          this.fecharModalSugestao();
       }
   }
 
   adicionarComSugestoes(): void {
-      if (!this.produtoOriginalSelecionado) return;
+      if (!this.produtoOriginalSelecionado) {
+          this.fecharModalSugestao();
+          return;
+      }
       const usuarioId = this.authService.getUsuarioIdDoToken();
       if (!usuarioId) return;
 
-      this.carregandoModalSugestao = true;
       const adicoes = [];
       const qtdOriginal = this.quantidades[this.produtoOriginalSelecionado.id!] || 1;
       
-      // Request do original modificado para retornar nulo on erro para não travar forkjoin
       const requisicaoOriginal = this.processarAdicaoUnitaria(usuarioId, this.produtoOriginalSelecionado, qtdOriginal)
           .pipe(catchError(e => of(null)));
       adicoes.push(requisicaoOriginal);
 
-      // Requests das sugestoes > 0
       this.sugestoesTamanhos.forEach(sugestao => {
           const qtdSugestao = this.quantidadesSugestao[sugestao.id!];
           if (qtdSugestao > 0) {
@@ -396,13 +393,11 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
           }
       });
 
-      forkJoin(adicoes).subscribe({
-          next: () => {
-              this.mostrarToast('Carrinho atualizado');
-              this.fecharModalSugestao();
-          },
-          error: () => this.carregandoModalSugestao = false
+      forkJoin(adicoes).subscribe(() => {
+          this.mostrarToast('Carrinho atualizado');
       });
+      
+      this.fecharModalSugestao();
   }
 
   mostrarToast(mensagem: string): void {

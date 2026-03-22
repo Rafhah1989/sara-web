@@ -238,11 +238,8 @@
         </div>
 
         <div class="modal-footer">
-            <button class="btn-cancelar" (click)="adicionarApenasOriginal()" [disabled]="carregandoModalSugestao">Não, obrigado</button>
-            <button class="btn-confirmar" (click)="adicionarComSugestoes()" [disabled]="carregandoModalSugestao">
-                <i *ngIf="carregandoModalSugestao" class="fa fa-spinner fa-spin spinner-btn"></i>
-                {{ carregandoModalSugestao ? 'Adicionando...' : 'Adicionar' }}
-            </button>
+            <button class="btn-cancelar" (click)="adicionarApenasOriginal()">Não, obrigado</button>
+            <button class="btn-confirmar" (click)="adicionarComSugestoes()">Adicionar</button>
         </div>
     </div>
 </div>
