@@ -110,7 +110,7 @@
                     <th (click)="alternarOrdenacao('id')" class="sortable">
                         Número <i class="fa" [ngClass]="getSortIcon('id')"></i>
                     </th>
-                    <th (click)="alternarOrdenacao('usuario.nome')" class="sortable hide-mobile">
+                    <th (click)="alternarOrdenacao('usuario.nome')" class="sortable hide-mobile" *ngIf="isAdmin">
                         Cliente <i class="fa" [ngClass]="getSortIcon('usuario.nome')"></i>
                     </th>
                     <th (click)="alternarOrdenacao('dataPedido')" class="sortable">
@@ -126,7 +126,7 @@
             <tbody>
                 <tr *ngFor="let pedido of pedidos" [class.pedido-cancelado]="pedido.cancelado">
                     <td>{{ pedido.id }}</td>
-                    <td class="hide-mobile">{{ pedido.usuarioNome }}</td>
+                    <td class="hide-mobile" *ngIf="isAdmin">{{ pedido.usuarioNome }}</td>
                     <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
                     <td class="hide-mobile">
@@ -199,7 +199,7 @@
                     </td>
                 </tr>
                 <tr *ngIf="pedidos.length === 0 && !loading">
-                    <td colspan="6" class="text-center">Nenhum pedido encontrado.</td>
+                    <td [attr.colspan]="isAdmin ? 8 : 7" class="text-center">Nenhum pedido encontrado.</td>
                 </tr>
             </tbody>
         </table>
