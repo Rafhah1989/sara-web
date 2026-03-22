@@ -194,8 +194,8 @@
     right: -20px;
     background: #fff;
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -203,8 +203,8 @@
     justify-content: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 100;
-    color: #333;
-    font-size: 1.2rem;
+    color: #ff0000;
+    font-size: 1.8rem;
     transition: all 0.2s;
 }
 
@@ -230,8 +230,9 @@
     .zoom-close-btn-exclusive {
         top: 10px;
         right: 10px;
-        width: 36px;
-        height: 36px;
+        width: 54px;
+        height: 54px;
+        font-size: 1.5rem;
     }
 }
 
