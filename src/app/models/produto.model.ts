@@ -8,4 +8,5 @@ export interface Produto {
     ativo: boolean;
     imagem: string; // Base64
     temImagem?: boolean;
+    quantidadeSelecionada?: number;
 }

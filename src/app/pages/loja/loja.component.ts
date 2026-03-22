@@ -14,7 +14,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: [
     './loja.component.css',
     './loja-vitrine.css',
-    './loja-filtros.css'
+    './loja-filtros.css',
+    './loja-modal.css'
   ]
 })
 export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -62,6 +63,18 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Mobile Filters
   exibirFiltrosMobile: boolean = false;
+
+  // Modal Produtos Alternativo (Bulk Add)
+  exibirModalProdutosAlternativo: boolean = false;
+  tamanhosDisponiveisModal: string[] = []; // Novo: Tamanhos dinâmicos no modal
+  filtroModalNome: string = '';
+  filtroModalTamanho: string = '';
+  filtroModalPrecoMin: string = '';
+  filtroModalPrecoMax: string = '';
+  produtosModal: Produto[] = [];
+  produtosModalFiltrados: Produto[] = [];
+  produtosModalAgrupadosPorTamanho: any[] = [];
+  avisoPdf: boolean = false;
 
   constructor(
     private produtoService: ProdutoService,
@@ -376,11 +389,36 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 3000);
   }
 
-  abrirVisualizacaoImagem(url?: string): void {
-      if (url) {
-          this.imagemUrlVisualizacao = url;
+  abrirVisualizacaoImagem(prod: any): void {
+      if (!prod) return;
+
+      // Se a imagem já estiver presente, abre direto
+      if (prod.imagem) {
+          this.imagemUrlVisualizacao = prod.imagem;
           this.exibirVisualizacaoImagem = true;
+          return;
       }
+
+      // Se não tiver imagem, busca o produto completo pelo ID (o endpoint /ativos não traz imagem por performance)
+      this.carregando = true;
+      this.produtoService.buscarPorId(prod.id).subscribe({
+          next: (produtoCompleto) => {
+              this.carregando = false;
+              if (produtoCompleto && produtoCompleto.imagem) {
+                  this.imagemUrlVisualizacao = produtoCompleto.imagem;
+                  this.exibirVisualizacaoImagem = true;
+                  // Opcional: Atualiza o objeto no modal para não buscar novamente
+                  prod.imagem = produtoCompleto.imagem;
+              } else {
+                  this.mostrarToast('Este produto não possui imagem cadastrada.');
+              }
+          },
+          error: (err) => {
+              console.error('Erro ao buscar imagem do produto', err);
+              this.carregando = false;
+              this.mostrarToast('Erro ao carregar imagem.');
+          }
+      });
   }
 
   fecharVisualizacaoImagem(): void {
@@ -415,5 +453,220 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     if (atual > 1) {
       this.quantidades[id] = atual - 1;
     }
+  }
+
+  // --- Modal Produtos Alternativo (Inclusão em Lote) ---
+
+  abrirModalProdutosAlternativo(): void {
+    this.carregando = true;
+    this.produtoService.listarAtivos().subscribe({
+      next: (produtos) => {
+        this.produtosModal = produtos.map(p => ({ ...p, quantidadeSelecionada: 0 }));
+        
+        // Calcula tamanhos disponíveis dinamicamente
+        const uniqueSizes = [...new Set(this.produtosModal
+            .filter(p => p.tamanho != null)
+            .map(p => p.tamanho.toString()))]
+            .sort((a, b) => Number(a) - Number(b));
+        this.tamanhosDisponiveisModal = uniqueSizes;
+
+        this.produtosModalFiltrados = [...this.produtosModal];
+        this.filtrarProdutosModal();
+        this.exibirModalProdutosAlternativo = true;
+        this.carregando = false;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar produtos para modal', err);
+        this.carregando = false;
+      }
+    });
+  }
+
+  fecharModalProdutosAlternativo(): void {
+    this.exibirModalProdutosAlternativo = false;
+    this.limparFiltrosModal();
+  }
+
+  filtrarProdutosModal(): void {
+    this.produtosModalFiltrados = this.produtosModal.filter(p => {
+      let matchNome = true;
+      let matchTamanho = true;
+      let matchPreco = true;
+
+      if (this.filtroModalNome && this.filtroModalNome.trim() !== '') {
+        const term = this.filtroModalNome.toLowerCase();
+        // Filtra por NOME, ID ou CÓDIGO
+        matchNome = p.nome.toLowerCase().includes(term) || 
+                   (p.id && p.id.toString().includes(term)) ||
+                   (p.codigo && p.codigo.toString().includes(term));
+      }
+      if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
+        matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
+      }
+
+      if (this.filtroModalPrecoMin) {
+        let clearMin = this.filtroModalPrecoMin.toString().replace(/[^\d,]/g, '').replace(',', '.');
+        let parsedMin = parseFloat(clearMin);
+        if (!isNaN(parsedMin) && parsedMin > 0) {
+          matchPreco = p.preco !== undefined && p.preco !== null && p.preco >= parsedMin;
+        }
+      }
+
+      if (this.filtroModalPrecoMax && matchPreco) {
+        let clearMax = this.filtroModalPrecoMax.toString().replace(/[^\d,]/g, '').replace(',', '.');
+        let parsedMax = parseFloat(clearMax);
+        if (!isNaN(parsedMax) && parsedMax > 0) {
+          matchPreco = p.preco !== undefined && p.preco !== null && p.preco <= parsedMax;
+        }
+      }
+
+      return matchNome && matchTamanho && matchPreco;
+    });
+
+    this.atualizarAgrupamentoTamanhos();
+  }
+
+  atualizarAgrupamentoTamanhos(): void {
+    const grupos = new Map<string, any[]>();
+    this.produtosModalFiltrados.forEach(p => {
+      const tamanho = p.tamanho != null ? p.tamanho.toString() : 'Sem Tamanho';
+      if (!grupos.has(tamanho)) {
+        grupos.set(tamanho, []);
+      }
+      grupos.get(tamanho)?.push(p);
+    });
+
+    this.produtosModalAgrupadosPorTamanho = Array.from(grupos.entries()).map(([tamanho, produtos]) => ({
+      tamanho,
+      produtos
+    })).sort((a, b) => {
+      if (a.tamanho === 'Sem Tamanho') return 1;
+      if (b.tamanho === 'Sem Tamanho') return -1;
+      return a.tamanho.localeCompare(b.tamanho, undefined, { numeric: true });
+    });
+  }
+
+  limparFiltrosModal(): void {
+    this.filtroModalNome = '';
+    this.filtroModalTamanho = '';
+    this.filtroModalPrecoMin = '';
+    this.filtroModalPrecoMax = '';
+    this.filtrarProdutosModal();
+  }
+
+  applyFiltroMoedaMaskMin(event: any): void {
+    const input = event.target;
+    let value = input.value.replace(/\D/g, '');
+    if (value === '') {
+      this.filtroModalPrecoMin = '';
+      this.filtrarProdutosModal();
+      return;
+    }
+    value = (Number(value) / 100).toFixed(2);
+    this.filtroModalPrecoMin = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+    this.filtrarProdutosModal();
+  }
+
+  applyFiltroMoedaMaskMax(event: any): void {
+    const input = event.target;
+    let value = input.value.replace(/\D/g, '');
+    if (value === '') {
+      this.filtroModalPrecoMax = '';
+      this.filtrarProdutosModal();
+      return;
+    }
+    value = (Number(value) / 100).toFixed(2);
+    this.filtroModalPrecoMax = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+    this.filtrarProdutosModal();
+  }
+
+  get totalModalAlternativo(): number {
+    return this.produtosModalFiltrados.reduce((acc, p) => acc + ((p.quantidadeSelecionada || 0) * (p.preco || 0)), 0);
+  }
+
+  get totalModalAlternativoQtd(): number {
+    return this.produtosModalFiltrados.reduce((acc, p) => acc + (Number(p.quantidadeSelecionada) || 0), 0);
+  }
+
+  calcularQtdGrupo(grupo: any): number {
+    return grupo.produtos.reduce((acc: number, p: any) => acc + (Number(p.quantidadeSelecionada) || 0), 0);
+  }
+
+  calcularTotalGrupo(grupo: any): number {
+    return grupo.produtos.reduce((acc: number, p: any) => acc + ((Number(p.quantidadeSelecionada) || 0) * (p.preco || 0)), 0);
+  }
+
+  adicionarProdutosModalCarrinho(): void {
+    const usuarioId = this.authService.getUsuarioIdDoToken();
+    if (!usuarioId) {
+      alert("Sessão inválida ou expirada. Faça login novamente.");
+      return;
+    }
+
+    // Busca em TODOS os produtos, não apenas nos filtrados, para não perder seleções anteriores
+    const produtosSelecionados = this.produtosModal.filter(p => (p.quantidadeSelecionada || 0) > 0);
+    
+    if (produtosSelecionados.length === 0) {
+      this.fecharModalProdutosAlternativo();
+      return;
+    }
+
+    const dtos = produtosSelecionados.map(p => ({
+      usuarioId: usuarioId,
+      produtoId: p.id!,
+      quantidade: p.quantidadeSelecionada!
+    }));
+
+    this.carrinhoService.adicionarLote(dtos).subscribe({
+      next: () => {
+        this.mostrarToast('Itens adicionados ao carrinho');
+        this.fecharModalProdutosAlternativo();
+      },
+      error: (err) => {
+        console.error('Erro ao adicionar produtos em lote', err);
+        this.mostrarToast('Erro ao adicionar alguns itens.');
+      }
+    });
+  }
+
+  calcularTotalItensModal(): number {
+    return this.produtosModal.reduce((acc, p) => acc + (Number(p.quantidadeSelecionada) || 0), 0);
+  }
+
+  calcularTotalSomaModal(): number {
+    return this.produtosModal.reduce((acc, p) => acc + ((p.quantidadeSelecionada || 0) * (p.preco || 0)), 0);
+  }
+
+  gerarCatalogoPdfModal(): void {
+    this.gerarCatalogoPdf();
+  }
+
+  gerarCatalogoPdf(): void {
+    this.avisoPdf = true;
+    
+    // Abre a janela IMEDIATAMENTE antes do subscribe para evitar bloqueio de pop-up
+    const win = window.open('', '_blank');
+    
+    this.produtoService.gerarCatalogo().subscribe({
+      next: (blob) => {
+        this.avisoPdf = false;
+        const fileURL = URL.createObjectURL(blob);
+        if (win) {
+          win.location.href = fileURL;
+        } else {
+          window.open(fileURL, '_blank');
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao gerar catálogo', err);
+        if (win) win.close();
+        this.avisoPdf = false;
+        this.mostrarToast('Erro ao gerar catálogo. Tente novamente.');
+      }
+    });
+  }
+
+  fecharAvisoPdf(): void {
+    this.avisoPdf = false;
   }
 }

@@ -55,6 +55,16 @@ export class CarrinhoService {
     );
   }
 
+  adicionarLote(dtos: CarrinhoRequestDTO[]): Observable<CarrinhoResponseDTO[]> {
+    return this.http.post<CarrinhoResponseDTO[]>(`${this.apiUrl}/lote`, dtos).pipe(
+      tap(() => {
+        if (dtos.length > 0) {
+          this.atualizarContagem(dtos[0].usuarioId);
+        }
+      })
+    );
+  }
+
   atualizarQuantidade(idUsuario: number, idProduto: number, dto: CarrinhoRequestDTO): Observable<CarrinhoResponseDTO> {
     return this.http.put<CarrinhoResponseDTO>(`${this.apiUrl}/${idUsuario}/${idProduto}`, dto);
   }

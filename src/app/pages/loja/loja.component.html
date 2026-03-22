@@ -44,6 +44,10 @@
                 Filtros</button>
             <button class="btn-clear" style="width: 100%; margin-top: 10px;" (click)="limparFiltros()">Limpar
                 Filtros</button>
+            
+            <button class="btn-modern-secondary" style="width: 100%; margin-top: 20px;" (click)="abrirModalProdutosAlternativo()">
+                <i class="fa fa-th-list"></i> Adicionar por tabela
+            </button>
         </aside>
 
         <!-- Vitrine de Produtos -->
@@ -57,6 +61,9 @@
                             placeholder="Buscar produto..." class="mobile-input-search">
                         <i class="fa fa-search"></i>
                     </div>
+                    <button class="mobile-btn-modern-accent" (click)="abrirModalProdutosAlternativo()" type="button">
+                        <i class="fa fa-th-list"></i>
+                    </button>
                     <button class="mobile-btn-filters" (click)="toggleFiltrosMobile()" type="button">
                         <i class="fa fa-filter"></i>
                     </button>
@@ -218,6 +225,145 @@
             <button class="btn-cancelar" (click)="adicionarApenasOriginal()">Não, obrigado</button>
             <button class="btn-confirmar" (click)="adicionarComSugestoes()">Adicionar</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal Inclusão Alternativa (Bulk Add) -->
+<div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+<!-- Modal Moderno de Inclusão Alternativa -->
+<div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo">
+    <div class="modern-modal">
+        <!-- Header -->
+        <div class="modal-header-modern">
+            <h2>Adicionar Produtos</h2>
+            <button class="btn-close-modern" (click)="fecharModalProdutosAlternativo()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Filters Area -->
+        <div class="modal-filters-modern">
+            <div class="search-group-modern">
+                <i class="fa fa-search"></i>
+                <input type="text" [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()" placeholder="Pesquisar por nome ou código...">
+            </div>
+            
+            <div class="filter-pills-modern">
+                <div class="modern-select-wrapper">
+                    <select [(ngModel)]="filtroModalTamanho" (change)="filtrarProdutosModal()">
+                        <option value="">Todos os Tamanhos</option>
+                        <option *ngFor="let t of tamanhosDisponiveisModal" [value]="t">{{ t }}cm</option>
+                    </select>
+                </div>
+                <button class="btn-modern-filter-action" (click)="gerarCatalogoPdfModal()" title="Gerar catálogo em PDF">
+                    <i class="fa fa-file-pdf"></i> Catálogo
+                </button>
+                <button class="btn-modern-filter-action clear" (click)="limparFiltrosModal()">
+                    <i class="fa fa-eraser"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Body (Compact Tables Area) -->
+        <div class="modal-body-modern">
+            <div *ngFor="let grupo of produtosModalAgrupadosPorTamanho" class="group-section-modern">
+                <div class="group-title-modern">
+                    Tamanho {{ grupo.tamanho }}cm
+                </div>
+
+                <div class="modern-table-container">
+                    <table class="modern-table-compact">
+                        <thead>
+                            <tr>
+                                <th class="col-id">Cód</th>
+                                <th class="col-name">Nome do Produto</th>
+                                <th class="col-img">Img</th>
+                                <th class="col-qty">Qtd</th>
+                                <th class="col-price">V. Unit</th>
+                                <th class="col-total">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let p of grupo.produtos">
+                                <td class="col-id">{{ p.id }}</td>
+                                <td class="col-name">{{ p.nome }}</td>
+                                <td class="col-img">
+                                    <button class="btn-img-mini-icon" (click)="abrirVisualizacaoImagem(p)" title="Ver Imagem">
+                                        <i class="fa fa-image"></i>
+                                    </button>
+                                </td>
+                                <td class="col-qty">
+                                    <div class="qtd-control-compact">
+                                        <button class="btn-qty-compact" (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) > 0 ? p.quantidadeSelecionada - 1 : 0">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="input-qty-compact" [(ngModel)]="p.quantidadeSelecionada" min="0">
+                                        <button class="btn-qty-compact" (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) + 1">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td class="col-price">{{ p.preco | currency:'BRL' }}</td>
+                                <td class="col-total">{{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot *ngIf="calcularQtdGrupo(grupo) > 0">
+                            <!-- Desktop View -->
+                            <tr class="modern-table-subtotal hide-mobile">
+                                <td [colSpan]="3" class="text-right">Total {{ grupo.tamanho }}cm:</td>
+                                <td class="col-qty">{{ calcularQtdGrupo(grupo) }}</td>
+                                <td class="col-price"></td>
+                                <td class="col-total">{{ calcularTotalGrupo(grupo) | currency:'BRL' }}</td>
+                            </tr>
+                            <!-- Mobile View -->
+                            <tr class="modern-table-subtotal show-mobile-only">
+                                <td [colSpan]="2" class="text-right">Total {{ grupo.tamanho }}cm:</td>
+                                <td class="col-qty">{{ calcularQtdGrupo(grupo) }} it.</td>
+                                <td class="col-price" style="text-align: right;">{{ calcularTotalGrupo(grupo) | currency:'BRL' }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="text-center py-5" *ngIf="produtosModalAgrupadosPorTamanho.length === 0">
+                <i class="fa fa-search fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Nenhum produto encontrado.</p>
+            </div>
+        </div>
+
+        <!-- Footer Area -->
+        <div class="modal-footer-modern">
+            <div class="footer-stats-modern">
+                <div class="stat-item-modern">
+                    <span class="stat-label-modern">ITENS SELECIONADOS</span>
+                    <span class="stat-value-modern">{{ calcularTotalItensModal() }}</span>
+                </div>
+                <div class="stat-item-modern">
+                    <span class="stat-label-modern">VALOR TOTAL</span>
+                    <span class="stat-value-modern gold">{{ calcularTotalSomaModal() | currency:'BRL' }}</span>
+                </div>
+            </div>
+
+            <div class="footer-btns-modern">
+                <button class="btn-modern-cancel" (click)="fecharModalProdutosAlternativo()">Cancelar</button>
+                <button class="btn-modern-primary" (click)="adicionarProdutosModalCarrinho()">
+                    <i class="fa fa-shopping-cart"></i>
+                    Adicionar no carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Frame de Aviso PDF -->
+<div class="modal-overlay" *ngIf="avisoPdf" style="z-index: 20000;">
+    <div class="modal-content" style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 5px solid #d4af37; min-width: 400px;">
+        <h2 class="cinzel-font">Gerando Catálogo</h2>
+        <p>O catálogo em PDF está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize pop-ups.</p>
+        <button class="btn-add" style="width: auto; padding: 10px 30px;" (click)="fecharAvisoPdf()">OK</button>
     </div>
 </div>
 
