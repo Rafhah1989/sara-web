@@ -428,7 +428,31 @@
 
     .modal-filters-modern {
         padding: 15px;
-        gap: 10px;
+        gap: 12px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-pills-modern {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .modern-select-wrapper {
+        width: 100%;
+    }
+
+    .modern-select-wrapper select {
+        width: 100%;
+    }
+
+    .btn-modern-filter-action {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+        padding: 0 10px;
+        font-size: 0.8rem;
     }
 
     .search-group-modern {

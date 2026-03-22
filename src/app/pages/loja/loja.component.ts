@@ -392,33 +392,47 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   abrirVisualizacaoImagem(prod: any): void {
       if (!prod) return;
 
-      // Se a imagem já estiver presente, abre direto
-      if (prod.imagem) {
-          this.imagemUrlVisualizacao = prod.imagem;
-          this.exibirVisualizacaoImagem = true;
+      const setImagem = (url: string) => {
+          this.imagemUrlVisualizacao = url;
+          // Forçamos o ciclo de detecção do Angular com setTimeout
+          setTimeout(() => {
+              this.exibirVisualizacaoImagem = true;
+          }, 0);
+      };
+
+      // 1. Se for uma string (URL direta ou base64)
+      if (typeof prod === 'string' && prod.trim().length > 0) {
+          setImagem(prod);
           return;
       }
 
-      // Se não tiver imagem, busca o produto completo pelo ID (o endpoint /ativos não traz imagem por performance)
-      this.carregando = true;
-      this.produtoService.buscarPorId(prod.id).subscribe({
-          next: (produtoCompleto) => {
-              this.carregando = false;
-              if (produtoCompleto && produtoCompleto.imagem) {
-                  this.imagemUrlVisualizacao = produtoCompleto.imagem;
-                  this.exibirVisualizacaoImagem = true;
-                  // Opcional: Atualiza o objeto no modal para não buscar novamente
-                  prod.imagem = produtoCompleto.imagem;
-              } else {
-                  this.mostrarToast('Este produto não possui imagem cadastrada.');
+      // 2. Se for um objeto com a propriedade 'imagem' preenchida
+      if (prod && prod.imagem && typeof prod.imagem === 'string') {
+          setImagem(prod.imagem);
+          return;
+      }
+
+      // 3. Se for um objeto com ID mas sem imagem, busca no servidor
+      if (prod && prod.id) {
+          this.carregando = true;
+          this.produtoService.buscarPorId(prod.id).subscribe({
+              next: (produtoCompleto) => {
+                  this.carregando = false;
+                  if (produtoCompleto && produtoCompleto.imagem) {
+                      setImagem(produtoCompleto.imagem);
+                      // Atualiza cache local
+                      prod.imagem = produtoCompleto.imagem;
+                  } else {
+                      this.mostrarToast('Este produto não possui imagem cadastrada.');
+                  }
+              },
+              error: (err) => {
+                  console.error('Erro ao buscar imagem do produto', err);
+                  this.carregando = false;
+                  this.mostrarToast('Erro ao carregar imagem.');
               }
-          },
-          error: (err) => {
-              console.error('Erro ao buscar imagem do produto', err);
-              this.carregando = false;
-              this.mostrarToast('Erro ao carregar imagem.');
-          }
-      });
+          });
+      }
   }
 
   fecharVisualizacaoImagem(): void {

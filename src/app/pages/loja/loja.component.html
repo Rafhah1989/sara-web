@@ -1,3 +1,13 @@
+<!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
+<div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
+    <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
+        <img [src]="imagemUrlVisualizacao" alt="Visualização" class="zoom-img-exclusive">
+        <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+</div>
+
 <div class="page-title-banner">
     <h1>Loja Sara</h1>
 </div>
@@ -205,7 +215,7 @@
 
         <div class="modal-body">
             <div class="sugestao-item" *ngFor="let sugestao of sugestoesTamanhos">
-                <div class="sugestao-img-container"
+                <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)" title="Clique para ampliar"
                     [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
                     <img *ngIf="sugestao.imagem" [src]="sugestao.imagem" [alt]="sugestao.nome" class="sugestao-img">
                     <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
@@ -228,12 +238,9 @@
     </div>
 </div>
 
-<!-- Modal Inclusão Alternativa (Bulk Add) -->
+<!-- Modal Moderno de Inclusão Alternativa (Bulk Add) -->
 <div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
-    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-<!-- Modal Moderno de Inclusão Alternativa -->
-<div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo">
-    <div class="modern-modal">
+    <div class="modern-modal" (click)="$event.stopPropagation()">
         <!-- Header -->
         <div class="modal-header-modern">
             <h2>Adicionar Produtos</h2>
@@ -371,13 +378,4 @@
 <div class="toast-notification" *ngIf="exibirToast">
     {{ mensagemToast }}
 </div>
-
-<!-- Modal de Visualização de Imagem (Zoom) -->
-<div class="modal-overlay zoom-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
-    <div class="modal-content-zoom zoom-modal-container" (click)="$event.stopPropagation()">
-        <img [src]="imagemUrlVisualizacao" alt="Visualização" class="zoom-modal-content">
-        <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn">
-            <i class="fa fa-times" style="font-size: 1.2rem; color: #333;"></i>
-        </button>
-    </div>
-</div>
+
