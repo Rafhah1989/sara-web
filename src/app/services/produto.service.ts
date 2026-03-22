@@ -28,7 +28,7 @@ export class ProdutoService {
         return this.http.get<Produto[]>(`${this.apiUrl}/nome/${nome}`);
     }
 
-    buscarPorCodigo(codigo: number): Observable<Produto> {
+    buscarPorCodigo(codigo: string): Observable<Produto> {
         return this.http.get<Produto>(`${this.apiUrl}/codigo/${codigo}`);
     }
 

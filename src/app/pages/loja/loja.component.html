@@ -19,9 +19,9 @@
         <aside class="loja-sidebar card hide-mobile">
             <h2>Filtros</h2>
             <div class="form-group">
-                <label>Nome do Produto</label>
+                <label>Produto</label>
                 <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
-                    placeholder="Mínimo 3 letras...">
+                    placeholder="Mínimo 3 caracteres...">
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
@@ -54,8 +54,9 @@
                 Filtros</button>
             <button class="btn-clear" style="width: 100%; margin-top: 10px;" (click)="limparFiltros()">Limpar
                 Filtros</button>
-            
-            <button class="btn-modern-secondary" style="width: 100%; margin-top: 20px;" (click)="abrirModalProdutosAlternativo()">
+
+            <button class="btn-modern-secondary" style="width: 100%; margin-top: 20px;"
+                (click)="abrirModalProdutosAlternativo()">
                 <i class="fa fa-th-list"></i> Adicionar por tabela
             </button>
         </aside>
@@ -176,7 +177,8 @@
                     </div>
 
                     <div class="card-body">
-                        <h4 class="card-title" [class.small-font]="itensPorLinha === 5">{{ product.nome }}</h4>
+                        <h4 class="card-title" [class.small-font]="itensPorLinha === 5">{{ product.nome }} (#{{
+                            product.codigo }})</h4>
                         <p class="card-size">Tamanho: {{ product.tamanho }} cm</p>
                         <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
 
@@ -215,7 +217,8 @@
 
         <div class="modal-body">
             <div class="sugestao-item" *ngFor="let sugestao of sugestoesTamanhos">
-                <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)" title="Clique para ampliar"
+                <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)"
+                    title="Clique para ampliar"
                     [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
                     <img *ngIf="sugestao.imagem" [src]="sugestao.imagem" [alt]="sugestao.nome" class="sugestao-img">
                     <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
@@ -253,9 +256,10 @@
         <div class="modal-filters-modern">
             <div class="search-group-modern">
                 <i class="fa fa-search"></i>
-                <input type="text" [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()" placeholder="Pesquisar por nome ou código...">
+                <input type="text" [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()"
+                    placeholder="Pesquisar por nome ou código...">
             </div>
-            
+
             <div class="filter-pills-modern">
                 <div class="modern-select-wrapper">
                     <select [(ngModel)]="filtroModalTamanho" (change)="filtrarProdutosModal()">
@@ -263,7 +267,8 @@
                         <option *ngFor="let t of tamanhosDisponiveisModal" [value]="t">{{ t }}cm</option>
                     </select>
                 </div>
-                <button class="btn-modern-filter-action" (click)="gerarCatalogoPdfModal()" title="Gerar catálogo em PDF">
+                <button class="btn-modern-filter-action" (click)="gerarCatalogoPdfModal()"
+                    title="Gerar catálogo em PDF">
                     <i class="fa fa-file-pdf"></i> Catálogo
                 </button>
                 <button class="btn-modern-filter-action clear" (click)="limparFiltrosModal()">
@@ -293,26 +298,31 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let p of grupo.produtos">
-                                <td class="col-id">{{ p.id }}</td>
+                                <td class="col-id">{{ p.codigo }}</td>
                                 <td class="col-name">{{ p.nome }}</td>
                                 <td class="col-img">
-                                    <button class="btn-img-mini-icon" (click)="abrirVisualizacaoImagem(p)" title="Ver Imagem">
+                                    <button class="btn-img-mini-icon" (click)="abrirVisualizacaoImagem(p)"
+                                        title="Ver Imagem">
                                         <i class="fa fa-image"></i>
                                     </button>
                                 </td>
                                 <td class="col-qty">
                                     <div class="qtd-control-compact">
-                                        <button class="btn-qty-compact" (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) > 0 ? p.quantidadeSelecionada - 1 : 0">
+                                        <button class="btn-qty-compact"
+                                            (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) > 0 ? p.quantidadeSelecionada - 1 : 0">
                                             <i class="fa fa-minus"></i>
                                         </button>
-                                        <input type="number" class="input-qty-compact" [(ngModel)]="p.quantidadeSelecionada" min="0">
-                                        <button class="btn-qty-compact" (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) + 1">
+                                        <input type="number" class="input-qty-compact"
+                                            [(ngModel)]="p.quantidadeSelecionada" min="0">
+                                        <button class="btn-qty-compact"
+                                            (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) + 1">
                                             <i class="fa fa-plus"></i>
                                         </button>
                                     </div>
                                 </td>
                                 <td class="col-price">{{ p.preco | currency:'BRL' }}</td>
-                                <td class="col-total">{{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}</td>
+                                <td class="col-total">{{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) |
+                                    currency:'BRL' }}</td>
                             </tr>
                         </tbody>
                         <tfoot *ngIf="calcularQtdGrupo(grupo) > 0">
@@ -327,7 +337,8 @@
                             <tr class="modern-table-subtotal show-mobile-only">
                                 <td [colSpan]="2" class="text-right">Total {{ grupo.tamanho }}cm:</td>
                                 <td class="col-qty">{{ calcularQtdGrupo(grupo) }} it.</td>
-                                <td class="col-price" style="text-align: right;">{{ calcularTotalGrupo(grupo) | currency:'BRL' }}</td>
+                                <td class="col-price" style="text-align: right;">{{ calcularTotalGrupo(grupo) |
+                                    currency:'BRL' }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -367,9 +378,11 @@
 
 <!-- Frame de Aviso PDF -->
 <div class="modal-overlay" *ngIf="avisoPdf" style="z-index: 20000;">
-    <div class="modal-content" style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 5px solid #d4af37; min-width: 400px;">
+    <div class="modal-content"
+        style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 5px solid #d4af37; min-width: 400px;">
         <h2 class="cinzel-font">Gerando Catálogo</h2>
-        <p>O catálogo em PDF está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize pop-ups.</p>
+        <p>O catálogo em PDF está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize
+            pop-ups.</p>
         <button class="btn-add" style="width: auto; padding: 10px 30px;" (click)="fecharAvisoPdf()">OK</button>
     </div>
 </div>
@@ -378,4 +391,3 @@
 <div class="toast-notification" *ngIf="exibirToast">
     {{ mensagemToast }}
 </div>
-

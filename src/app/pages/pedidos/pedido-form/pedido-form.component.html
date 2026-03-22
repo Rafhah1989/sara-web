@@ -117,7 +117,7 @@
                         class="form-control">
                     <div class="autocomplete-dropdown" *ngIf="showProdutosDropdown">
                         <div *ngFor="let p of produtosFiltrados" (click)="adicionarProduto(p)" class="dropdown-item">
-                            #{{ p.id }} - {{ p.nome }} ({{ p.tamanho }})
+                            #{{ p.codigo }} - {{ p.nome }} ({{ p.tamanho }})
                         </div>
                     </div>
                 </div>
@@ -297,7 +297,7 @@
                                     <tr *ngFor="let p of grupo.produtos" style="font-size: 0.85rem;">
                                         <td class="text-center hide-mobile"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
-                                            p.id }}</td>
+                                            p.codigo }}</td>
                                         <td class="text-left"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; text-align: left !important;">{{
                                             p.nome }}</td>

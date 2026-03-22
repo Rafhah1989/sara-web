@@ -31,7 +31,7 @@ export interface PedidoProduto {
     id?: number;
     produtoId: number;
     produtoNome: string;
-    produtoCodigo?: number;
+    produtoCodigo?: string;
     valor: number;
     quantidade: number;
     desconto: number;

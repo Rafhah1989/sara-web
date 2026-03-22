@@ -16,7 +16,7 @@ export interface CarrinhoResponseDTO {
   usuarioCpfCnpj: string;
   produtoId: number;
   produtoNome: string;
-  produtoCodigo: number;
+  produtoCodigo: string;
   produtoPreco: number;
   produtoImagem: string;
   produtoTamanho: number;

@@ -271,13 +271,15 @@ export class PedidoFormComponent implements OnInit {
     }
 
     filtrarProdutosModal(): void {
-        this.produtosModalFiltrados = this.produtosModal.filter(p => {
+        const termo = this.filtroModalNome?.toLowerCase() || '';
+        
+        const filtrados = this.produtosModal.filter(p => {
             let matchNome = true;
             let matchTamanho = true;
             let matchPreco = true;
 
-            if (this.filtroModalNome && this.filtroModalNome.length >= 3) {
-                matchNome = p.nome.toLowerCase().includes(this.filtroModalNome.toLowerCase());
+            if (termo && termo.length >= 3) {
+                matchNome = p.nome.toLowerCase().includes(termo) || (p.codigo?.toLowerCase().includes(termo) || false);
             }
             if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
                 matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
@@ -300,6 +302,25 @@ export class PedidoFormComponent implements OnInit {
             }
 
             return matchNome && matchTamanho && matchPreco;
+        });
+
+        // Ordenação por prioridade: Prefixo > Sufixo > Nome
+        this.produtosModalFiltrados = filtrados.sort((a, b) => {
+            if (termo && termo.length >= 3) {
+                const aCodigo = a.codigo?.toLowerCase() || '';
+                const bCodigo = b.codigo?.toLowerCase() || '';
+                
+                const aPrefix = aCodigo.startsWith(termo);
+                const bPrefix = bCodigo.startsWith(termo);
+                if (aPrefix && !bPrefix) return -1;
+                if (!aPrefix && bPrefix) return 1;
+
+                const aSuffix = aCodigo.endsWith(termo);
+                const bSuffix = bCodigo.endsWith(termo);
+                if (aSuffix && !bSuffix) return -1;
+                if (!aSuffix && bSuffix) return 1;
+            }
+            return a.nome.localeCompare(b.nome);
         });
 
         this.atualizarAgrupamentoTamanhos();
@@ -380,7 +401,7 @@ export class PedidoFormComponent implements OnInit {
                 const itemForm = this.fb.group({
                     produtoId: [p.id],
                     produtoNome: [p.nome],
-                    produtoCodigo: [p.id],
+                    produtoCodigo: [p.codigo],
                     tamanho: [p.tamanho],
                     quantidade: [{ value: p.quantidadeSelecionada, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' && !this.isAdmin }, [Validators.required, Validators.min(0.01)]],
                     valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
@@ -423,7 +444,7 @@ export class PedidoFormComponent implements OnInit {
             const itemForm = this.fb.group({
                 produtoId: [produto.id],
                 produtoNome: [produto.nome],
-                produtoCodigo: [produto.id],
+                produtoCodigo: [produto.codigo],
                 tamanho: [produto.tamanho],
                 quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' }, [Validators.required, Validators.min(0.01)]],
                 valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],

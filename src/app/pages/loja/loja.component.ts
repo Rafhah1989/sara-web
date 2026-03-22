@@ -511,8 +511,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
         const term = this.filtroModalNome.toLowerCase();
         // Filtra por NOME, ID ou CÓDIGO
         matchNome = p.nome.toLowerCase().includes(term) || 
-                   (p.id && p.id.toString().includes(term)) ||
-                   (p.codigo && p.codigo.toString().includes(term));
+                   (p.codigo && p.codigo.toLowerCase().includes(term));
       }
       if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
         matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
@@ -536,6 +535,27 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
       return matchNome && matchTamanho && matchPreco;
     });
+
+    // Ordenação por prioridade de código se houver termo de busca
+    if (this.filtroModalNome && this.filtroModalNome.trim() !== '') {
+      const term = this.filtroModalNome.toLowerCase();
+      this.produtosModalFiltrados.sort((a, b) => {
+        const aCod = a.codigo?.toLowerCase() || '';
+        const bCod = b.codigo?.toLowerCase() || '';
+
+        const aStarts = aCod.startsWith(term);
+        const bStarts = bCod.startsWith(term);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        const aEnds = aCod.endsWith(term);
+        const bEnds = bCod.endsWith(term);
+        if (aEnds && !bEnds) return -1;
+        if (!aEnds && bEnds) return 1;
+
+        return a.nome.localeCompare(b.nome);
+      });
+    }
 
     this.atualizarAgrupamentoTamanhos();
   }

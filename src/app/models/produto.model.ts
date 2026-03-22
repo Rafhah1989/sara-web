@@ -4,7 +4,7 @@ export interface Produto {
     tamanho: number;
     peso?: number;
     preco?: number;
-    codigo?: number;
+    codigo?: string;
     ativo: boolean;
     imagem: string; // Base64
     temImagem?: boolean;

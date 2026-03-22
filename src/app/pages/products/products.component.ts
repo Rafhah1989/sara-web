@@ -27,7 +27,7 @@ export class ProductsComponent implements OnInit {
     this.precoFMT = '';
     return {
       nome: '',
-      codigo: 0,
+      codigo: '',
       tamanho: 0,
       peso: 0,
       preco: undefined,
@@ -48,23 +48,18 @@ export class ProductsComponent implements OnInit {
   pesquisar(): void {
     if (this.filtroNome.trim()) {
       const termo = this.filtroNome.trim();
-      const codigo = Number(termo);
-
-      if (!isNaN(codigo)) {
-        // Busca híbrida: tenta por código, se não achar (ou em paralelo), busca por nome
-        this.produtoService.buscarPorCodigo(codigo).subscribe({
-          next: (prod) => {
-            if (prod) {
-              this.produtos = [prod];
-            } else {
-              this.buscarPorNome(termo);
-            }
-          },
-          error: () => this.buscarPorNome(termo)
-        });
-      } else {
-        this.buscarPorNome(termo);
-      }
+      
+      // Busca híbrida: tenta por código exato primeiro, se não achar, busca por nome (que agora inclui código parcial no backend)
+      this.produtoService.buscarPorCodigo(termo).subscribe({
+        next: (prod) => {
+          if (prod) {
+            this.produtos = [prod];
+          } else {
+            this.buscarPorNome(termo);
+          }
+        },
+        error: () => this.buscarPorNome(termo)
+      });
     } else {
       this.carregarProdutos();
     }

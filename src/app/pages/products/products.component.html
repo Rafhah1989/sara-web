@@ -28,8 +28,8 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="codigo">Código</label>
-                    <input type="number" id="codigo" name="codigo" [(ngModel)]="produtoAtual.codigo" required
-                        placeholder="Ex: 1234">
+                    <input type="text" id="codigo" name="codigo" [(ngModel)]="produtoAtual.codigo" required
+                        placeholder="Ex: 08101">
                 </div>
                 <div class="form-group">
                     <label for="preco">Preço (R$)</label>
@@ -99,7 +99,7 @@
                 <div *ngIf="!product.imagem" class="product-image placeholder">Sem Imagem</div>
             </div>
             <div class="product-info">
-                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo || product.id }})</small></h3>
+                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo }})</small></h3>
                 <p>Tamanho: {{ product.tamanho }} cm</p>
                 <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong>
                 </p>
@@ -140,7 +140,7 @@
                         <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome" class="product-thumb">
                         <div *ngIf="!product.imagem" class="thumb-placeholder"><i class="fa fa-image"></i></div>
                     </td>
-                    <td>#{{ product.codigo || product.id }}</td>
+                    <td>#{{ product.codigo }}</td>
                     <td class="col-nome">{{ product.nome }}</td>
                     <td>{{ product.tamanho }}cm</td>
                     <td class="col-preco">{{ product.preco | currency:'BRL' }}</td>
