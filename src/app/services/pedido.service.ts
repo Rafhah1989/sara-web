@@ -25,6 +25,7 @@ export interface Pedido {
     dataExpiracaoPix?: string;
     notaFiscalPath?: string;
     produtos?: PedidoProduto[];
+    pagamentos?: any[];
 }
 
 export interface PedidoProduto {
@@ -85,8 +86,13 @@ export class PedidoService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`, { params });
     }
 
-    alterarSituacao(id: number, situacao: string): Observable<void> {
-        return this.http.patch<void>(`${this.apiUrl}/${id}/situacao`, { situacao });
+    alterarSituacao(id: number, situacao: string, enviarEmail: boolean = false): Observable<void> {
+        let params = new HttpParams().set('enviarEmail', enviarEmail.toString());
+        return this.http.patch<void>(`${this.apiUrl}/${id}/situacao`, { situacao }, { params });
+    }
+
+    confirmar(id: number, enviarEmail: boolean, ajustarDatas: boolean = true): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/confirmar`, { enviarEmail, ajustarDatas });
     }
 
     gerarPdf(id: number): Observable<Blob> {

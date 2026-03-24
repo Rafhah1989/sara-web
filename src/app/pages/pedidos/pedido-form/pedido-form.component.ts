@@ -10,6 +10,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MetodoPagamentoAutorizado } from '../../../models/metodo-pagamento-autorizado.enum';
+import { OpcaoParcelamentoService } from '../../../services/opcao-parcelamento.service';
+import { OpcaoParcelamento } from '../../../models/opcao-parcelamento.model';
 
 @Component({
     selector: 'app-pedido-form',
@@ -33,6 +35,7 @@ export class PedidoFormComponent implements OnInit {
     descontoUsuarioAtual: number = 0;
     isAdmin: boolean = false;
     metodoPagamentoAutorizadoCliente?: MetodoPagamentoAutorizado;
+    ativarDescontoAVista: boolean = false;
 
     exibirSucesso: boolean = false;
     exibirVisualizacaoImagem: boolean = false;
@@ -40,6 +43,13 @@ export class PedidoFormComponent implements OnInit {
     avisoPdf: boolean = false;
     pendenteRedirecionamento: boolean = false;
     notaFiscalPath?: string;
+    
+    // Parcelamento
+    permitirParcelamento: boolean = false;
+    opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
+    opcaoParcelamentoSelecionada?: OpcaoParcelamento;
+    quantidadeParcelas: number = 1;
+    parcelasGeradas: { id?: number, dataVencimento: string, valor: number, valorFormatado?: string, pago: boolean, formaPagamentoId?: number }[] = [];
 
     // Modal Alternativo State
     exibirModalProdutosAlternativo: boolean = false;
@@ -62,6 +72,7 @@ export class PedidoFormComponent implements OnInit {
         private pedidoService: PedidoService,
         private usuarioService: UsuarioService,
         private authService: AuthService,
+        private opcaoParcelamentoService: OpcaoParcelamentoService,
         productService: ProdutoService,
         route: ActivatedRoute,
         router: Router
@@ -106,10 +117,8 @@ export class PedidoFormComponent implements OnInit {
                     });
                     this.pedidoForm.get('usuarioNome')?.disable();
                     this.usuarioService.buscarPorId(userId).subscribe(user => {
-                        this.metodoPagamentoAutorizadoCliente = user.metodoPagamentoAutorizado;
-                        this.verificarRegrasPagamentoOnline();
+                        this.selecionarUsuario(user);
                     });
-                    this.carregarConfiguracaoFrete(userId);
                 }
             }
         }
@@ -128,7 +137,18 @@ export class PedidoFormComponent implements OnInit {
             this.pedidoForm.get('frete')?.disable();
             this.pedidoForm.get('situacao')?.disable();
             this.pedidoForm.get('usuarioNome')?.disable();
+
+            if (this.modoEdicao) {
+                this.pedidoForm.get('formaPagamentoId')?.disable();
+                this.pedidoForm.get('pagamentoOnline')?.disable();
+            }
         }
+    }
+
+    get isPedidoBloqueadoParaUsuario(): boolean {
+        if (this.isAdmin) return false;
+        if (!this.modoEdicao) return false;
+        return this.pedidoForm.get('situacao')?.value !== 'PENDENTE';
     }
 
     carregarSituacoes(): void {
@@ -168,7 +188,11 @@ export class PedidoFormComponent implements OnInit {
             desconto: this.calcularDescontoTotal(this.pedidoForm.get('formaPagamentoId')?.value)
         }, { emitEvent: false });
         this.metodoPagamentoAutorizadoCliente = usuario.metodoPagamentoAutorizado;
+        this.permitirParcelamento = usuario.permitirParcelamento || false;
+        this.ativarDescontoAVista = usuario.ativarDescontoAVista || false;
+        this.opcoesParcelamentoAutorizadas = usuario.opcoesParcelamento || [];
         this.verificarRegrasPagamentoOnline();
+        this.atualizarOpcoesParcelamento();
         this.showUsuariosDropdown = false;
 
         // Fetch freight config regardless of mode (though in edit mode we might want to preserve existing? 
@@ -200,6 +224,152 @@ export class PedidoFormComponent implements OnInit {
         this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
         this.verificarRegrasPagamentoOnline();
         this.calcularTotais();
+        // Nota: calcularTotais já chama atualizarOpcoesParcelamento
+    }
+
+    onDescontoManualChange(): void {
+        const currentVal = this.pedidoForm.get('desconto')?.value || 0;
+        const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+        let maxForma = 0;
+        // Se estiver em 1x, o valor no input inclui o desconto da forma. 
+        // Subtraímos para obter o "Base" que será preservado ao mudar para parcelado.
+        if (formaId && Number(this.quantidadeParcelas) === 1) {
+            const fp = this.formasPagamento.find(f => f.id == formaId);
+            if (fp) maxForma = fp.desconto || 0;
+        }
+        this.descontoUsuarioAtual = currentVal - maxForma;
+        this.calcularTotais();
+    }
+
+    atualizarOpcoesParcelamento(manterParcelasExistentes: boolean = false): void {
+      if (!this.permitirParcelamento || !this.pedidoForm.get('formaPagamentoId')?.value) {
+          this.opcaoParcelamentoSelecionada = undefined;
+          this.quantidadeParcelas = 1;
+          if (!manterParcelasExistentes) {
+              this.parcelasGeradas = [];
+          }
+          return;
+      }
+
+      const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+      const op = this.opcoesParcelamentoAutorizadas.find(o => o.formaPagamentoId == formaId);
+      
+      if (op) {
+          this.opcaoParcelamentoSelecionada = op;
+          
+          // Preserva a quantidade de parcelas se ela ainda for válida no novo cenário de total
+          const disponiveis = this.opcoesParcelasDisponiveis;
+          const qtdAtual = Number(this.quantidadeParcelas);
+          if (qtdAtual > 0 && !disponiveis.includes(qtdAtual)) {
+              this.quantidadeParcelas = 1;
+          }
+
+          if (!manterParcelasExistentes || this.parcelasGeradas.length === 0) {
+              this.gerarParcelasPreview();
+          }
+      } else {
+          this.opcaoParcelamentoSelecionada = undefined;
+          this.quantidadeParcelas = 0; // Se não tem regra, fica em Selecione
+          if (!manterParcelasExistentes) {
+              this.parcelasGeradas = [];
+          }
+      }
+    }
+
+    get opcoesParcelasDisponiveis(): number[] {
+        if (!this.opcaoParcelamentoSelecionada) return [];
+        const valorTotal = this.pedidoForm.get('valorTotal')?.value || 0;
+        const result: number[] = [];
+        
+        // 1x sempre disponível
+        result.push(1);
+
+        for (let i = 2; i <= this.opcaoParcelamentoSelecionada.qtdMaxParcelas; i++) {
+            const valorParcela = valorTotal / i;
+            if (valorParcela >= (this.opcaoParcelamentoSelecionada.valorMinimoParcela || 0)) {
+                result.push(i);
+            }
+        }
+        return result;
+    }
+
+    getLabelParcela(n: number): string {
+        const valor = this.getValorParcelaPreview(n);
+        const valorFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        
+        if (n === 1) {
+            const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+            const fp = this.formasPagamento.find(f => f.id == formaId);
+            const descForma = (fp && this.ativarDescontoAVista) ? (fp.desconto || 0) : 0;
+            const suffix = descForma > 0 ? ` (-${descForma}% à vista)` : '';
+            return `À vista (1x) de ${valorFmt}${suffix}`;
+        }
+
+        if (!this.opcaoParcelamentoSelecionada) return `${n}x de ${valorFmt}`;
+
+        const interval = this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo;
+        const dias: number[] = [];
+        for (let i = 1; i <= n; i++) {
+            dias.push(i * interval);
+        }
+        
+        return `${n}x (${dias.join('/')}) de ${valorFmt}`;
+    }
+
+    onQuantidadeParcelasChange(): void {
+        this.calcularTotais();
+    }
+
+    gerarParcelasPreview(): void {
+        if (Number(this.quantidadeParcelas) === 0) return; // Não faz nada se estiver em "SELECIONE"
+
+        const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+        if (!this.opcaoParcelamentoSelecionada || !formaId) {
+            this.parcelasGeradas = [];
+            return;
+        }
+
+        const valorTotal = this.pedidoForm.get('valorTotal')?.value || 0;
+        const valorPorParcela = parseFloat((valorTotal / this.quantidadeParcelas).toFixed(2));
+        let saldo = valorTotal;
+        this.parcelasGeradas = [];
+
+        const dataBase = new Date();
+        const diaBase = dataBase.getDate();
+        // Se for parcelado (> 1x), o primeiro pagamento é após o intervalo (offset 1)
+        // Se for à vista (1x), o pagamento é hoje (offset 0)
+        const offset = Number(this.quantidadeParcelas) > 1 ? 1 : 0;
+
+        for (let i = 0; i < this.quantidadeParcelas; i++) {
+            let data = new Date(dataBase);
+            
+            if (this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo === 30) {
+                // Lógica de "mesmo dia" (Ex.: 22/04, 22/05, 22/06...)
+                data.setMonth(dataBase.getMonth() + i + offset);
+                
+                // Trata meses com menos dias que o diaBase (ex: 31/03 -> 30/04)
+                if (data.getDate() !== diaBase) {
+                    data.setDate(0); // Último dia do mês anterior
+                }
+            } else {
+                // Lógica padrão de dias corridos
+                data.setDate(data.getDate() + ((i + offset) * this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo));
+            }
+            
+            let v = valorPorParcela;
+            if (i === this.quantidadeParcelas - 1) {
+                v = parseFloat(saldo.toFixed(2));
+            }
+            saldo -= v;
+
+            this.parcelasGeradas.push({
+                dataVencimento: data.toISOString().split('T')[0],
+                valor: v,
+                valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v),
+                pago: false,
+                formaPagamentoId: formaId
+            });
+        }
     }
 
     verificarRegrasPagamentoOnline(): void {
@@ -226,13 +396,27 @@ export class PedidoFormComponent implements OnInit {
         return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
     }
 
-    calcularDescontoTotal(formaPagamentoId?: number): number {
+    getValorParcelaPreview(n: number): number {
+        const items = this.itens.getRawValue();
+        const subtotal = items.reduce((acc: number, it: any) => acc + (this.parseMoeda(it.valor) * it.quantidade), 0);
+        const frete = this.parseMoeda(this.pedidoForm.get('frete')?.value);
+        
+        const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+        const totalDescPerc = this.calcularDescontoTotal(formaId, n);
+        
+        const valorComDesconto = subtotal * (1 - (totalDescPerc / 100));
+        return (valorComDesconto + frete) / n;
+    }
+
+    calcularDescontoTotal(formaPagamentoId?: number, n?: number): number {
+        const qtdParcelas = n !== undefined ? n : Number(this.quantidadeParcelas);
         let maxForma = 0;
-        if (formaPagamentoId) {
-            const fp = this.formasPagamento.find(f => f.id === formaPagamentoId);
+        // O desconto da forma de pagamento só é aplicado se for À Vista (1 parcela) E se o usuário tiver o desconto ativo
+        if (formaPagamentoId && qtdParcelas === 1 && this.ativarDescontoAVista) {
+            const fp = this.formasPagamento.find(f => f.id == formaPagamentoId);
             if (fp) maxForma = fp.desconto || 0;
         }
-        return this.descontoUsuarioAtual + maxForma;
+        return (this.descontoUsuarioAtual || 0) + maxForma;
     }
 
     // --- Início Modal Alternativo ---
@@ -585,26 +769,72 @@ export class PedidoFormComponent implements OnInit {
         this.calcularTotais();
     }
 
-    calcularTotais(): void {
+    calcularTotais(manterParcelasExistentes: boolean = false): void {
         // Then calculate totals
         let subtotal = 0;
-        this.itens.controls.forEach(control => {
-            const qtd = control.get('quantidade')?.value || 0;
-            const valorRaw = control.get('valor')?.value;
-            const valor = this.parseMoeda(valorRaw);
+        const items = this.itens.getRawValue();
+        items.forEach((item: any, index: number) => {
+            const qtd = item.quantidade || 0;
+            const valor = this.parseMoeda(item.valor);
             const totalItem = qtd * valor;
-            control.get('total')?.setValue(totalItem, { emitEvent: false });
+            this.itens.at(index).get('total')?.setValue(totalItem, { emitEvent: false });
             subtotal += totalItem;
         });
 
-        const descontoPerc = this.pedidoForm.get('desconto')?.value || 0;
+        // Determina o desconto CORRETO baseado no plano atual (À vista vs Parcelado)
+        const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
+        const totalDescPerc = this.calcularDescontoTotal(formaId);
+        
+        // Atualiza o input de desconto visualmente para incluir o bônus de à vista
+        this.pedidoForm.get('desconto')?.setValue(totalDescPerc, { emitEvent: false });
+
         const freteRaw = this.pedidoForm.get('frete')?.value;
         const frete = this.parseMoeda(freteRaw);
 
-        const valorDesconto = subtotal * (descontoPerc / 100);
+        const valorDesconto = subtotal * (totalDescPerc / 100);
         const totalGeral = (subtotal - valorDesconto) + frete;
-
         this.pedidoForm.get('valorTotal')?.setValue(totalGeral, { emitEvent: false });
+
+        // Auto-deseleciona se a forma escolhida se tornar inválida devido a mudanças no total
+        if (formaId) {
+            const fp = this.formasPagamento.find(f => f.id == formaId);
+            if (fp && !this.isFormaPagamentoDisponivel(fp)) {
+                this.pedidoForm.get('formaPagamentoId')?.setValue(null, { emitEvent: false });
+                this.aoSelecionarFormaPagamento(null);
+            }
+        }
+        this.atualizarOpcoesParcelamento(manterParcelasExistentes);
+    }
+
+    isFormaPagamentoDisponivel(forma: any): boolean {
+        // Admins podem tudo, inclusive ignorar o mínimo configurado se necessário na edição
+        if (this.isAdmin) return true;
+
+        const valorTotal = this.pedidoForm.get('valorTotal')?.value || 0;
+        const minVista = forma.valorMinimo || 0;
+        
+        const op = this.opcoesParcelamentoAutorizadas.find(o => o.formaPagamentoId == forma.id);
+        const minParcelado = op ? (op.valorMinimoParcela * 2) : Infinity;
+
+        const menorMinimo = Math.min(minVista, minParcelado);
+        return valorTotal >= menorMinimo;
+    }
+
+    getMensagemMinimo(forma: any): string {
+        const valorTotal = this.pedidoForm.get('valorTotal')?.value || 0;
+        const minVista = forma.valorMinimo || 0;
+        
+        const op = this.opcoesParcelamentoAutorizadas.find(o => o.formaPagamentoId == forma.id);
+        const minParcelado = op ? (op.valorMinimoParcela * 2) : Infinity;
+
+        const menorMinimo = Math.min(minVista, minParcelado);
+
+        if (valorTotal < menorMinimo) {
+            const falta = menorMinimo - valorTotal;
+            const faltaFmt = falta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            return `Faltam ${faltaFmt} para o mínimo`;
+        }
+        return '';
     }
 
     carregarPedido(id: number): void {
@@ -625,18 +855,41 @@ export class PedidoFormComponent implements OnInit {
             this.notaFiscalPath = pedido.notaFiscalPath;
 
             // Pulo do gato: Para não perder o valor original e a base de cálculo. 
-            // Como a API não traz o "desconto padrão do usuário" no responseDTO do pedido, 
-            // nós assumimos que o desconto salvo já é a representação real do momento atual.
-            this.descontoUsuarioAtual = pedido.desconto || 0;
-            // E na re-seleção somaria, mas apenas se desmarcássemos.
-            // Para editar mantemos o valor salvo pelo Backend.
+            // O desconto salvo no banco para o pedido já inclui os ganhos da forma de pagamento se for à vista.
+            // Precisamos extrair o "Desconto Base" para a lógica reativa funcionar.
+            const formaId = pedido.formaPagamentoId;
+            let descontoForma = 0;
+            if (formaId && pedido.pagamentos && pedido.pagamentos.length === 1) {
+                const fp = this.formasPagamento.find(f => f.id == formaId);
+                if (fp) descontoForma = fp.desconto || 0;
+            }
+            this.descontoUsuarioAtual = (pedido.desconto || 0) - descontoForma;
             
             // Load freight config for this user to enable dynamic updates during edit
             this.carregarConfiguracaoFrete(pedido.usuarioId);
 
+            // Carrega parcelas do banco ANTES de qualquer recalculo que possa limpá-las
+            if (pedido.pagamentos && pedido.pagamentos.length > 0) {
+                this.parcelasGeradas = pedido.pagamentos.map(p => ({
+                    id: p.id,
+                    dataVencimento: p.dataVencimento.toString(),
+                    valor: p.valor,
+                    valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor),
+                    pago: p.pago,
+                    formaPagamentoId: p.formaPagamentoId
+                }));
+                setTimeout(() => {
+                    this.quantidadeParcelas = 0;
+                });
+            }
+
             this.usuarioService.buscarPorId(pedido.usuarioId).subscribe(user => {
                 this.metodoPagamentoAutorizadoCliente = user.metodoPagamentoAutorizado;
+                this.permitirParcelamento = user.permitirParcelamento || false;
+                this.ativarDescontoAVista = user.ativarDescontoAVista || false;
+                this.opcoesParcelamentoAutorizadas = user.opcoesParcelamento || [];
                 this.verificarRegrasPagamentoOnline();
+                this.atualizarOpcoesParcelamento(true);
             });
 
             pedido.produtos.sort((a, b) => {
@@ -671,18 +924,18 @@ export class PedidoFormComponent implements OnInit {
             // This race condition might cause freight to jump if calculated differs from saved.
             // But usually saved should match calculated unless rules changed.
             // For now, accept this.
-            this.calcularTotais();
+            this.calcularTotais(true);
         });
     }
 
-    salvar(): void {
+    salvar(notificar: boolean = false): void {
         if (this.pedidoForm.invalid || this.itens.length === 0) {
             alert('Preencha todos os campos obrigatórios e adicione ao menos um produto.');
             return;
         }
 
         const formValue = this.pedidoForm.getRawValue();
-        const pedidoData = {
+        const pedidoData: any = {
             usuarioId: formValue.usuarioId,
             formaPagamentoId: formValue.formaPagamentoId,
             desconto: formValue.desconto,
@@ -691,14 +944,29 @@ export class PedidoFormComponent implements OnInit {
             valorTotal: formValue.valorTotal,
             observacao: formValue.observacao,
             pagamentoOnline: formValue.pagamentoOnline || false,
+            notificar: notificar,
             produtos: formValue.itens.map((it: any) => ({
                 produtoId: it.produtoId,
                 valor: this.parseMoeda(it.valor), // Clean currency string
                 quantidade: it.quantidade,
                 desconto: 0,
                 peso: 0
-            }))
+            })),
+            pagamentos: this.parcelasGeradas.length > 0 ? this.parcelasGeradas.map(p => ({
+                id: p.id,
+                dataVencimento: p.dataVencimento,
+                valor: p.valor,
+                pago: p.pago || false,
+                formaPagamentoId: p.formaPagamentoId || formValue.formaPagamentoId
+            })) : [
+                { dataVencimento: new Date().toISOString().split('T')[0], valor: formValue.valorTotal, pago: false, formaPagamentoId: formValue.formaPagamentoId }
+            ]
         };
+
+        if (this.isPedidoBloqueadoParaUsuario) {
+            alert('Este pedido não pode ser alterado pois não está na situação PENDENTE.');
+            return;
+        }
 
         if (this.modoEdicao) {
             this.pedidoService.alterar(this.pedidoId!, pedidoData).subscribe(() => {
@@ -715,6 +983,50 @@ export class PedidoFormComponent implements OnInit {
 
     voltar(): void {
         this.router.navigate(['/pedidos']);
+    }
+
+    toggleParcelaPago(p: any): void {
+        if (!this.isAdmin && this.isPedidoBloqueadoParaUsuario) return;
+        p.pago = !p.pago;
+    }
+
+    adicionarPagamentoManual(): void {
+        const hoje = new Date().toISOString().split('T')[0];
+        const valorRestante = this.calcularValorRestantePagamentos();
+        
+        this.parcelasGeradas.push({
+            dataVencimento: hoje,
+            valor: valorRestante > 0 ? valorRestante : 0,
+            valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorRestante > 0 ? valorRestante : 0),
+            pago: false,
+            formaPagamentoId: this.pedidoForm.get('formaPagamentoId')?.value
+        });
+        this.quantidadeParcelas = this.parcelasGeradas.length;
+    }
+
+    removerPagamentoManual(index: number): void {
+        if (confirm('Deseja remover este pagamento?')) {
+            this.parcelasGeradas.splice(index, 1);
+            this.quantidadeParcelas = this.parcelasGeradas.length;
+        }
+    }
+
+    private calcularValorRestantePagamentos(): number {
+        const totalPedido = this.pedidoForm.get('valorTotal')?.value || 0;
+        const totalJaAlocado = this.parcelasGeradas.reduce((acc, p) => acc + (p.valor || 0), 0);
+        return Math.max(0, totalPedido - totalJaAlocado);
+    }
+
+    applyParcelaMoedaMask(event: any, index: number): void {
+        let value = event.target.value;
+        value = value.replace(/\D/g, '');
+        if (value === '') value = '0';
+        const valorNumerico = Number(value) / 100;
+        const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorNumerico);
+        
+        event.target.value = valorFormatado;
+        this.parcelasGeradas[index].valorFormatado = valorFormatado;
+        this.parcelasGeradas[index].valor = valorNumerico;
     }
 
     fecharAvisoPdf(): void {

@@ -7,6 +7,8 @@ import { Usuario, Role } from '../../models/usuario.model';
 import { Setor } from '../../models/setor.model';
 import { Frete } from '../../models/frete.model';
 import { MetodoPagamentoAutorizado, MetodoPagamentoAutorizadoLabels } from '../../models/metodo-pagamento-autorizado.enum';
+import { OpcaoParcelamentoService } from '../../services/opcao-parcelamento.service';
+import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
 
 @Component({
     selector: 'app-usuarios',
@@ -21,6 +23,7 @@ export class UsuariosComponent implements OnInit {
     filtroNome: string = '';
     modoEdicao: boolean = false;
     usuarioIdEmEdicao?: number;
+    todasOpcoesParcelamento: OpcaoParcelamento[] = [];
 
     showSenha: boolean = false;
     showConfirmSenha: boolean = false;
@@ -37,7 +40,8 @@ export class UsuariosComponent implements OnInit {
         private fb: FormBuilder,
         private usuarioService: UsuarioService,
         private setorService: SetorService,
-        private freteService: FreteService
+        private freteService: FreteService,
+        private opcaoParcelamentoService: OpcaoParcelamentoService
     ) {
         this.userForm = this.fb.group({
             nome: ['', [Validators.required, Validators.maxLength(100)]],
@@ -62,13 +66,24 @@ export class UsuariosComponent implements OnInit {
             role: [Role.CLIENTE, Validators.required],
             email: ['', [Validators.required, Validators.email]],
             senha: [''],
-            confirmarSenha: ['']
+            confirmarSenha: [''],
+            permitirParcelamento: [false],
+            ativarDescontoAVista: [false],
+            opcoesParcelamentoIds: [[]]
         }, { validator: this.passwordMatchValidator });
     }
 
     ngOnInit(): void {
         this.carregarUsuarios();
         this.carregarSetores();
+        this.carregarOpcoesParcelamento();
+    }
+
+    carregarOpcoesParcelamento(): void {
+        this.opcaoParcelamentoService.findAll().subscribe({
+            next: (data) => this.todasOpcoesParcelamento = data,
+            error: (err) => console.error('Erro ao listar opções de parcelamento', err)
+        });
     }
 
     carregarSetores(): void {
@@ -218,7 +233,10 @@ export class UsuariosComponent implements OnInit {
             formaPagamento: rawData.formaPagamento || null,
             modalidadeEntrega: rawData.modalidadeEntrega || null,
             setorId: rawData.setorId || null,
-            tabelaFreteId: rawData.tabelaFreteId || null
+            tabelaFreteId: rawData.tabelaFreteId || null,
+            permitirParcelamento: rawData.permitirParcelamento,
+            ativarDescontoAVista: rawData.ativarDescontoAVista,
+            opcoesParcelamentoIds: rawData.opcoesParcelamentoIds
         };
 
         if (this.modoEdicao && this.usuarioIdEmEdicao) {
@@ -257,7 +275,8 @@ export class UsuariosComponent implements OnInit {
         this.userForm.patchValue({
             ...user,
             senha: '',
-            confirmarSenha: ''
+            confirmarSenha: '',
+            opcoesParcelamentoIds: user.opcoesParcelamento ? user.opcoesParcelamento.map(o => o.id) : []
         });
         this.onSetorChange(true);
         window.scrollTo(0, 0);
@@ -286,6 +305,22 @@ export class UsuariosComponent implements OnInit {
         this.modoEdicao = false;
         this.usuarioIdEmEdicao = undefined;
         this.carregarUsuarios();
+    }
+
+    onOpcaoToggle(opcaoId: number, event: any): void {
+        const ids = this.userForm.get('opcoesParcelamentoIds')?.value as number[];
+        if (event.target.checked) {
+            if (!ids.includes(opcaoId)) {
+                this.userForm.get('opcoesParcelamentoIds')?.setValue([...ids, opcaoId]);
+            }
+        } else {
+            this.userForm.get('opcoesParcelamentoIds')?.setValue(ids.filter(id => id !== opcaoId));
+        }
+    }
+
+    isOpcaoSelected(opcaoId: number): boolean {
+        const ids = this.userForm.get('opcoesParcelamentoIds')?.value as number[];
+        return ids ? ids.includes(opcaoId) : false;
     }
 
     isInvalid(controlName: string): boolean {

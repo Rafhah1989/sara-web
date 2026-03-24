@@ -89,7 +89,7 @@
             </div>
 
             <div class="resumo-linha text-danger" *ngIf="valorDescontoCalculado > 0">
-                <span>Descontos ({{ descontoUsuario + descontoForma }}%):</span>
+                <span>Descontos ({{ getDescontoTotalExibicao() }}%):</span>
                 <span class="resumo-valor">- {{ valorDescontoCalculado | currency:'BRL':'symbol':'1.2-2' }}</span>
             </div>
 
@@ -111,25 +111,40 @@
             <div class="forma-pagamento-section mt-15">
                 <h4>Forma de Pagamento</h4>
                 <div class="radio-cards">
-                    <label class="payment-radio" *ngFor="let forma of formasPagamento">
+                    <label class="payment-radio" *ngFor="let forma of formasPagamento" [class.disabled]="!isFormaHabilitada(forma)">
                         <input type="radio" name="formaPagamento" [value]="forma.id"
-                            [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()">
+                            [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()"
+                            [disabled]="!isFormaHabilitada(forma)">
                         <div class="payment-card">
                             <i [ngClass]="forma.iconeFontAwesome"></i>
                             <span>{{ forma.descricao || forma.nome }}</span>
-                            <small *ngIf="forma.desconto > 0">(-{{ forma.desconto }}%)</small>
+                            <small *ngIf="ativarDescontoAVista && forma.desconto > 0 && isFormaHabilitada(forma)">(-{{ forma.desconto }}% à vista)</small>
+                            <span class="badget-minimo-alert" *ngIf="!isFormaHabilitada(forma)">
+                                {{ getMensagemMinimo(forma) }}
+                            </span>
                         </div>
                     </label>
                 </div>
 
-                <div class="online-payment-confirm" *ngIf="deveMostrarCampoPagamentoOnline()"
-                    style="background: #fdf8e6; padding: 12px; border-radius: 8px; border: 1px solid #d4af37; margin-top: 15px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="pagamentoOnline" [(ngModel)]="pagamentoOnline"
-                            style="width: 18px; height: 18px; cursor: pointer;">
-                        <label for="pagamentoOnline" style="margin-bottom: 0; font-weight: bold; font-size: 0.85rem; cursor: pointer;">
-                            Pagamento Online via PIX (Gerar QR Code)
-                        </label>
+                <!-- Parcelamento -->
+                <div class="installment-selection mt-15" *ngIf="permitirParcelamento && opcaoParcelamentoSelecionada">
+                    <h4>Condições de Parcelamento</h4>
+                    <div class="installment-selector-wrapper">
+                        <select class="form-select-gold" [(ngModel)]="quantidadeParcelas" (change)="gerarParcelasPreview()">
+                            <option *ngFor="let n of opcoesParcelasDisponiveis" [value]="n">
+                                {{ getLabelParcela(n) }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="installment-preview mt-10" *ngIf="quantidadeParcelas > 1">
+                        <ul class="preview-list">
+                            <li *ngFor="let p of parcelasGeradas; let i = index">
+                                <span class="parcela-label">{{ i + 1 }}ª:</span>
+                                <span class="parcela-valor">{{ p.valor | currency:'BRL' }}</span>
+                                <span class="parcela-data">Venc: {{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -193,6 +208,7 @@
                 </table>
             </div>
 
+            <!-- Resumo Financeiro -->
             <div
                 style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px; margin-top: 20px;">
                 <div class="d-flex justify-content-between mb-2">
@@ -201,7 +217,7 @@
                         currency:'BRL':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2 text-danger" *ngIf="valorDescontoCalculado > 0">
-                    <span style="font-size: 1.1rem;">Descontos:</span>
+                    <span style="font-size: 1.1rem;">Descontos ({{ getDescontoTotalExibicao() }}%):</span>
                     <span style="font-size: 1.1rem; font-weight: bold;">- {{ valorDescontoCalculado |
                         currency:'BRL':'symbol':'1.2-2' }}</span>
                 </div>
@@ -211,6 +227,20 @@
                         currency:'BRL':'symbol':'1.2-2' }}</span>
                     <span style="font-size: 1.1rem; font-weight: bold;" *ngIf="!freteSugerido">Grátis</span>
                 </div>
+
+                <!-- Plano de Parcelamento na Modal -->
+                <div *ngIf="quantidadeParcelas > 1" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <label style="font-weight: bold; color: #555; display: block; margin-bottom: 8px;">Plano de Parcelamento:</label>
+                    <div style="background: #fff; border-radius: 6px; border: 1px solid #eee; padding: 10px;">
+                        <div *ngFor="let p of parcelasGeradas; let i = index" 
+                             style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid #f9f9f9;">
+                            <span><strong>{{ i + 1 }}ª Parcela</strong></span>
+                            <span>{{ p.valor | currency:'BRL' }}</span>
+                            <span style="color: #888;">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
                 <hr style="margin: 10px 0; border-top: 1px dashed #ccc;">
                 <div class="d-flex justify-content-between">
                     <span style="font-size: 1.3rem; color: #333; font-weight: bold;">Total Geral:</span>

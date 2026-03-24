@@ -1,0 +1,242 @@
+.logs-page {
+    padding: 2rem;
+    background: #fafafa;
+    min-height: calc(100vh - 80px);
+}
+
+/* Header & Banner - Removido para usar o padrão global da Loja Sara */
+
+/* Filter Section */
+.filters-wrapper {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--primary-gold-dark);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-item label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.filter-input {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.filter-input:focus {
+    border-color: var(--primary-gold-dark);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-filter {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-search {
+    background: var(--primary-gold-dark);
+    color: white;
+    flex: 2;
+}
+
+.btn-search:hover {
+    background: #8b6d1b; /* Tom mais escuro de dourado */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-clear {
+    background: #eee;
+    color: #666;
+    flex: 1;
+}
+
+.btn-clear:hover {
+    background: #ddd;
+}
+
+/* Table Design */
+.logs-table-container {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.logs-table th {
+    background: #f8f9fa;
+    padding: 1.25rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: #333;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #eee;
+}
+
+.logs-table th.sortable {
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.logs-table th.sortable:hover {
+    background: #f0f0f0;
+}
+
+.logs-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+}
+
+.logs-table tr:hover td {
+    background: #fffdf7;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-info .name {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.2rem;
+}
+
+.user-info .doc {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Badges */
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.role-admin { background: #e3f2fd; color: #1976d2; }
+.role-cliente { background: #f3e5f5; color: #7b1fa2; }
+
+.status-sucesso { background: #e8f5e9; color: #2e7d32; }
+.status-falha { background: #ffebee; color: #c62828; }
+
+.user-agent {
+    font-size: 0.8rem;
+    color: #777;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+/* Pagination */
+.table-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #eee;
+    background: #fdfdfd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-page {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-page:hover:not(:disabled) {
+    background: var(--primary-gold-dark);
+    color: white;
+    border-color: var(--primary-gold-dark);
+}
+
+.btn-page:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: 600;
+    color: #555;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    padding: 5rem;
+    text-align: center;
+}
+
+.spinner {
+    font-size: 2.5rem;
+    color: var(--primary-gold-dark);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .logs-page { padding: 1rem; }
+    .page-title-banner h1 { font-size: 1.8rem; }
+    .filter-grid { grid-template-columns: 1fr; }
+    .hide-mobile { display: none; }
+    .logs-table th:nth-child(3), .logs-table td:nth-child(3) { display: none; }
+}

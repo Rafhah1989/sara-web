@@ -7,6 +7,7 @@ export interface FormaPagamento {
     id?: number;
     descricao: string;
     desconto: number;
+    valorMinimo: number;
     iconeFontAwesome: string;
 }
 

@@ -57,31 +57,98 @@
         <h3>{{ formaPagamentoAtual.id ? 'Editar Forma de Pagamento' : 'Nova Forma de Pagamento' }}</h3>
         
         <form (ngSubmit)="salvarFormaPagamento()">
-            <div class="form-group flex-col">
-                <label for="descricao">Nome/Descrição *</label>
-                <input type="text" id="descricao" name="descricao" [(ngModel)]="formaPagamentoAtual.descricao" required placeholder="Ex: PIX">
+            <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group flex-col">
+                    <label for="descricao">Descrição</label>
+                    <input type="text" id="descricao" name="descricao" [(ngModel)]="formaPagamentoAtual.descricao" class="gold-input" placeholder="Ex: Cartão de Crédito">
+                </div>
+                <div class="form-group flex-col">
+                    <label for="icone">Ícone FontAwesome</label>
+                    <input type="text" id="icone" name="icone" [(ngModel)]="formaPagamentoAtual.iconeFontAwesome" class="gold-input" placeholder="Ex: fa-credit-card">
+                </div>
             </div>
 
-            <div class="form-row">
+            <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group flex-col">
-                    <label for="desconto">Desconto Fixo (%)</label>
-                    <input type="number" id="desconto" name="desconto" [(ngModel)]="formaPagamentoAtual.desconto" step="0.5" min="0" placeholder="Ex: 5">
+                    <label for="desconto">Desconto (%)</label>
+                    <input type="number" id="desconto" name="desconto" [(ngModel)]="formaPagamentoAtual.desconto" step="0.01" min="0" class="gold-input" placeholder="0.00">
+                </div>
+                <div class="form-group flex-col">
+                    <label for="valorMinimo">Valor Mínimo (À Vista)</label>
+                    <input type="text" id="valorMinimo" name="valorMinimo" [value]="valorMinimoFormatado" 
+                           (input)="applyMoedaMask($event, 'valorMinimo')" placeholder="R$ 0,00" class="gold-input">
+                </div>
+            </div>
+
+            <hr class="divider" *ngIf="formaPagamentoAtual.id">
+            
+            <div class="installment-section">
+                <h3>Regras de Parcelamento</h3>
+                
+                <div class="rule-add-card">
+                    <p class="rule-entry-title">
+                        <i class="fa" [ngClass]="editandoOpcaoId ? 'fa-pencil' : 'fa-plus-circle'"></i> 
+                        {{ editandoOpcaoId ? 'Editando Regra #' + editandoOpcaoId : 'Nova Regra' }}
+                    </p>
+                    <div class="installment-form-row">
+                        <div class="form-group flex-col">
+                            <label>Máx. Parcelas</label>
+                            <input type="number" [(ngModel)]="novaOpcao.qtdMaxParcelas" name="qtdMax" min="1" max="12" class="gold-input" placeholder="Ex: 12">
+                        </div>
+                        <div class="form-group flex-col">
+                            <label>Intervalo (Dias)</label>
+                            <input type="number" [(ngModel)]="novaOpcao.diasVencimentoIntervalo" name="intervalo" min="1" class="gold-input" placeholder="Ex: 30">
+                        </div>
+                        <div class="form-group flex-col w-40">
+                            <label>Vlr. Mín. Parcela</label>
+                            <input type="text" [value]="valorMinimoParcelaFormatada" (input)="applyMoedaMask($event, 'valorMinimoParcela')" 
+                                   name="vlrMinParcela" placeholder="R$ 0,00" class="gold-input">
+                        </div>
+                    </div>
+
+                    <div class="installment-form-actions">
+                        <button type="button" class="btn-primary-gold btn-main" (click)="adicionarOpcaoParcelamento()">
+                            <i class="fa" [ngClass]="editandoOpcaoId ? 'fa-save' : 'fa-plus'"></i> 
+                            {{ editandoOpcaoId ? 'Salvar Alterações da Regra' : 'Adicionar Nova Regra' }}
+                        </button>
+                        <button type="button" class="btn-secondary-gold btn-main" *ngIf="editandoOpcaoId" (click)="cancelarEdicaoOpcao()">
+                            <i class="fa fa-times"></i> Cancelar Edição
+                        </button>
+                    </div>
                 </div>
 
-                <div class="form-group flex-col">
-                    <label for="icone">Classe Font-Awesome Opcional</label>
-                    <div class="input-icon-wrapper">
-                        <input type="text" id="icone" name="icone" [(ngModel)]="formaPagamentoAtual.iconeFontAwesome" placeholder="Ex: fa-brands fa-pix">
-                        <div class="real-time-preview">
-                            <i [ngClass]="formaPagamentoAtual.iconeFontAwesome" class="fa-2x text-primary" [title]="'Preview Atual' "></i>
+                <div class="rules-container">
+                    <div class="rules-grid">
+                        <div class="rule-card-mini" *ngFor="let opt of opcoesParcelamento">
+                            <div class="rule-info">
+                                <span class="rule-installments">{{ opt.qtdMaxParcelas }}x</span>
+                                <span class="rule-interval">{{ opt.diasVencimentoIntervalo }} dias</span>
+                                <span class="rule-min-value" *ngIf="opt.valorMinimoParcela > 0">
+                                    Min: {{ opt.valorMinimoParcela | currency:'BRL' }}
+                                </span>
+                            </div>
+                            <div class="rule-actions">
+                                <button type="button" class="btn-icon btn-edit" (click)="prepararEdicaoOpcao(opt)">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button type="button" class="btn-icon btn-delete" (click)="removerOpcaoParcelamento(opt.id!)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="empty-rules" *ngIf="opcoesParcelamento.length === 0">
+                        <i class="fa fa-info-circle"></i> Nenhuma regra definida
                     </div>
                 </div>
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn-secondary" (click)="fecharModal()">Cancelar</button>
-                <button type="submit" class="btn-primary" [disabled]="!formaPagamentoAtual.descricao">Salvar</button>
+                <button type="button" class="btn-secondary-gold" (click)="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn-primary-gold" [disabled]="!formaPagamentoAtual.descricao">
+                    {{ formaPagamentoAtual.id ? 'Salvar Alterações' : 'Criar Forma de Pagamento' }}
+                </button>
             </div>
         </form>
     </div>

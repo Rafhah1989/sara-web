@@ -153,7 +153,7 @@
                                 <i class="fa fa-file-pdf"></i>
                             </button>
                             <button class="btn-action btn-pix" title="Visualizar PIX"
-                                *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)">
+                                *ngIf="!pedido.pago && pedido.pagamentoOnline && (isAdmin || pedido.situacao !== 'PENDENTE')" (click)="visualizarPix(pedido.id)">
                                 <i class="fa fa-qrcode"></i>
                             </button>
                             <button class="btn-action btn-sync" title="Sincronizar Mercado Pago"
@@ -187,7 +187,7 @@
                             </button>
                             <div class="actions-menu" *ngIf="itemMenuAberto === pedido.id">
                                 <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF</button>
-                                <button *ngIf="!pedido.pago && pedido.pagamentoOnline" (click)="visualizarPix(pedido.id)"><i class="fa fa-qrcode"></i> PIX</button>
+                                <button *ngIf="!pedido.pago && pedido.pagamentoOnline && (isAdmin || pedido.situacao !== 'PENDENTE')" (click)="visualizarPix(pedido.id)"><i class="fa fa-qrcode"></i> PIX</button>
                                 <button *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)"><i class="fa fa-sync"></i> Sync MP</button>
                                 <button (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado"><i class="fa fa-pencil-alt"></i> Detalhes</button>
                                 <button *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))" 
@@ -344,6 +344,34 @@
                 <button class="btn-modal btn-modal-back" style="width: 100%;" (click)="fecharModalNotaFiscal()"
                     [disabled]="uploadingNotaFiscal">Fechar</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Pedido (ADMIN) -->
+<div class="modal-overlay" *ngIf="exibirModalConfirmacao">
+    <div class="modal-container" style="max-width: 500px;">
+        <h2 class="cinzel-font" style="margin-bottom: 20px; color: #d4af37;">Confirmar Pedido #{{ pedidoParaConfirmar?.id }}</h2>
+        <p style="margin-bottom: 20px; font-weight: 500;">Você está alterando a situação deste pedido para <strong>CONFIRMADO</strong>.</p>
+        
+        <div style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37; margin-bottom: 25px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="chkEnviarEmail" [(ngModel)]="enviarEmailConfirmacao"
+                    style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="chkEnviarEmail" style="cursor: pointer; font-weight: bold; color: #333; margin: 0;">
+                    Enviar e-mail de confirmação ao cliente
+                </label>
+            </div>
+            <p style="margin: 8px 0 0 30px; font-size: 0.85rem; color: #666;">
+                O cliente receberá um e-mail com os detalhes do pedido e as instruções de pagamento.
+            </p>
+        </div>
+
+        <div class="d-flex justify-content-end" style="gap: 15px;">
+            <button class="btn-modal btn-modal-back" (click)="fecharModalConfirmacao()">Voltar</button>
+            <button class="btn-modal" style="background: var(--primary-gold); color: white;" (click)="confirmarPedido()">
+                <i class="fa fa-check"></i> Confirmar Pedido
+            </button>
         </div>
     </div>
 </div>

@@ -31,6 +31,7 @@ import { FormaPagamentoComponent } from './pages/forma-pagamento/forma-pagamento
 import { ConfiguracaoComponent } from './pages/configuracao/configuracao.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
+import { LogsComponent } from './pages/logs/logs.component';
 
 registerLocaleData(localePt);
 
@@ -51,6 +52,7 @@ const routes: Routes = [
   { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
   { path: 'pedidos/pix/:id', component: PixPaymentComponent, canActivate: [AuthGuard] },
+  { path: 'logs', component: LogsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: '**', redirectTo: '' }
 ];
 
@@ -75,7 +77,8 @@ const routes: Routes = [
     ConfiguracaoComponent,
     ResetPasswordComponent,
     ForgotPasswordComponent,
-    PixPaymentComponent
+    PixPaymentComponent,
+    LogsComponent
   ],
   imports: [
     BrowserModule,

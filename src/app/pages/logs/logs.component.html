@@ -1,0 +1,124 @@
+<div class="page-title-banner">
+    <h1>Logs de Acesso</h1>
+</div>
+
+<section class="logs-page">
+    <!-- Filtros Modernos -->
+    <div class="container">
+        <div class="filters-wrapper">
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label>Filtrar Usuário</label>
+                    <input type="text" class="filter-input" [(ngModel)]="filtroUsuario" (keyup.enter)="currentPage = 0; carregarLogs()" placeholder="Nome ou CPF/CNPJ...">
+                </div>
+                
+                <div class="filter-item">
+                    <label>Perfil do Usuário</label>
+                    <select class="filter-input" [(ngModel)]="filtroRole">
+                        <option value="">TODOS OS PERFIS</option>
+                        <option value="CLIENTE">CLIENTE</option>
+                        <option value="ADMIN">ADMINISTRADOR</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Período Inicial</label>
+                    <input type="date" class="filter-input" [(ngModel)]="dataInicio">
+                </div>
+
+                <div class="filter-item">
+                    <label>Período Final</label>
+                    <input type="date" class="filter-input" [(ngModel)]="dataFim" (change)="currentPage = 0; carregarLogs()">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn-filter btn-search" (click)="currentPage = 0; carregarLogs()">
+                        <i class="fa fa-sync-alt" [class.fa-spin]="carregando"></i>
+                        <span>Aplicar</span>
+                    </button>
+                    <button type="button" class="btn-filter btn-clear" (click)="limparFiltros()">
+                        <i class="fa fa-eraser"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Logs -->
+        <div class="logs-table-container shadow-card">
+            <div *ngIf="carregando" class="loading-overlay">
+                <i class="fa fa-spinner fa-spin spinner"></i>
+                <p>Buscando registros...</p>
+            </div>
+
+            <table class="logs-table" *ngIf="!carregando">
+                <thead>
+                    <tr>
+                        <th class="sortable" (click)="alterarOrdenacao('dataHora')">
+                            Data e Hora 
+                            <i class="fa" [ngClass]="sortField === 'dataHora' ? (sortDir === 'ASC' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort text-muted'"></i>
+                        </th>
+                        <th class="sortable" (click)="alterarOrdenacao('usuario.nome')">
+                            Usuário 
+                            <i class="fa" [ngClass]="sortField === 'usuario.nome' ? (sortDir === 'ASC' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort text-muted'"></i>
+                        </th>
+                        <th class="hide-mobile">Perfil</th>
+                        <th>Status</th>
+                        <th class="hide-mobile">Dispositivo / Navegador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of logs">
+                        <td>
+                            <strong>{{ log.dataHora | date:'dd/MM/yyyy' }}</strong><br>
+                            <small>{{ log.dataHora | date:'HH:mm:ss' }}</small>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <span class="name">{{ log.usuarioNome }}</span>
+                                <span class="doc">{{ log.usuarioCpfCnpj }}</span>
+                            </div>
+                        </td>
+                        <td class="hide-mobile">
+                            <span class="badge" [ngClass]="log.usuarioRole === 'ADMIN' ? 'role-admin' : 'role-cliente'">
+                                {{ log.usuarioRole === 'ADMIN' ? 'ADMIN' : 'CLIENTE' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="log.status === 'SUCESSO' ? 'status-sucesso' : 'status-falha'">
+                                {{ log.status }}
+                            </span>
+                        </td>
+                        <td class="hide-mobile">
+                            <span class="user-agent" [title]="log.userAgent">{{ log.userAgent }}</span>
+                        </td>
+                    </tr>
+                    
+                    <tr *ngIf="logs.length === 0">
+                        <td colspan="5" class="text-center py-5">
+                            <i class="fa fa-search fa-3x" style="opacity: 0.1; display: block; margin-bottom: 1rem;"></i>
+                            Nenhum registro encontrado para este filtro.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer" *ngIf="logs.length > 0">
+                <div class="total-info">
+                    Exibindo {{ logs.length }} de {{ totalItems }} registros
+                </div>
+                
+                <div class="pagination-controls">
+                    <button class="btn-page" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                    
+                    <span class="page-info">Página {{ currentPage + 1 }}</span>
+                    
+                    <button class="btn-page" (click)="onPageChange(currentPage + 1)" [disabled]="(currentPage + 1) * pageSize >= totalItems">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

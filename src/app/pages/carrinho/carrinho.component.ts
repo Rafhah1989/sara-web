@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
 import { Router } from '@angular/router';
 import { MetodoPagamentoAutorizado } from '../../models/metodo-pagamento-autorizado.enum';
+import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
 
 @Component({
   selector: 'app-carrinho',
@@ -28,6 +29,13 @@ export class CarrinhoComponent implements OnInit {
   valorTotalGeral: number = 0;
   pagamentoOnline: boolean = false;
   metodoPagamentoAutorizadoCliente?: MetodoPagamentoAutorizado;
+  ativarDescontoAVista: boolean = false;
+  
+  permitirParcelamento: boolean = false;
+  opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
+  opcaoParcelamentoSelecionada?: OpcaoParcelamento;
+  quantidadeParcelas: number = 1;
+  parcelasGeradas: { dataVencimento: string, valor: number, pago: boolean }[] = [];
 
   exibirModalLimpar: boolean = false;
   exibirModalGerarPedido: boolean = false;
@@ -63,6 +71,9 @@ export class CarrinhoComponent implements OnInit {
     this.usuarioService.buscarPorId(usuarioId).subscribe(usuario => {
         this.descontoUsuario = usuario.desconto || 0;
         this.metodoPagamentoAutorizadoCliente = usuario.metodoPagamentoAutorizado;
+        this.permitirParcelamento = usuario.permitirParcelamento || false;
+        this.ativarDescontoAVista = usuario.ativarDescontoAVista || false;
+        this.opcoesParcelamentoAutorizadas = usuario.opcoesParcelamento || [];
         this.carregarCarrinho(usuarioId);
         this.verificarRegrasPagamentoOnline();
     });
@@ -132,10 +143,51 @@ export class CarrinhoComponent implements OnInit {
         this.freteSugerido = freteCalculado;
     }
 
-    const descontoTotalPerc = this.descontoUsuario + this.descontoForma;
+    // O desconto da forma de pagamento só é aplicado se for À Vista (1 parcela) E se o usuário tiver o desconto ativo
+    const descFormaAplicado = (Number(this.quantidadeParcelas) === 1 && this.ativarDescontoAVista) ? this.descontoForma : 0;
+    const descontoTotalPerc = this.descontoUsuario + descFormaAplicado;
     this.valorDescontoCalculado = this.valorSubtotal * (descontoTotalPerc / 100);
     
     this.valorTotalGeral = (this.valorSubtotal - this.valorDescontoCalculado) + this.freteSugerido;
+    
+    // Auto-deseleciona se a forma escolhida se tornar inválida devido a mudanças no total
+    if (this.formaPagamentoSelecionada) {
+        const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+        if (fp && !this.isFormaHabilitada(fp)) {
+            this.formaPagamentoSelecionada = undefined;
+            this.descontoForma = 0;
+            this.atualizarOpcoesParcelamento();
+        }
+    }
+  }
+
+  isFormaHabilitada(forma: any): boolean {
+    const minVista = forma.valorMinimo || 0;
+    const op = this.opcoesParcelamentoAutorizadas.find(o => o.formaPagamentoId == forma.id);
+    const minParcelado = op ? (op.valorMinimoParcela * 2) : Infinity;
+
+    const menorMinimo = Math.min(minVista, minParcelado);
+    return this.valorTotalGeral >= menorMinimo;
+  }
+
+  getDescontoTotalExibicao(): number {
+    const descFormaAplicado = (Number(this.quantidadeParcelas) === 1 && this.ativarDescontoAVista) ? this.descontoForma : 0;
+    return this.descontoUsuario + descFormaAplicado;
+  }
+
+  getMensagemMinimo(forma: any): string {
+    const minVista = forma.valorMinimo || 0;
+    const op = this.opcoesParcelamentoAutorizadas.find(o => o.formaPagamentoId == forma.id);
+    const minParcelado = op ? (op.valorMinimoParcela * 2) : Infinity;
+
+    const menorMinimo = Math.min(minVista, minParcelado);
+
+    if (this.valorTotalGeral < menorMinimo) {
+        const falta = menorMinimo - this.valorTotalGeral;
+        const faltaFmt = falta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        return `Faltam ${faltaFmt} para o mínimo`;
+    }
+    return '';
   }
 
   aoSelecionarFormaPagamento(): void {
@@ -147,6 +199,133 @@ export class CarrinhoComponent implements OnInit {
       }
       this.verificarRegrasPagamentoOnline();
       this.calcularTotais();
+      this.atualizarOpcoesParcelamento();
+  }
+
+  atualizarOpcoesParcelamento(): void {
+      if (!this.permitirParcelamento || !this.formaPagamentoSelecionada) {
+          this.opcaoParcelamentoSelecionada = undefined;
+          this.quantidadeParcelas = 1;
+          this.parcelasGeradas = [];
+          return;
+      }
+
+      const opcoesFiltradas = this.opcoesParcelamentoAutorizadas.filter(o => o.formaPagamentoId == this.formaPagamentoSelecionada);
+      
+      if (opcoesFiltradas.length > 0) {
+          this.opcaoParcelamentoSelecionada = opcoesFiltradas[0]; // Pega a primeira regra disponível
+          this.quantidadeParcelas = 1; // Reseta para 1x ao mudar forma de pagamento
+          this.gerarParcelasPreview();
+      } else {
+          this.opcaoParcelamentoSelecionada = undefined;
+          this.quantidadeParcelas = 1;
+          this.parcelasGeradas = [];
+      }
+  }
+
+  get opcoesParcelasDisponiveis(): number[] {
+    if (!this.opcaoParcelamentoSelecionada) return [1];
+    
+    // Total a considerar para o parcelamento (sem o desconto de à vista)
+    const totalBase = (this.valorSubtotal - (this.valorSubtotal * (this.descontoUsuario / 100))) + this.freteSugerido;
+    const result: number[] = [1];
+    
+    const max = this.opcaoParcelamentoSelecionada.qtdMaxParcelas || 1;
+    const minParcela = this.opcaoParcelamentoSelecionada.valorMinimoParcela || 0;
+
+    for (let i = 2; i <= max; i++) {
+        if ((totalBase / i) >= minParcela) {
+            result.push(i);
+        }
+    }
+    return result;
+  }
+
+  getValorParcelaPreview(n: number): number {
+    let descontoTotalPerc = this.descontoUsuario;
+    
+    // Se for à vista (1x), incluímos o desconto da forma de pagamento se houver e se o usuário tiver o desconto ativo
+    if (n === 1 && this.formaPagamentoSelecionada && this.ativarDescontoAVista) {
+        const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+        if (fp) {
+            descontoTotalPerc += (fp.desconto || 0);
+        }
+    }
+    
+    const valorComDesconto = this.valorSubtotal * (1 - (descontoTotalPerc / 100));
+    return (valorComDesconto + this.freteSugerido) / n;
+  }
+
+  getLabelParcela(n: number): string {
+    const valor = this.getValorParcelaPreview(n);
+    const valorFmt = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    if (n === 1) {
+        const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+        const descForma = (fp && this.ativarDescontoAVista) ? (fp.desconto || 0) : 0;
+        const suffix = descForma > 0 ? ` (-${descForma}% à vista)` : '';
+        return `À vista (1x) de ${valorFmt}${suffix}`;
+    }
+
+    if (!this.opcaoParcelamentoSelecionada) {
+        return `${n}x de ${valorFmt}`;
+    }
+
+    const intervalos = [];
+    const dias = this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo;
+    for (let i = 1; i <= n; i++) {
+        intervalos.push(i * dias);
+    }
+    
+    return `${n}x (${intervalos.join('/')}) de ${valorFmt}`;
+  }
+
+  gerarParcelasPreview(): void {
+      if (!this.opcaoParcelamentoSelecionada || this.quantidadeParcelas < 1) {
+          this.parcelasGeradas = [];
+          return;
+      }
+
+      // Se mudou a quantidade de parcelas, o desconto pode mudar
+      this.calcularTotais();
+
+      const valorPorParcela = parseFloat((this.valorTotalGeral / this.quantidadeParcelas).toFixed(2));
+      let saldo = this.valorTotalGeral;
+      this.parcelasGeradas = [];
+
+      const dataBase = new Date();
+      const diaBase = dataBase.getDate();
+      // Se for parcelado (> 1x), o primeiro pagamento é após o intervalo (offset 1)
+      // Se for à vista (1x), o pagamento é hoje (offset 0)
+      const offset = Number(this.quantidadeParcelas) > 1 ? 1 : 0;
+
+      for (let i = 0; i < this.quantidadeParcelas; i++) {
+          let data = new Date(dataBase);
+          
+          if (this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo === 30) {
+              // Lógica de "mesmo dia" (Ex.: 22/04, 22/05, 22/06...)
+              data.setMonth(dataBase.getMonth() + i + offset);
+              
+              if (data.getDate() !== diaBase) {
+                  data.setDate(0); // Último dia do mês anterior
+              }
+          } else {
+              // Lógica padrão de dias corridos
+              data.setDate(data.getDate() + ((i + offset) * this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo));
+          }
+          
+          let v = valorPorParcela;
+          if (i === this.quantidadeParcelas - 1) {
+              v = parseFloat(saldo.toFixed(2));
+          }
+          saldo -= v;
+
+          this.parcelasGeradas.push({
+              dataVencimento: data.toISOString().split('T')[0],
+              valor: v,
+              pago: false
+          });
+      }
   }
 
   verificarRegrasPagamentoOnline(): void {
@@ -268,7 +447,10 @@ export class CarrinhoComponent implements OnInit {
               produtoId: item.produtoId,
               quantidade: item.quantidade,
               valor: item.produtoPreco
-          }))
+          })),
+          pagamentos: this.parcelasGeradas.length > 0 ? this.parcelasGeradas : [
+              { dataVencimento: new Date().toISOString().split('T')[0], valor: this.valorTotalGeral, pago: false }
+          ]
       };
 
       this.pedidoService.salvar(novoPedido).subscribe({

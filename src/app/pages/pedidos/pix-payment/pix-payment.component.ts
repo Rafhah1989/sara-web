@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PedidoService } from '../../../services/pedido.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-pix-payment',
@@ -18,14 +19,18 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   timer: any;
   dataExpiracao: Date | null = null;
   loadingGeracao: boolean = false;
+  erroSituacaoPendente: boolean = false;
+  isAdmin: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private pedidoService: PedidoService
+    private pedidoService: PedidoService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.pedidoId = +id;
@@ -42,6 +47,11 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     
     this.pedidoService.buscarPorId(this.pedidoId).subscribe({
       next: (pedido) => {
+        if (!this.isAdmin && pedido.situacao === 'PENDENTE') {
+          this.erroSituacaoPendente = true;
+          this.loading = false;
+          return;
+        }
         if (pedido.dataExpiracaoPix) {
           this.dataExpiracao = new Date(pedido.dataExpiracaoPix);
           if (this.dataExpiracao < new Date() && !pedido.pago) {

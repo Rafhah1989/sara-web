@@ -67,9 +67,17 @@
 
 .card-price {
     font-size: 1.1rem;
-    font-weight: bold;
+    font-weight: 700;
     color: var(--color-primary-dark);
+    margin-bottom: 12px;
+}
+
+.card-installment {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: -8px;
     margin-bottom: 15px;
+    font-weight: 500;
 }
 
 .card-actions {

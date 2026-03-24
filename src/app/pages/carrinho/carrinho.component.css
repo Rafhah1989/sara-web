@@ -33,6 +33,24 @@
     color: #666;
 }
 
+.payment-radio.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.payment-radio.disabled .payment-card {
+    border-color: #eee;
+    background: #fafafa;
+}
+
+.badget-minimo-alert {
+    display: block;
+    font-size: 0.75rem;
+    color: #cc0000;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
 .payment-radio input:checked + .payment-card {
     border-color: var(--primary-color);
     background-color: #f7f1e3;
@@ -565,3 +583,59 @@
         font-size: 1.5rem;
     }
 }
+/* ================== INSTALLMENTS ================== */
+.installment-selection h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.form-select-gold {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.preview-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.preview-list li:last-child {
+    border-bottom: none;
+}
+
+.parcela-label {
+    font-weight: bold;
+    color: #666;
+    width: 40px;
+}
+
+.parcela-valor {
+    color: var(--primary-color);
+    font-weight: bold;
+    flex: 1;
+    margin: 0 10px;
+}
+
+.parcela-data {
+    color: #888;
+}
+
+.mt-10 { margin-top: 10px; }

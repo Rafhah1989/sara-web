@@ -6,16 +6,32 @@
         <h1 class="cinzel-font color-primary-gold-dark">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}
         </h1>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn btn-info text-white" *ngIf="modoEdicao && notaFiscalPath" (click)="visualizarNotaFiscal()">
+            <button type="button" class="btn btn-info text-white" *ngIf="modoEdicao && notaFiscalPath"
+                (click)="visualizarNotaFiscal()">
                 <i class="fa fa-file-invoice"></i> Ver Nota Fiscal
             </button>
+        </div>
+    </div>
+
+    <!-- Alerta de Pedido Bloqueado -->
+    <div class="alert alert-warning mb-4 shadow-sm" *ngIf="isPedidoBloqueadoParaUsuario"
+        style="border-left: 5px solid #ffc107; background: #fff3cd; border-radius: 8px; margin: 20px 0;">
+        <div style="display: flex; align-items: center; gap: 15px; padding: 15px;">
+            <i class="fa fa-lock fa-2x" style="color: #856404;"></i>
+            <div>
+                <strong style="font-size: 1.1rem; display: block; margin-bottom: 5px; color: #856404;">Pedido em Modo de
+                    Visualização</strong>
+                <p style="margin: 0; color: #856404;">Este pedido já foi <strong>{{ pedidoForm.get('situacao')?.value
+                        }}</strong> e não pode ser alterado. Se precisar alterar, entre em contato com o atendimento.
+                </p>
+            </div>
         </div>
     </div>
 
     <form [formGroup]="pedidoForm" (ngSubmit)="salvar()" class="pedido-form">
 
         <!-- Dados do Pedido -->
-        <fieldset class="form-section">
+        <fieldset class="form-section" [disabled]="isPedidoBloqueadoParaUsuario">
             <legend>Dados do Pedido</legend>
 
             <div class="form-row">
@@ -37,7 +53,8 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Desconto (%)</label>
-                    <input type="number" formControlName="desconto" (input)="calcularTotais()" placeholder="0.00">
+                    <input type="number" formControlName="desconto" (input)="onDescontoManualChange()"
+                        placeholder="0.00">
                 </div>
 
                 <div class="form-group">
@@ -68,38 +85,153 @@
                 <div class="form-group" style="flex: 100%;">
                     <label>Forma de Pagamento</label>
                     <div class="payment-options">
-                        <label class="payment-radio" *ngFor="let forma of formasPagamento">
-                            <input type="radio" formControlName="formaPagamentoId" [value]="forma.id"
-                                (change)="aoSelecionarFormaPagamento(forma.id)">
-                            <div class="payment-card">
-                                <i [ngClass]="forma.iconeFontAwesome"></i>
-                                <span>{{ forma.descricao }}</span>
-                                <small *ngIf="forma.desconto > 0">(-{{ forma.desconto }}%)</small>
-                            </div>
-                        </label>
+                        <ng-container *ngFor="let forma of formasPagamento">
+                            <label class="payment-radio" [class.disabled]="!isFormaPagamentoDisponivel(forma)">
+                                <input type="radio" formControlName="formaPagamentoId" [value]="forma.id"
+                                    (change)="aoSelecionarFormaPagamento(forma.id)"
+                                    [disabled]="!isFormaPagamentoDisponivel(forma)">
+                                <div class="payment-card">
+                                    <i [ngClass]="forma.iconeFontAwesome"></i>
+                                    <span>{{ forma.descricao || forma.nome }}</span>
+                                    <small
+                                        *ngIf="ativarDescontoAVista && forma.desconto > 0 && isFormaPagamentoDisponivel(forma)">(-{{
+                                        forma.desconto }}% à vista)</small>
+                                    <span class="badget-minimo-alert" *ngIf="!isFormaPagamentoDisponivel(forma)">
+                                        {{ getMensagemMinimo(forma) }}
+                                    </span>
+                                </div>
+                            </label>
+                        </ng-container>
                     </div>
                 </div>
             </div>
 
             <div class="form-row" *ngIf="deveMostrarCampoPagamentoOnline()" style="margin-top: 20px;">
                 <div class="form-group" style="flex: 100%;">
-                    <div class="online-payment-confirm" style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
+                    <div class="online-payment-confirm"
+                        style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline" style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
-                            <label for="pagamentoOnline" style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
+                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline"
+                                style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                            <label for="pagamentoOnline"
+                                style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
                                 Pagamento Online via PIX (Gerar QR Code)
                             </label>
                         </div>
                         <p style="margin: 8px 0 0 30px; font-size: 0.9rem; color: #666;">
-                            Ao marcar esta opção, o QR Code para pagamento será gerado imediatamente após salvar o pedido.
+                            Ao marcar esta opção, o QR Code para pagamento será gerado imediatamente após salvar o
+                            pedido.
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parcelamento -->
+            <div class="form-row"
+                *ngIf="(permitirParcelamento && (opcaoParcelamentoSelecionada || parcelasGeradas.length > 0)) || parcelasGeradas.length > 0"
+                style="margin-top: 20px;">
+                <div class="form-group" style="flex: 100%;">
+                    <div class="installment-box"
+                        style="border: 2px solid var(--primary-color); border-radius: 8px; padding: 15px; background: #fff;">
+                        <label
+                            style="font-weight: bold; color: var(--primary-color); font-size: 1.1rem; margin-bottom: 15px; display: block;">
+                            <i class="fa fa-credit-card"></i> Plano de Parcelamento Autorizado
+                        </label>
+
+                        <div class="installment-selector" *ngIf="opcaoParcelamentoSelecionada"
+                            style="margin-bottom: 15px;">
+                            <select class="form-select-gold" [(ngModel)]="quantidadeParcelas"
+                                [ngModelOptions]="{standalone: true}" (change)="onQuantidadeParcelasChange()"
+                                [disabled]="isPedidoBloqueadoParaUsuario">
+                                <option [ngValue]="0" *ngIf="modoEdicao">SELECIONE</option>
+                                <option *ngFor="let n of opcoesParcelasDisponiveis" [value]="n">
+                                    {{ getLabelParcela(n) }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="installment-table-preview" *ngIf="parcelasGeradas.length > 0">
+                            <table class="table table-sm table-borderless mb-0">
+                                <thead style="background: #fdf8e6; color: var(--primary-gold-dark);">
+                                    <tr>
+                                        <th>Parcela</th>
+                                        <th>Valor</th>
+                                        <th>Vencimento</th>
+                                        <th>Forma</th>
+                                        <th>Status</th>
+                                        <th *ngIf="isAdmin" style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of parcelasGeradas; let i = index">
+                                        <td><strong>{{ i + 1 }}ª</strong></td>
+                                        <td>
+                                            <input type="text" [(ngModel)]="p.valorFormatado"
+                                                [ngModelOptions]="{standalone: true}"
+                                                (input)="applyParcelaMoedaMask($event, i)" [disabled]="!isAdmin"
+                                                class="form-control form-control-sm"
+                                                style="width: 110px; display: inline-block; font-weight: bold; color: var(--primary-color);">
+                                        </td>
+                                        <td>
+                                            <input type="date" [(ngModel)]="p.dataVencimento"
+                                                [ngModelOptions]="{standalone: true}"
+                                                class="form-control form-control-sm" *ngIf="isAdmin"
+                                                style="width: 135px; display: inline-block;">
+                                            <span *ngIf="!isAdmin">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                                        </td>
+                                        <td>
+                                            <select [(ngModel)]="p.formaPagamentoId"
+                                                [ngModelOptions]="{standalone: true}" *ngIf="isAdmin"
+                                                class="form-select-gold-sm" style="width: 130px;">
+                                                <option *ngFor="let forma of formasPagamento" [value]="forma.id">{{
+                                                    forma.descricao }}</option>
+                                            </select>
+                                            <span *ngFor="let f of formasPagamento">
+                                                <span *ngIf="!isAdmin && f.id == p.formaPagamentoId">{{ f.descricao
+                                                    }}</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="badge"
+                                                [ngClass]="p.pago ? 'badge-success' : 'badge-warning'" *ngIf="isAdmin"
+                                                style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; border: none; cursor: pointer; min-width: 80px;"
+                                                (click)="toggleParcelaPago(p)">
+                                                {{ p.pago ? 'PAGO' : 'PENDENTE' }}
+                                            </button>
+                                            <span class="badge" [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
+                                                *ngIf="!isAdmin"
+                                                style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-block; min-width: 80px; text-align: center;">
+                                                {{ p.pago ? 'PAGO' : 'PENDENTE' }}
+                                            </span>
+                                        </td>
+                                        <td *ngIf="isAdmin">
+                                            <button type="button" class="btn-remove-parc"
+                                                (click)="removerPagamentoManual(i)" title="Remover Pagamento">
+                                                <i class="fa fa-times-circle"
+                                                    style="color: #dc3545; font-size: 1.2rem;"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot *ngIf="isAdmin">
+                                    <tr>
+                                        <td colspan="6" style="padding-top: 15px;">
+                                            <button type="button" class="btn btn-outline-gold btn-sm"
+                                                (click)="adicionarPagamentoManual()">
+                                                <i class="fa fa-plus-circle"></i> Adicionar Pagamento
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </fieldset>
 
         <!-- Itens do Pedido -->
-        <fieldset class="form-section">
+        <fieldset class="form-section" [disabled]="isPedidoBloqueadoParaUsuario">
             <legend>Itens do Pedido</legend>
 
             <div class="mb-5 mt-3 text-right">
@@ -152,7 +284,8 @@
                                         [disabled]="(item.get('quantidade')?.value || 1) <= 1">-</button>
                                     <input type="number" formControlName="quantidade" (input)="onItemChange()"
                                         class="form-control small input-qtd-mobile">
-                                    <button type="button" class="btn-qty show-mobile" (click)="incrementarQtd(i)">+</button>
+                                    <button type="button" class="btn-qty show-mobile"
+                                        (click)="incrementarQtd(i)">+</button>
                                 </div>
                             </td>
                             <td>
@@ -182,11 +315,18 @@
             </div>
         </fieldset>
 
-        <div class="form-actions">
+        <div class="form-actions" *ngIf="!isPedidoBloqueadoParaUsuario">
             <button type="submit" class="btn-gold" [disabled]="pedidoForm.invalid || itens.length === 0">
                 {{ modoEdicao ? 'Salvar Alterações' : 'Salvar Pedido' }}
             </button>
+            <button type="button" class="btn-notify" (click)="salvar(true)" *ngIf="isAdmin && modoEdicao"
+                [disabled]="pedidoForm.invalid || itens.length === 0">
+                <i class="fa fa-envelope"></i> Salvar e Notificar
+            </button>
             <button type="button" class="btn-outline" (click)="voltar()">Cancelar</button>
+        </div>
+        <div class="form-actions" *ngIf="isPedidoBloqueadoParaUsuario">
+            <button type="button" class="btn-gold" (click)="voltar()">Voltar</button>
         </div>
     </form>
 </div>
@@ -209,7 +349,8 @@
         <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao" alt="Produto" class="img-preview">
         <div *ngIf="!imagemUrlVisualizacao" style="padding: 40px; background: #f9f9f9; border-radius: 8px;">
             <i class="fa fa-image-slash" style="font-size: 4rem; color: #ddd; display: block; margin-bottom: 15px;"></i>
-            <span style="color: #999; font-weight: bold; font-family: 'Cinzel', serif;">Produto sem imagem cadastrada</span>
+            <span style="color: #999; font-weight: bold; font-family: 'Cinzel', serif;">Produto sem imagem
+                cadastrada</span>
         </div>
         <div style="margin-top: 20px;">
             <button class="btn btn-secondary" (click)="fecharVisualizacaoImagem()">Fechar</button>
@@ -220,14 +361,16 @@
 <!-- Modal Inclusão Alternativa -->
 <div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
     <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-        <div class="d-flex justify-content-between align-items-center" style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-            <h2 class="cinzel-font color-primary-gold-dark text-left" style="margin: 0; font-size: 1.5rem;">Adicionar Produtos</h2>
+        <div class="d-flex justify-content-between align-items-center"
+            style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+            <h2 class="cinzel-font color-primary-gold-dark text-left" style="margin: 0; font-size: 1.5rem;">Adicionar
+                Produtos</h2>
         </div>
 
         <div class="mb-2 mt-1">
             <!-- Linha única de filtros compacta -->
             <div class="modal-filters-row">
-                
+
                 <div class="filter-item-name">
                     <label>Nome</label>
                     <input type="text" class="form-control" [(ngModel)]="filtroModalNome"
@@ -282,7 +425,9 @@
                                     <tr style="font-size: 0.85rem;">
                                         <th width="60" class="text-center hide-mobile"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Cód.</th>
-                                        <th width="150" class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">Nome</th>
+                                        <th width="150" class="text-left"
+                                            style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">
+                                            Nome</th>
                                         <th width="45" class="text-center hide-mobile"
                                             style="padding: 4px 8px; border: 1px solid #ccc;">Img</th>
                                         <th width="80" class="text-center"
@@ -299,12 +444,13 @@
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
                                             p.codigo }}</td>
                                         <td class="text-left"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; text-align: left !important;">{{
+                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; text-align: left !important;">
+                                            {{
                                             p.nome }}</td>
                                         <td class="text-center hide-mobile"
                                             style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">
-                                            <button class="btn btn-info text-white"
-                                                (click)="visualizarImagem(p)" title="Ver Imagem"
+                                            <button class="btn btn-info text-white" (click)="visualizarImagem(p)"
+                                                title="Ver Imagem"
                                                 style="padding: 2px 6px; font-size: 0.8rem; line-height: 1;">
                                                 <i class="fa fa-image"></i>
                                             </button>
@@ -327,14 +473,17 @@
                                 </tbody>
                                 <tfoot>
                                     <tr style="background: #f4f4f4; font-size: 0.85rem;">
-                                        <td class="text-right" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold;">
+                                        <td class="text-right"
+                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold;">
                                             Total {{ grupo.tamanho }}cm:
                                         </td>
-                                        <td class="text-left" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; text-align: left !important;">
+                                        <td class="text-left"
+                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; text-align: left !important;">
                                             {{ calcularQtdGrupo(grupo) }}
                                         </td>
                                         <td class="hide-mobile" style="border: 1px solid #ccc;"></td>
-                                        <td class="text-right hide-mobile" style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
+                                        <td class="text-right hide-mobile"
+                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
                                             {{ calcularTotalGrupo(grupo) | currency:'BRL' }}
                                         </td>
                                     </tr>
@@ -370,7 +519,8 @@
                 </div>
             </div>
             <div class="footer-actions">
-                <button type="button" class="btn-loja-cancelar" (click)="fecharModalProdutosAlternativo()">Cancelar</button>
+                <button type="button" class="btn-loja-cancelar"
+                    (click)="fecharModalProdutosAlternativo()">Cancelar</button>
                 <button type="button" class="btn-loja-add" (click)="adicionarProdutosModal()">
                     <i class="fa fa-check"></i> Adicionar
                 </button>
@@ -383,7 +533,8 @@
 <div class="modal-overlay" *ngIf="avisoPdf">
     <div class="modal-content">
         <h2 class="cinzel-font">Gerando PDF</h2>
-        <p>O PDF do pedido está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize a abertura de janelas (pop-ups) no seu navegador.</p>
+        <p>O PDF do pedido está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize a
+            abertura de janelas (pop-ups) no seu navegador.</p>
         <button class="btn btn-primary" (click)="fecharAvisoPdf()">OK</button>
     </div>
 </div>

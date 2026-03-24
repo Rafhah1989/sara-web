@@ -33,6 +33,24 @@
     color: #666;
 }
 
+.payment-radio.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.payment-radio.disabled .payment-card {
+    border-color: #eee;
+    background: #fafafa;
+}
+
+.badget-minimo-alert {
+    display: block;
+    font-size: 0.75rem;
+    color: #cc0000;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
 .payment-radio input:checked+.payment-card {
     border-color: var(--primary-color);
     background-color: #f7f1e3;
@@ -551,4 +569,136 @@ form {
   .footer-summary { justify-content: space-around; gap: 5px; }
   .footer-actions { flex-direction: row; }
   .footer-actions button { flex: 1; height: 38px; }
+}
+
+/* ================== INSTALLMENTS & LOCKING ================== */
+.installment-box {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.form-select-gold {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select-gold:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+    border-color: var(--primary-gold-dark);
+}
+
+.installment-table-preview {
+    margin-top: 15px;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.installment-table-preview th {
+    padding: 10px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.installment-table-preview td {
+    padding: 12px 10px;
+    vertical-align: middle;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #856404;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+
+fieldset[disabled] {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+fieldset[disabled] .form-control,
+fieldset[disabled] select,
+fieldset[disabled] textarea,
+fieldset[disabled] input {
+    background-color: #f8f9fa;
+    pointer-events: none;
+}
+
+.btn-notify {
+    background-color: #c5a059;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-notify:hover {
+    background-color: #b38f4d;
+}
+
+.btn-notify:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-remove-parc {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.btn-remove-parc:hover {
+    transform: scale(1.1);
+}
+
+.form-select-gold-sm {
+    padding: 4px 8px;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.btn-outline-gold {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-gold-dark);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline-gold:hover {
+    background-color: #f7f1e3;
+    border-color: var(--primary-gold-dark);
 }

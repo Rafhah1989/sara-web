@@ -181,6 +181,7 @@
                             product.codigo }})</h4>
                         <p class="card-size">Tamanho: {{ product.tamanho }} cm</p>
                         <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
+                        <p class="card-installment" *ngIf="product.preco">{{ getParcelamentoInfo(product.preco) }}</p>
 
                         <div class="card-actions">
                             <div class="qtd-control">

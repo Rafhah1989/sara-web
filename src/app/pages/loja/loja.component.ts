@@ -7,6 +7,8 @@ import { CarrinhoService } from '../../services/carrinho.service';
 import { AuthService } from '../../services/auth.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
+import { UsuarioService } from '../../services/usuario.service';
 
 @Component({
   selector: 'app-loja',
@@ -58,6 +60,10 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   mensagemToast: string = '';
   toastTimeout: any;
 
+  // Real-time Installments Info
+  opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
+  descontoUsuario: number = 0;
+
   // Image Visualization Modal
   exibirVisualizacaoImagem: boolean = false;
   imagemUrlVisualizacao: string = '';
@@ -80,7 +86,8 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private produtoService: ProdutoService,
     private carrinhoService: CarrinhoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private usuarioService: UsuarioService
   ) {
     this.nomeSubject.pipe(
       debounceTime(600),
@@ -95,7 +102,50 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.carregarTamanhos();
+    this.carregarDadosUsuario();
     this.pesquisar();
+  }
+
+  carregarDadosUsuario(): void {
+    const userId = this.authService.getUsuarioIdDoToken();
+    if (userId) {
+      this.usuarioService.buscarPorId(userId).subscribe(user => {
+        this.descontoUsuario = user.desconto || 0;
+        this.opcoesParcelamentoAutorizadas = user.opcoesParcelamento || [];
+      });
+    }
+  }
+
+  getParcelamentoInfo(preco: number): string {
+    if (!preco || this.opcoesParcelamentoAutorizadas.length === 0) return '';
+
+    // Consideramos apenas o desconto do usuário aqui, sem o da forma de pagamento (que é só para à vista)
+    const precoComDescontoUsuario = preco - (preco * (this.descontoUsuario / 100));
+    
+    let melhorParcela = 0;
+    let valorParcela = 0;
+
+    // Busca em todas as regras autorizadas a melhor condição (maior N)
+    this.opcoesParcelamentoAutorizadas.forEach(opcao => {
+      const max = opcao.qtdMaxParcelas || 1;
+      const minVal = opcao.valorMinimoParcela || 0;
+
+      for (let n = max; n >= 2; n--) {
+        const v = precoComDescontoUsuario / n;
+        if (v >= minVal && n > melhorParcela) {
+          melhorParcela = n;
+          valorParcela = v;
+          break;
+        }
+      }
+    });
+
+    if (melhorParcela >= 2) {
+      const valorFmt = valorParcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      return `ou até ${melhorParcela}x de ${valorFmt}`;
+    }
+
+    return 'À vista';
   }
 
   carregarTamanhos(): void {

@@ -37,6 +37,29 @@
     </div>
   </div>
 
+  <!-- Estado de Aguardando Confirmação -->
+  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && erroSituacaoPendente">
+    <div class="pix-header" style="text-align: center;">
+      <i class="fa fa-hourglass-half fa-4x" style="color: #d4af37; margin-bottom: 20px;"></i>
+      <h2 class="cinzel-font color-primary-gold-dark">Pedido Aguardando Confirmação</h2>
+      <p style="margin-top: 15px; font-size: 1.1rem; color: #555;">
+        O pedido <strong>#{{ pedidoId }}</strong> foi recebido em nossa base.
+      </p>
+    </div>
+    <div class="pix-content" style="text-align: center; padding: 20px;">
+      <p style="margin-bottom: 20px; color: #666; line-height: 1.6;">
+        Para sua segurança, pedidos com pagamento via PIX ou Depósito passam por uma breve análise administrativa.<br>
+        Assim que seu pedido for <strong>confirmado</strong> por nossa equipe, os dados para pagamento serão liberados aqui mesmo.
+      </p>
+      <div style="background: #fdf8e6; border: 1px solid #d4af37; padding: 15px; border-radius: 8px; color: #856404; font-size: 0.9rem;">
+        <i class="fa fa-info-circle"></i> Você receberá uma notificação por e-mail assim que o pagamento for liberado.
+      </div>
+    </div>
+    <div class="pix-footer" style="margin-top: 10px;">
+      <button class="btn-gold" (click)="irParaListagem()">Voltar para Meus Pedidos</button>
+    </div>
+  </div>
+
   <!-- Estado de Erro -->
   <div class="pix-card shadow-card error-card animate-fade-in" *ngIf="!loading && erroGeracao">
     <div class="error-content">

@@ -51,6 +51,12 @@ export class PedidoListComponent implements OnInit {
     uploadingNotaFiscal: boolean = false;
     isDragging: boolean = false;
     notificarCliente: boolean = true;
+    
+    // Confirmação de Pedido
+    exibirModalConfirmacao: boolean = false;
+    pedidoParaConfirmar: Pedido | null = null;
+    novaSituacaoParaConfirmar: string = '';
+    enviarEmailConfirmacao: boolean = true;
 
     constructor(
         private pedidoService: PedidoService,
@@ -212,18 +218,49 @@ export class PedidoListComponent implements OnInit {
 
     alterarSituacao(pedido: Pedido, novaSituacao: string): void {
         if (!this.isAdmin) return;
+
+        if (novaSituacao === 'CONFIRMADO') {
+            this.pedidoParaConfirmar = pedido;
+            this.novaSituacaoParaConfirmar = novaSituacao;
+            this.enviarEmailConfirmacao = true;
+            this.exibirModalConfirmacao = true;
+            return;
+        }
         
-        this.pedidoService.alterarSituacao(pedido.id, novaSituacao).subscribe(() => {
+        this.executarAlteracaoSituacao(pedido, novaSituacao, false);
+    }
+
+    executarAlteracaoSituacao(pedido: Pedido, novaSituacao: string, enviarEmail: boolean): void {
+        const obs = novaSituacao === 'CONFIRMADO' 
+            ? this.pedidoService.confirmar(pedido.id, enviarEmail)
+            : this.pedidoService.alterarSituacao(pedido.id, novaSituacao, enviarEmail);
+
+        obs.subscribe(() => {
             pedido.situacao = novaSituacao;
             const sitObj = this.situacoesPedido.find(s => s.codigo === novaSituacao);
             if (sitObj) {
                 pedido.situacaoDescricao = sitObj.descricao;
+            }
+            if (this.exibirModalConfirmacao) {
+                this.fecharModalConfirmacao();
+                alert('Pedido confirmado com sucesso!');
             }
         }, error => {
             console.error('Erro ao alterar situação', error);
             alert('Erro ao alterar situação do pedido.');
             this.carregarPedidos(); // Revert local changes by reloading
         });
+    }
+
+    confirmarPedido(): void {
+        if (!this.pedidoParaConfirmar) return;
+        this.executarAlteracaoSituacao(this.pedidoParaConfirmar, this.novaSituacaoParaConfirmar, this.enviarEmailConfirmacao);
+    }
+
+    fecharModalConfirmacao(): void {
+        this.exibirModalConfirmacao = false;
+        this.pedidoParaConfirmar = null;
+        this.novaSituacaoParaConfirmar = '';
     }
 
     alterarStatusPago(pedido: Pedido, pago: boolean): void {

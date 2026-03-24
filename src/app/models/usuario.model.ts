@@ -30,4 +30,8 @@ export interface Usuario {
     senha?: string;
     ativo?: boolean;
     metodoPagamentoAutorizado: import('./metodo-pagamento-autorizado.enum').MetodoPagamentoAutorizado;
+    permitirParcelamento?: boolean;
+    ativarDescontoAVista?: boolean;
+    opcoesParcelamento?: import('./opcao-parcelamento.model').OpcaoParcelamento[];
+    opcoesParcelamentoIds?: number[];
 }
