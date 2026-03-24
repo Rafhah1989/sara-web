@@ -1,8 +1,14 @@
-<div class="page-title-banner">
+<div class="page-title-banner text-center">
     <h1>Gestão de Usuários</h1>
 </div>
 
 <section class="users-page container">
+    <!-- NOVO: Link de Pesquisa no topo da página -->
+    <div class="top-actions-row">
+        <button class="btn-gold anchor-search-btn" (click)="scrollToSearch()">
+            <i class="fa fa-search"></i> Pesquisar
+        </button>
+    </div>
 
     <!-- Formulário -->
     <div class="user-form-container card">
@@ -250,7 +256,7 @@
 
     <hr class="divider">
 
-    <div class="search-container">
+    <div id="secaoPesquisa" class="search-container">
         <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome..." (keyup.enter)="pesquisar()">
         <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
     </div>
@@ -277,12 +283,28 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn-edit" (click)="editar(user)" title="Editar">✏️</button>
-                        <button class="btn-info" (click)="reenviarConvite(user)" title="Reenviar Convite" style="margin: 0 5px; background: none; border: 1px solid #c5a059; border-radius: 4px; padding: 4px 8px; cursor: pointer;">📧</button>
-                        <button class="btn-delete" (click)="desativar(user.id)" *ngIf="user.ativo"
-                            title="Desativar">🚫</button>
-                        <button class="btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo"
-                            title="Ativar">✅</button>
+                        <!-- Ações Desktop -->
+                        <div class="actions hide-mobile">
+                            <button class="btn-edit" (click)="editar(user)" title="Editar">✏️</button>
+                            <button class="btn-info" (click)="reenviarConvite(user)" title="Reenviar Convite" style="margin: 0 5px; background: none; border: 1px solid #c5a059; border-radius: 4px; padding: 4px 8px; cursor: pointer;">📧</button>
+                            <button class="btn-delete" (click)="desativar(user.id)" *ngIf="user.ativo"
+                                title="Desativar">🚫</button>
+                            <button class="btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo"
+                                title="Ativar">✅</button>
+                        </div>
+
+                        <!-- Ações Mobile (Menu Sanduíche) -->
+                        <div class="mobile-actions show-mobile">
+                            <button class="btn-sandwich" (click)="alternarMenuAcoes(user.id!, $event)">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <div class="actions-menu" *ngIf="itemMenuAberto === user.id">
+                                <button (click)="editar(user)"><i class="fa fa-pencil-alt"></i> Editar</button>
+                                <button (click)="reenviarConvite(user)"><i class="fa fa-envelope"></i> Convite</button>
+                                <button (click)="desativar(user.id)" *ngIf="user.ativo" class="text-danger"><i class="fa fa-ban"></i> Desativar</button>
+                                <button (click)="ativar(user.id)" *ngIf="!user.ativo" class="text-success"><i class="fa fa-check"></i> Ativar</button>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 <tr *ngIf="users.length === 0">

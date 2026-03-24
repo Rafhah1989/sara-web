@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { SetorService } from '../../services/setor.service';
@@ -24,6 +24,7 @@ export class UsuariosComponent implements OnInit {
     modoEdicao: boolean = false;
     usuarioIdEmEdicao?: number;
     todasOpcoesParcelamento: OpcaoParcelamento[] = [];
+    itemMenuAberto: number | null = null;
 
     showSenha: boolean = false;
     showConfirmSenha: boolean = false;
@@ -326,5 +327,22 @@ export class UsuariosComponent implements OnInit {
     isInvalid(controlName: string): boolean {
         const control = this.userForm.get(controlName);
         return !!(control && control.invalid && (control.dirty || control.touched));
+    }
+
+    scrollToSearch(): void {
+        const element = document.getElementById('secaoPesquisa');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    alternarMenuAcoes(id: number, event: Event): void {
+        event.stopPropagation();
+        this.itemMenuAberto = this.itemMenuAberto === id ? null : id;
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent): void {
+        this.itemMenuAberto = null;
     }
 }

@@ -1,14 +1,19 @@
 <div class="container page-container">
     <div class="header-section">
-        <h1 class="cinzel-font color-primary-gold-dark">Listagem de Pedidos</h1>
-        <div class="header-actions">
-            <!-- Botão de Filtros Mobile -->
-            <button class="mobile-btn-filters show-mobile" (click)="abrirFiltrosMobile()">
-                <i class="fa fa-filter"></i>
-            </button>
-            <button class="btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()">
-                <i class="fa fa-sync"></i> <span class="hide-mobile">Sincronizar PIX</span>
-            </button>
+        <div class="header-main">
+            <h1 class="cinzel-font color-primary-gold-dark">Pedidos</h1>
+            <div class="header-actions">
+                <!-- Botão de Filtros Mobile -->
+                <button class="mobile-btn-filters show-mobile" (click)="abrirFiltrosMobile()">
+                    <i class="fa fa-filter"></i>
+                </button>
+                <button class="btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()">
+                    <i class="fa fa-sync"></i> <span class="hide-mobile">Sincronizar PIX</span>
+                </button>
+                <button class="btn-gold hide-mobile" (click)="novoPedido()">Novo Pedido</button>
+            </div>
+        </div>
+        <div class="mobile-new-order-container show-mobile">
             <button class="btn-gold" (click)="novoPedido()">Novo Pedido</button>
         </div>
     </div>

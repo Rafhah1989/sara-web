@@ -1,7 +1,8 @@
 <!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
 <div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
     <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
-        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Visualização" class="zoom-img-exclusive" (error)="imagemUrlVisualizacao=''">
+        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Visualização"
+            class="zoom-img-exclusive" (error)="imagemUrlVisualizacao=''">
         <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
             <i class="fa fa-times"></i>
         </button>
@@ -57,26 +58,27 @@
 
             <button class="btn-modern-secondary" style="width: 100%; margin-top: 20px;"
                 (click)="abrirModalProdutosAlternativo()">
-                <i class="fa fa-th-list"></i> Adicionar por tabela
+                <i class="fa fa-th-list"></i> Comprar por tabela
             </button>
         </aside>
 
         <!-- Vitrine de Produtos -->
         <main class="loja-vitrine">
 
-            <!-- NOVO: Cabeçalho Mobile (Filtro Nome + Botão Filtros) -->
+            <!-- NOVO: Cabeçalho Mobile (Filtro Nome + Botões de Ação) -->
             <div class="mobile-filters-header show-mobile">
-                <div class="mobile-search-row">
-                    <div class="mobile-search-container">
-                        <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
-                            placeholder="Buscar produto..." class="mobile-input-search">
-                        <i class="fa fa-search"></i>
-                    </div>
-                    <button class="mobile-btn-modern-accent" (click)="abrirModalProdutosAlternativo()" type="button">
-                        <i class="fa fa-th-list"></i>
+                <div class="mobile-search-container">
+                    <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
+                        placeholder="Buscar produto..." class="mobile-input-search">
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="mobile-actions-row">
+                    <button class="mobile-btn-modern-accent-full" (click)="abrirModalProdutosAlternativo()"
+                        type="button">
+                        <i class="fa fa-th-list"></i> Comprar por Tabela
                     </button>
-                    <button class="mobile-btn-filters" (click)="toggleFiltrosMobile()" type="button">
-                        <i class="fa fa-filter"></i>
+                    <button class="mobile-btn-filters-full" (click)="toggleFiltrosMobile()" type="button">
+                        <i class="fa fa-filter"></i> Filtro
                     </button>
                 </div>
             </div>
@@ -172,7 +174,8 @@
                 <div class="vitrine-card" *ngFor="let product of produtos">
                     <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)"
                         title="Clique para ampliar">
-                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" (error)="product.imagem = ''">
+                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome"
+                            (error)="product.imagem = ''">
                         <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
                     </div>
 
@@ -191,8 +194,10 @@
                                 <button class="btn-qty" (click)="incrementarQtd(product.id!)">+</button>
                             </div>
                         </div>
-                        <button class="btn-add" (click)="adicionarAoCarrinho(product)" [disabled]="produtosSendoAdicionados.has(product.id!)">
-                            <i *ngIf="produtosSendoAdicionados.has(product.id!)" class="fa fa-spinner fa-spin spinner-btn"></i>
+                        <button class="btn-add" (click)="adicionarAoCarrinho(product)"
+                            [disabled]="produtosSendoAdicionados.has(product.id!)">
+                            <i *ngIf="produtosSendoAdicionados.has(product.id!)"
+                                class="fa fa-spinner fa-spin spinner-btn"></i>
                             {{ produtosSendoAdicionados.has(product.id!) ? 'Adicionando...' : 'Adicionar' }}
                         </button>
                     </div>
@@ -224,7 +229,8 @@
                 <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)"
                     title="Clique para ampliar"
                     [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
-                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem | ociImage" [alt]="sugestao.nome" class="sugestao-img" (error)="sugestao.imagem = ''">
+                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem | ociImage" [alt]="sugestao.nome"
+                        class="sugestao-img" (error)="sugestao.imagem = ''">
                     <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
                 </div>
                 <div class="sugestao-info">
@@ -250,7 +256,7 @@
     <div class="modern-modal" (click)="$event.stopPropagation()">
         <!-- Header -->
         <div class="modal-header-modern">
-            <h2>Adicionar Produtos</h2>
+            <h2>Comprar Produtos</h2>
             <button class="btn-close-modern" (click)="fecharModalProdutosAlternativo()">
                 <i class="fa fa-times"></i>
             </button>
