@@ -32,6 +32,7 @@ import { ConfiguracaoComponent } from './pages/configuracao/configuracao.compone
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { LogsComponent } from './pages/logs/logs.component';
+import { OciImagePipe } from './shared/pipes/oci-image.pipe';
 
 registerLocaleData(localePt);
 
@@ -78,7 +79,8 @@ const routes: Routes = [
     ResetPasswordComponent,
     ForgotPasswordComponent,
     PixPaymentComponent,
-    LogsComponent
+    LogsComponent,
+    OciImagePipe
   ],
   imports: [
     BrowserModule,

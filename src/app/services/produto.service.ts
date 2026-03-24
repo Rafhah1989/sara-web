@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Produto } from '../models/produto.model';
 import { environment } from '../../environments/environment';
 
@@ -12,32 +13,40 @@ export class ProdutoService {
 
     constructor(private http: HttpClient) { }
 
+    private formatProduto(produto: any): any {
+        return produto;
+    }
+
+    private formatProdutos(produtos: any[]): any[] {
+        return produtos.map(p => this.formatProduto(p));
+    }
+
     listarTodos(): Observable<Produto[]> {
-        return this.http.get<Produto[]>(this.apiUrl);
+        return this.http.get<Produto[]>(this.apiUrl).pipe(map(res => this.formatProdutos(res)));
     }
 
     listarAtivos(): Observable<Produto[]> {
-        return this.http.get<Produto[]>(`${this.apiUrl}/ativos`);
+        return this.http.get<Produto[]>(`${this.apiUrl}/ativos`).pipe(map(res => this.formatProdutos(res)));
     }
 
     buscarPorId(id: number): Observable<Produto> {
-        return this.http.get<Produto>(`${this.apiUrl}/${id}`);
+        return this.http.get<Produto>(`${this.apiUrl}/${id}`).pipe(map(res => this.formatProduto(res)));
     }
 
     buscarPorNome(nome: string): Observable<Produto[]> {
-        return this.http.get<Produto[]>(`${this.apiUrl}/nome/${nome}`);
+        return this.http.get<Produto[]>(`${this.apiUrl}/nome/${nome}`).pipe(map(res => this.formatProdutos(res)));
     }
 
     buscarPorCodigo(codigo: string): Observable<Produto> {
-        return this.http.get<Produto>(`${this.apiUrl}/codigo/${codigo}`);
+        return this.http.get<Produto>(`${this.apiUrl}/codigo/${codigo}`).pipe(map(res => this.formatProduto(res)));
     }
 
     adicionar(produto: Produto): Observable<Produto> {
-        return this.http.post<Produto>(this.apiUrl, produto);
+        return this.http.post<Produto>(this.apiUrl, produto).pipe(map(res => this.formatProduto(res)));
     }
 
     alterar(id: number, produto: Produto): Observable<Produto> {
-        return this.http.put<Produto>(`${this.apiUrl}/${id}`, produto);
+        return this.http.put<Produto>(`${this.apiUrl}/${id}`, produto).pipe(map(res => this.formatProduto(res)));
     }
 
     excluir(id: number): Observable<void> {
@@ -73,7 +82,14 @@ export class ProdutoService {
     return this.http.get<any>(`${this.apiUrl}/loja`, {
       params,
       headers: skipSpinner ? { 'X-Skip-Spinner': 'true' } : {}
-    });
+    }).pipe(
+      map(res => {
+        if (res && res.content) {
+          res.content = this.formatProdutos(res.content);
+        }
+        return res;
+      })
+    );
   }
 
   getTamanhosAtivos(): Observable<number[]> {
@@ -82,7 +98,7 @@ export class ProdutoService {
 
     buscarOutrosTamanhos(id: number, skipSpinner: boolean = false): Observable<Produto[]> {
         const headers = skipSpinner ? { 'X-Skip-Spinner': 'true' } : {};
-        return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`, { headers });
+        return this.http.get<Produto[]>(`${this.apiUrl}/${id}/outros-tamanhos`, { headers }).pipe(map(res => this.formatProdutos(res)));
     }
 
     gerarCatalogo(): Observable<Blob> {

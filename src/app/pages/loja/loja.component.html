@@ -1,7 +1,7 @@
 <!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
 <div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
     <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
-        <img [src]="imagemUrlVisualizacao" alt="Visualização" class="zoom-img-exclusive">
+        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Visualização" class="zoom-img-exclusive" (error)="imagemUrlVisualizacao=''">
         <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
             <i class="fa fa-times"></i>
         </button>
@@ -172,7 +172,7 @@
                 <div class="vitrine-card" *ngFor="let product of produtos">
                     <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)"
                         title="Clique para ampliar">
-                        <img *ngIf="product.imagem" [src]="product.imagem" [alt]="product.nome">
+                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" (error)="product.imagem = ''">
                         <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
                     </div>
 
@@ -224,7 +224,7 @@
                 <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)"
                     title="Clique para ampliar"
                     [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
-                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem" [alt]="sugestao.nome" class="sugestao-img">
+                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem | ociImage" [alt]="sugestao.nome" class="sugestao-img" (error)="sugestao.imagem = ''">
                     <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
                 </div>
                 <div class="sugestao-info">

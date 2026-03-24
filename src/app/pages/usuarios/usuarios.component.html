@@ -106,6 +106,34 @@
             </fieldset>
 
             <fieldset class="form-section">
+                <legend>Parcelamento</legend>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="permitirParcelamento" formControlName="permitirParcelamento">
+                        <label for="permitirParcelamento">Permitir Parcelamento para este usuário</label>
+                    </div>
+                </div>
+
+                <div class="form-row" *ngIf="userForm.get('permitirParcelamento')?.value">
+                    <div class="form-group">
+                        <label>Opções de Parcelamento Autorizadas</label>
+                        <div class="installment-options-grid">
+                            <div *ngFor="let opt of todasOpcoesParcelamento" class="installment-option-item">
+                                <input type="checkbox" [id]="'opt-' + opt.id" [checked]="isOpcaoSelected(opt.id!)" (change)="onOpcaoToggle(opt.id!, $event)">
+                                <label [for]="'opt-' + opt.id">
+                                    <strong>{{ opt.formaPagamentoDescricao }}</strong>: 
+                                    Até {{ opt.qtdMaxParcelas }}x (Intervalo: {{ opt.diasVencimentoIntervalo }} dias)
+                                </label>
+                            </div>
+                        </div>
+                        <div *ngIf="todasOpcoesParcelamento.length === 0" class="no-data" style="padding: 10px !important;">
+                            Nenhuma opção de parcelamento cadastrada no sistema.
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
                 <legend>Pagamento e Frete</legend>
                 <div class="form-row">
                     <div class="form-group">
@@ -206,34 +234,6 @@
                             <button type="button" class="eye-icon" (click)="showConfirmSenha = !showConfirmSenha">
                                 <i class="fas" [ngClass]="showConfirmSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Parcelamento</legend>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="permitirParcelamento" formControlName="permitirParcelamento">
-                        <label for="permitirParcelamento">Permitir Parcelamento para este usuário</label>
-                    </div>
-                </div>
-
-                <div class="form-row" *ngIf="userForm.get('permitirParcelamento')?.value">
-                    <div class="form-group">
-                        <label>Opções de Parcelamento Autorizadas</label>
-                        <div class="installment-options-grid">
-                            <div *ngFor="let opt of todasOpcoesParcelamento" class="installment-option-item">
-                                <input type="checkbox" [id]="'opt-' + opt.id" [checked]="isOpcaoSelected(opt.id!)" (change)="onOpcaoToggle(opt.id!, $event)">
-                                <label [for]="'opt-' + opt.id">
-                                    <strong>{{ opt.formaPagamentoDescricao }}</strong>: 
-                                    Até {{ opt.qtdMaxParcelas }}x (Intervalo: {{ opt.diasVencimentoIntervalo }} dias)
-                                </label>
-                            </div>
-                        </div>
-                        <div *ngIf="todasOpcoesParcelamento.length === 0" class="no-data" style="padding: 10px !important;">
-                            Nenhuma opção de parcelamento cadastrada no sistema.
                         </div>
                     </div>
                 </div>

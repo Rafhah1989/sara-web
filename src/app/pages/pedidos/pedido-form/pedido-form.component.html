@@ -346,7 +346,7 @@
 <!-- Modal Imagem -->
 <div class="modal-overlay image-modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
     <div class="modal-content image-modal" (click)="$event.stopPropagation()" style="text-align: center;">
-        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao" alt="Produto" class="img-preview">
+        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Produto" class="img-preview">
         <div *ngIf="!imagemUrlVisualizacao" style="padding: 40px; background: #f9f9f9; border-radius: 8px;">
             <i class="fa fa-image-slash" style="font-size: 4rem; color: #ddd; display: block; margin-bottom: 15px;"></i>
             <span style="color: #999; font-weight: bold; font-family: 'Cinzel', serif;">Produto sem imagem
