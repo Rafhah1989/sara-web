@@ -7,8 +7,8 @@ import { ProdutoService } from '../../../services/produto.service';
 import { Usuario } from '../../../models/usuario.model';
 import { Produto } from '../../../models/produto.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, filter, tap } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 import { MetodoPagamentoAutorizado } from '../../../models/metodo-pagamento-autorizado.enum';
 import { OpcaoParcelamentoService } from '../../../services/opcao-parcelamento.service';
 import { OpcaoParcelamento } from '../../../models/opcao-parcelamento.model';
@@ -31,6 +31,7 @@ export class PedidoFormComponent implements OnInit {
     showProdutosDropdown: boolean = false;
 
     formasPagamento: any[] = [];
+    formasPagamentoExibicao: any[] = [];
     situacoesPedido: any[] = [];
     descontoUsuarioAtual: number = 0;
     isAdmin: boolean = false;
@@ -43,13 +44,26 @@ export class PedidoFormComponent implements OnInit {
     avisoPdf: boolean = false;
     pendenteRedirecionamento: boolean = false;
     notaFiscalPath?: string;
+    descontoManual: boolean = false;
     
     // Parcelamento
     permitirParcelamento: boolean = false;
     opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
     opcaoParcelamentoSelecionada?: OpcaoParcelamento;
     quantidadeParcelas: number = 1;
-    parcelasGeradas: { id?: number, dataVencimento: string, valor: number, valorFormatado?: string, pago: boolean, formaPagamentoId?: number }[] = [];
+    parcelasGeradas: { 
+        id?: number, 
+        dataVencimento: string, 
+        valor: number, 
+        valorFormatado?: string, 
+        pago: boolean, 
+        formaPagamentoId?: number,
+        formaPagamentoDescricao?: string,
+        pagamentoOnline?: boolean,
+        pagamentoOnlineSalvo?: boolean,
+        pixCopiaECola?: string,
+        mercadopagoPagamentoId?: string
+    }[] = [];
 
     // Modal Alternativo State
     exibirModalProdutosAlternativo: boolean = false;
@@ -84,7 +98,7 @@ export class PedidoFormComponent implements OnInit {
         this.pedidoForm = this.fb.group({
             usuarioId: ['', Validators.required],
             usuarioNome: ['', Validators.required],
-            formaPagamentoId: [null],
+            formaPagamentoId: [null, Validators.required],
             desconto: [0],
             frete: ['R$ 0,00'],
             situacao: ['PENDENTE'],
@@ -102,33 +116,13 @@ export class PedidoFormComponent implements OnInit {
         if (id) {
             this.modoEdicao = true;
             this.pedidoId = id;
-            this.carregarPedido(id);
-        } else {
-            // New order
-            if (!this.isAdmin) {
-                // If CLIENTE, auto-fill and disable client selection
-                const userId = this.authService.getUsuarioIdDoToken();
-                const userNome = this.authService.getSubjectDoToken();
-                if (userId) {
-                    // simulate user selection to load freight
-                    this.pedidoForm.patchValue({
-                        usuarioId: userId,
-                        usuarioNome: userNome
-                    });
-                    this.pedidoForm.get('usuarioNome')?.disable();
-                    this.usuarioService.buscarPorId(userId).subscribe(user => {
-                        this.selecionarUsuario(user);
-                    });
-                }
-            }
         }
 
-        // Only search users if ADMIN
-        if (this.isAdmin) {
-            this.setupBuscaUsuarios();
-        }
-        
-        this.carregarFormasPagamento();
+        this.carregarFormasPagamento().subscribe(() => {
+            if (id) {
+                this.carregarPedido(id);
+            }
+        });
         this.carregarSituacoes();
         
         // Disable fields for CLIENTE globally
@@ -141,6 +135,14 @@ export class PedidoFormComponent implements OnInit {
             if (this.modoEdicao) {
                 this.pedidoForm.get('formaPagamentoId')?.disable();
                 this.pedidoForm.get('pagamentoOnline')?.disable();
+            } else {
+                // Se é um NOVO pedido e é CLIENTE, já carrega os dados dele
+                const userId = this.authService.getUsuarioIdDoToken();
+                if (userId) {
+                    this.usuarioService.buscarPorId(userId).subscribe(u => {
+                        this.selecionarUsuario(u);
+                    });
+                }
             }
         }
     }
@@ -157,10 +159,14 @@ export class PedidoFormComponent implements OnInit {
         });
     }
 
-    carregarFormasPagamento(): void {
-        this.pedidoService.obterFormasPagamento().subscribe(formas => {
-            this.formasPagamento = formas;
-        });
+    carregarFormasPagamento(): Observable<any> {
+        return this.pedidoService.obterFormasPagamento().pipe(
+            tap(formas => {
+                this.formasPagamento = formas;
+                this.formasPagamentoExibicao = formas;
+                this.filtrarMetodosPagamentoAutorizados();
+            })
+        );
     }
 
     get itens() {
@@ -191,7 +197,9 @@ export class PedidoFormComponent implements OnInit {
         this.permitirParcelamento = usuario.permitirParcelamento || false;
         this.ativarDescontoAVista = usuario.ativarDescontoAVista || false;
         this.opcoesParcelamentoAutorizadas = usuario.opcoesParcelamento || [];
+        this.filtrarMetodosPagamentoAutorizados(); // Re-filter payment methods based on user
         this.verificarRegrasPagamentoOnline();
+        this.descontoManual = false;
         this.atualizarOpcoesParcelamento();
         this.showUsuariosDropdown = false;
 
@@ -220,25 +228,32 @@ export class PedidoFormComponent implements OnInit {
     }
 
     aoSelecionarFormaPagamento(id: number): void {
-        const descT = this.calcularDescontoTotal(id);
-        this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
+        if (!this.descontoManual) {
+            const descT = this.calcularDescontoTotal(id);
+            this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
+        }
         this.verificarRegrasPagamentoOnline();
         this.calcularTotais();
         // Nota: calcularTotais já chama atualizarOpcoesParcelamento
     }
 
     onDescontoManualChange(): void {
-        const currentVal = this.pedidoForm.get('desconto')?.value || 0;
+        let currentVal = this.pedidoForm.get('desconto')?.value || 0;
+        if (currentVal < 0) {
+            currentVal = 0;
+            this.pedidoForm.get('desconto')?.setValue(0, { emitEvent: false });
+        }
+        
+        this.descontoManual = true;
         const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
         let maxForma = 0;
-        // Se estiver em 1x, o valor no input inclui o desconto da forma. 
-        // Subtraímos para obter o "Base" que será preservado ao mudar para parcelado.
-        if (formaId && Number(this.quantidadeParcelas) === 1) {
+        
+        if (formaId && Number(this.quantidadeParcelas) === 1 && this.ativarDescontoAVista) {
             const fp = this.formasPagamento.find(f => f.id == formaId);
             if (fp) maxForma = fp.desconto || 0;
         }
         this.descontoUsuarioAtual = currentVal - maxForma;
-        this.calcularTotais();
+        this.calcularTotais(true); // Manter parcelas existentes ao mudar desconto manual
     }
 
     atualizarOpcoesParcelamento(manterParcelasExistentes: boolean = false): void {
@@ -317,6 +332,7 @@ export class PedidoFormComponent implements OnInit {
     }
 
     onQuantidadeParcelasChange(): void {
+        this.descontoManual = false;
         this.calcularTotais();
     }
 
@@ -367,15 +383,29 @@ export class PedidoFormComponent implements OnInit {
                 valor: v,
                 valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v),
                 pago: false,
-                formaPagamentoId: formaId
+                formaPagamentoId: formaId,
+                formaPagamentoDescricao: this.formasPagamento.find(f => f.id == formaId)?.descricao,
+                pagamentoOnline: this.pedidoForm.get('pagamentoOnline')?.value || false
             });
         }
+    }
+
+    filtrarMetodosPagamentoAutorizados(): void {
+        if (this.isAdmin || !this.metodoPagamentoAutorizadoCliente) {
+            this.formasPagamentoExibicao = this.formasPagamento;
+            return;
+        }
+        // ... por enquanto mantemos a lista completa no HTML para evitar sumiço inesperado
+        this.formasPagamentoExibicao = this.formasPagamento;
     }
 
     verificarRegrasPagamentoOnline(): void {
         const formaPagamentoId = this.pedidoForm.get('formaPagamentoId')?.value;
         const forma = this.formasPagamento.find(f => f.id === formaPagamentoId);
-        const isPix = forma && forma.descricao?.toUpperCase() === 'PIX';
+        const isPix = forma && (
+            (forma.descricao && forma.descricao.toUpperCase().includes('PIX')) || 
+            (forma.nome && forma.nome.toUpperCase().includes('PIX'))
+        );
 
         if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
             this.pedidoForm.get('pagamentoOnline')?.setValue(true);
@@ -384,16 +414,32 @@ export class PedidoFormComponent implements OnInit {
                 this.pedidoForm.get('pagamentoOnline')?.setValue(false);
             }
         } else {
-            this.pedidoForm.get('pagamentoOnline')?.setValue(false);
+            // Para administradores, permitimos manter online se for PIX, mesmo que o cliente não tenha perfil 'ENTREGA_E_ONLINE'
+            if (!this.isAdmin || !isPix) {
+                this.pedidoForm.get('pagamentoOnline')?.setValue(false);
+            }
+        }
+        
+        // Sincroniza com as parcelas já geradas
+        this.onPagamentoOnlineChange();
+    }
+
+    onPagamentoOnlineChange(): void {
+        const val = this.pedidoForm.get('pagamentoOnline')?.value;
+        if (this.parcelasGeradas) {
+            this.parcelasGeradas.forEach(p => p.pagamentoOnline = val);
         }
     }
 
     deveMostrarCampoPagamentoOnline(): boolean {
         const formaPagamentoId = this.pedidoForm.get('formaPagamentoId')?.value;
         const forma = this.formasPagamento.find(f => f.id === formaPagamentoId);
-        const isPix = forma && forma.descricao?.toUpperCase() === 'PIX';
+        const isPix = forma && (
+            (forma.descricao && forma.descricao.toUpperCase().includes('PIX')) || 
+            (forma.nome && forma.nome.toUpperCase().includes('PIX'))
+        );
 
-        return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
+        return isPix && (this.isAdmin || this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE);
     }
 
     getValorParcelaPreview(n: number): number {
@@ -409,13 +455,17 @@ export class PedidoFormComponent implements OnInit {
     }
 
     calcularDescontoTotal(formaPagamentoId?: number, n?: number): number {
-        const qtdParcelas = n !== undefined ? n : Number(this.quantidadeParcelas);
+        const qtdParcelas = n !== undefined ? n : (Number(this.quantidadeParcelas) || this.parcelasGeradas.length || 1);
         let maxForma = 0;
+        
         // O desconto da forma de pagamento só é aplicado se for À Vista (1 parcela) E se o usuário tiver o desconto ativo
         if (formaPagamentoId && qtdParcelas === 1 && this.ativarDescontoAVista) {
             const fp = this.formasPagamento.find(f => f.id == formaPagamentoId);
             if (fp) maxForma = fp.desconto || 0;
         }
+
+        // Se o desconto é manual, a base ja foi ajustada em onDescontoManualChange
+        // Se não é manual, usamos o desconto padrão do usuário atual (carregado do cadastro)
         return (this.descontoUsuarioAtual || 0) + maxForma;
     }
 
@@ -804,6 +854,29 @@ export class PedidoFormComponent implements OnInit {
             }
         }
         this.atualizarOpcoesParcelamento(manterParcelasExistentes);
+
+        if (this.parcelasGeradas.length > 0) {
+            this.redistribuirTotalNasParcelas();
+        }
+    }
+
+    private redistribuirTotalNasParcelas(): void {
+        if (this.parcelasGeradas.length === 0) return;
+        
+        const valorTotal = this.pedidoForm.get('valorTotal')?.value || 0;
+        const qtdParcelas = this.parcelasGeradas.length;
+        const valorPorParcela = parseFloat((valorTotal / qtdParcelas).toFixed(2));
+        let saldo = valorTotal;
+
+        for (let i = 0; i < qtdParcelas; i++) {
+            let v = valorPorParcela;
+            if (i === qtdParcelas - 1) {
+                v = parseFloat(saldo.toFixed(2));
+            }
+            this.parcelasGeradas[i].valor = v;
+            this.parcelasGeradas[i].valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+            saldo -= v;
+        }
     }
 
     isFormaPagamentoDisponivel(forma: any): boolean {
@@ -852,18 +925,11 @@ export class PedidoFormComponent implements OnInit {
                 pagamentoOnline: pedido.pagamentoOnline
             }, { emitEvent: false });
 
-            this.notaFiscalPath = pedido.notaFiscalPath;
-
-            // Pulo do gato: Para não perder o valor original e a base de cálculo. 
-            // O desconto salvo no banco para o pedido já inclui os ganhos da forma de pagamento se for à vista.
-            // Precisamos extrair o "Desconto Base" para a lógica reativa funcionar.
-            const formaId = pedido.formaPagamentoId;
-            let descontoForma = 0;
-            if (formaId && pedido.pagamentos && pedido.pagamentos.length === 1) {
-                const fp = this.formasPagamento.find(f => f.id == formaId);
-                if (fp) descontoForma = fp.desconto || 0;
+            if (!this.isAdmin) {
+                this.pedidoForm.get('formaPagamentoId')?.disable();
             }
-            this.descontoUsuarioAtual = (pedido.desconto || 0) - descontoForma;
+
+            this.notaFiscalPath = pedido.notaFiscalPath;
             
             // Load freight config for this user to enable dynamic updates during edit
             this.carregarConfiguracaoFrete(pedido.usuarioId);
@@ -876,7 +942,12 @@ export class PedidoFormComponent implements OnInit {
                     valor: p.valor,
                     valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor),
                     pago: p.pago,
-                    formaPagamentoId: p.formaPagamentoId
+                    formaPagamentoId: p.formaPagamentoId,
+                    formaPagamentoDescricao: p.formaPagamentoDescricao,
+                    pagamentoOnline: p.pagamentoOnline,
+                    pagamentoOnlineSalvo: p.pagamentoOnline,
+                    pixCopiaECola: p.pixCopiaECola,
+                    mercadopagoPagamentoId: p.mercadopagoPagamentoId
                 }));
                 setTimeout(() => {
                     this.quantidadeParcelas = 0;
@@ -888,8 +959,23 @@ export class PedidoFormComponent implements OnInit {
                 this.permitirParcelamento = user.permitirParcelamento || false;
                 this.ativarDescontoAVista = user.ativarDescontoAVista || false;
                 this.opcoesParcelamentoAutorizadas = user.opcoesParcelamento || [];
-                this.verificarRegrasPagamentoOnline();
+
+                // Pulo do gato: Para não perder o valor original e a base de cálculo. 
+                // O desconto salvo no banco para o pedido já inclui os ganhos da forma de pagamento se for à vista (1 parcela).
+                // Só extraímos o desconto da forma se o usuário realmente for elegível para o desconto à vista.
+                const formaIdReg = pedido.formaPagamentoId;
+                let descontoFormaExtraido = 0;
+                if (formaIdReg && pedido.pagamentos && pedido.pagamentos.length === 1 && this.ativarDescontoAVista) {
+                    const fp = this.formasPagamento.find(f => f.id == formaIdReg);
+                    if (fp) descontoFormaExtraido = fp.desconto || 0;
+                }
+                this.descontoUsuarioAtual = (pedido.desconto || 0) - descontoFormaExtraido;
+
+                this.filtrarMetodosPagamentoAutorizados(); // Re-filter payment methods based on user
                 this.atualizarOpcoesParcelamento(true);
+                
+                // FINAL CALCULATION: After everything is loaded!
+                this.calcularTotais(true);
             });
 
             pedido.produtos.sort((a, b) => {
@@ -957,11 +1043,23 @@ export class PedidoFormComponent implements OnInit {
                 dataVencimento: p.dataVencimento,
                 valor: p.valor,
                 pago: p.pago || false,
-                formaPagamentoId: p.formaPagamentoId || formValue.formaPagamentoId
+                formaPagamentoId: p.formaPagamentoId || formValue.formaPagamentoId,
+                pagamentoOnline: p.pagamentoOnline || false
             })) : [
-                { dataVencimento: new Date().toISOString().split('T')[0], valor: formValue.valorTotal, pago: false, formaPagamentoId: formValue.formaPagamentoId }
+                { 
+                    dataVencimento: new Date().toISOString().split('T')[0], 
+                    valor: formValue.valorTotal, 
+                    pago: false, 
+                    formaPagamentoId: formValue.formaPagamentoId,
+                    pagamentoOnline: formValue.pagamentoOnline || false
+                }
             ]
         };
+
+        if (!formValue.formaPagamentoId) {
+            alert('Por favor, selecione uma forma de pagamento antes de salvar.');
+            return;
+        }
 
         if (this.isPedidoBloqueadoParaUsuario) {
             alert('Este pedido não pode ser alterado pois não está na situação PENDENTE.');
@@ -969,14 +1067,34 @@ export class PedidoFormComponent implements OnInit {
         }
 
         if (this.modoEdicao) {
-            this.pedidoService.alterar(this.pedidoId!, pedidoData).subscribe(() => {
-                alert('Pedido alterado com sucesso!');
-                this.voltar();
+            this.pedidoService.alterar(this.pedidoId!, pedidoData).subscribe({
+                next: () => {
+                    alert('Pedido alterado com sucesso!');
+                    this.voltar();
+                },
+                error: (err) => {
+                    console.error('Erro ao alterar pedido', err);
+                    alert('Erro ao salvar as alterações do pedido. Verifique os dados e tente novamente.');
+                }
             });
         } else {
-            this.pedidoService.salvar(pedidoData).subscribe(salvo => {
-                this.pedidoId = salvo.id;
-                this.exibirSucesso = true;
+            this.pedidoService.salvar(pedidoData).subscribe({
+                next: (salvo) => {
+                    this.pedidoId = salvo.id;
+                    if (pedidoData.pagamentoOnline) {
+                        const proximo = salvo.pagamentos?.find((p: any) => p.pagamentoOnline && !p.pago);
+                        this.router.navigate(['/pedidos/pix', salvo.id], { 
+                            queryParams: proximo ? { pagamentoId: proximo.id } : {} 
+                        });
+                    } else {
+                        // Se não for online, volta para a lista passando o ID para mostrar o modal de sucesso (com opção de PDF)
+                        this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: salvo.id } });
+                    }
+                },
+                error: (err) => {
+                    console.error('Erro ao salvar novo pedido', err);
+                    alert('Erro ao criar o novo pedido. Verifique se todos os campos obrigatórios esto preenchidos.');
+                }
             });
         }
     }
@@ -994,13 +1112,17 @@ export class PedidoFormComponent implements OnInit {
         const hoje = new Date().toISOString().split('T')[0];
         const valorRestante = this.calcularValorRestantePagamentos();
         
+        const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
         this.parcelasGeradas.push({
             dataVencimento: hoje,
             valor: valorRestante > 0 ? valorRestante : 0,
             valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorRestante > 0 ? valorRestante : 0),
             pago: false,
-            formaPagamentoId: this.pedidoForm.get('formaPagamentoId')?.value
+            formaPagamentoId: formaId,
+            formaPagamentoDescricao: this.formasPagamento.find(f => f.id == formaId)?.descricao,
+            pagamentoOnline: this.pedidoForm.get('pagamentoOnline')?.value || false
         });
+        this.descontoManual = false;
         this.quantidadeParcelas = this.parcelasGeradas.length;
     }
 
@@ -1062,12 +1184,81 @@ export class PedidoFormComponent implements OnInit {
     }
 
     private posGeracaoSucesso(): void {
-        const formValue = this.pedidoForm.getRawValue();
-        if (formValue.pagamentoOnline && this.pedidoId) {
-            this.router.navigate(['/pedidos/pix', this.pedidoId]);
+        const proximo = this.parcelasGeradas.find(p => !p.pago && p.pagamentoOnline);
+        if (proximo && this.pedidoId) {
+            this.router.navigate(['/pedidos/pix', this.pedidoId], { queryParams: { pagamentoId: proximo.id } });
         } else {
             this.voltar();
         }
+    }
+
+    togglePagamentoOnlineParcela(p: any): void {
+        if (!this.isAdmin) return;
+        p.pagamentoOnline = !p.pagamentoOnline;
+    }
+
+    verificarPagamentoManualParcela(p: any): void {
+        if (!this.isAdmin || !p.id) return;
+        
+        this.pedidoService.verificarPagamentoManual(p.id).subscribe({
+            next: (res) => {
+                alert(`Status da parcela: ${res.status || 'OK'}`);
+                this.carregarPedido(this.pedidoId!);
+            },
+            error: (err) => {
+                console.error('Erro ao verificar parcela', err);
+                alert('Erro ao verificar status no Mercado Pago.');
+            }
+        });
+    }
+
+    podeExibirPix(p: any, index: number): boolean {
+        // Regra 1: Deve ser um pagamento salvo, online, pendente e de forma PIX
+        const isPix = p.formaPagamentoDescricao?.toUpperCase().includes('PIX');
+        if (!p.id || !p.pagamentoOnline || !p.pagamentoOnlineSalvo || p.pago || !isPix) return false;
+        
+        // Regra 2: Só exibe se todas as parcelas PIX Online ANTERIORES já estiverem pagas
+        for (let j = 0; j < index; j++) {
+            const anterior = this.parcelasGeradas[j];
+            const anteriorIsPix = anterior.formaPagamentoDescricao?.toUpperCase().includes('PIX');
+            if (anterior.pagamentoOnline && anterior.pagamentoOnlineSalvo && anteriorIsPix && !anterior.pago) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    podeExibirSincronizacao(p: any): boolean {
+        // Só habilita se o pagamento já estiver salvo e for online pendente E for PIX
+        return !!p.id && !!p.pagamentoOnline && !!p.pagamentoOnlineSalvo && !p.pago && this.isPix(p);
+    }
+
+    podeExibirNotificacaoPix(p: any): boolean {
+        // Regra: Admin, online já salvo, pendente, com ID e de forma PIX
+        return this.isAdmin && !!p.pagamentoOnline && !!p.pagamentoOnlineSalvo && !p.pago && !!p.id && this.isPix(p);
+    }
+
+    visualizarPixParcela(p: any): void {
+        if (!p.id || !this.pedidoId) return;
+        this.router.navigate(['/pedidos/pix', this.pedidoId], { queryParams: { pagamentoId: p.id } });
+    }
+
+    notificarCobrancaPix(p: any): void {
+        if (!this.pedidoId || !p.id) return;
+        
+        this.pedidoService.notificarCobrancaPix(this.pedidoId, p.id).subscribe({
+            next: () => {
+                alert('E-mail de cobrança enviado com sucesso para o cliente!');
+            },
+            error: (err) => {
+                console.error('Erro ao enviar e-mail de cobrança', err);
+                alert('Erro ao enviar e-mail: ' + (err.error?.message || err.message));
+            }
+        });
+    }
+
+    isPix(p: any): boolean {
+        return !!p.formaPagamentoDescricao?.toUpperCase().includes('PIX');
     }
 
     visualizarImagem(produto: any): void {

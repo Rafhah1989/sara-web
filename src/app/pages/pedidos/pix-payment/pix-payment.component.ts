@@ -10,10 +10,12 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class PixPaymentComponent implements OnInit, OnDestroy {
   pedidoId: number | null = null;
+  pagamentoId: number | null = null;
   pixCopiaECola: string = '';
   pixQrCodeBase64: string = '';
   loading: boolean = true;
   totalPedido: number = 0;
+  totalParcela: number = 0;
   erroGeracao: boolean = false;
   tempoRestante: string = '';
   timer: any;
@@ -21,6 +23,9 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   loadingGeracao: boolean = false;
   erroSituacaoPendente: boolean = false;
   isAdmin: boolean = false;
+  mensagemErro: string = '';
+  pagamentoConfirmado: boolean = false;
+  pollingTimer: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -32,9 +37,12 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isAdmin = this.authService.getRoleDoToken() === 'ADMIN';
     const id = this.route.snapshot.paramMap.get('id');
+    const pagId = this.route.snapshot.queryParamMap.get('pagamentoId');
     if (id) {
       this.pedidoId = +id;
+      if (pagId) this.pagamentoId = +pagId;
       this.carregarDadosPix();
+      this.iniciarPollingStatus();
     } else {
       this.router.navigate(['/pedidos']);
     }
@@ -44,30 +52,42 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     if (!this.pedidoId) return;
     this.loading = true;
     this.erroGeracao = false;
+    this.mensagemErro = '';
     
     this.pedidoService.buscarPorId(this.pedidoId).subscribe({
       next: (pedido) => {
-        if (!this.isAdmin && pedido.situacao === 'PENDENTE') {
-          this.erroSituacaoPendente = true;
+
+        this.totalPedido = pedido.valorTotal || 0;
+
+        let pagamento = null;
+        if (this.pagamentoId) {
+          pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
+        } else {
+          // Se não passou ID, pega o primeiro PIX online pendente
+          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+        }
+
+        if (!pagamento) {
+          this.erroGeracao = true;
           this.loading = false;
           return;
         }
-        if (pedido.dataExpiracaoPix) {
-          this.dataExpiracao = new Date(pedido.dataExpiracaoPix);
-          if (this.dataExpiracao < new Date() && !pedido.pago) {
-            this.tentarGerarPix(false); // Passa false para não mostrar spinner se já carregou os dados
+
+        if (pagamento.dataExpiracaoPix) {
+          this.dataExpiracao = new Date(pagamento.dataExpiracaoPix);
+          if (this.dataExpiracao < new Date() && !pagamento.pago) {
+            this.tentarGerarPix(false);
             return;
           }
           this.iniciarTimer();
         }
 
-        if (!pedido.pixQrCode && !pedido.pago && pedido.pagamentoOnline) {
-          // Se não tem QR Code mas deveria ter, tenta gerar
+        if (!pagamento.pixQrCode && !pagamento.pago && pagamento.pagamentoOnline) {
           this.tentarGerarPix();
         } else {
-          this.pixCopiaECola = pedido.pixCopiaECola || '';
-          this.pixQrCodeBase64 = pedido.pixQrCode || '';
-          this.totalPedido = pedido.valorTotal || 0;
+          this.pixCopiaECola = pagamento.pixCopiaECola || '';
+          this.pixQrCodeBase64 = pagamento.pixQrCode || '';
+          this.totalParcela = pagamento.valor || 0;
           this.loading = false;
         }
       },
@@ -75,26 +95,38 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
         console.error('Erro ao carregar dados do PIX', err);
         this.loading = false;
         this.erroGeracao = true;
+        this.mensagemErro = err.error?.message || err.message || 'Erro ao carregar dados do PIX';
       }
     });
   }
 
-  tentarGerarPix(showLoading: boolean = true): void {
+  tentarGerarPix(showLoading: boolean = true, skipSpinner: boolean = false): void {
     if (!this.pedidoId || this.loadingGeracao) return;
     
     if (this.timer) clearInterval(this.timer);
     if (showLoading) this.loading = true;
     this.loadingGeracao = true;
 
-    this.pedidoService.gerarPix(this.pedidoId).subscribe({
+    this.pedidoService.gerarPix(this.pedidoId, this.pagamentoId as number, skipSpinner).subscribe({
       next: (pedido) => {
-        this.pixCopiaECola = pedido.pixCopiaECola || '';
-        this.pixQrCodeBase64 = pedido.pixQrCode || '';
-        this.totalPedido = pedido.valorTotal || 0;
-        if (pedido.dataExpiracaoPix) {
-          this.dataExpiracao = new Date(pedido.dataExpiracaoPix);
-          this.iniciarTimer();
+        let pagamento = null;
+        if (this.pagamentoId) {
+          pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
+        } else {
+          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
         }
+
+        if (pagamento) {
+          this.pixCopiaECola = pagamento.pixCopiaECola || '';
+          this.pixQrCodeBase64 = pagamento.pixQrCode || '';
+          this.totalParcela = pagamento.valor || 0;
+          if (pagamento.dataExpiracaoPix) {
+            this.dataExpiracao = new Date(pagamento.dataExpiracaoPix);
+            this.iniciarTimer();
+          }
+        }
+        
+        this.totalPedido = pedido.valorTotal || 0;
         this.loading = false;
         this.loadingGeracao = false;
         
@@ -107,6 +139,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.loadingGeracao = false;
         this.erroGeracao = true;
+        this.mensagemErro = err.error?.message || err.message || 'Erro ao gerar PIX';
       }
     });
   }
@@ -124,7 +157,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
       if (diferenca <= 0) {
         this.tempoRestante = 'EXPIRADO';
         clearInterval(this.timer);
-        this.tentarGerarPix(false); // Regera sem spinner silenciosamente
+        this.tentarGerarPix(false, true); // Regera sem spinner silenciosamente
       } else {
         const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
         const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
@@ -135,6 +168,33 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.timer) clearInterval(this.timer);
+    if (this.pollingTimer) clearInterval(this.pollingTimer);
+  }
+
+  iniciarPollingStatus(): void {
+    if (this.pollingTimer) clearInterval(this.pollingTimer);
+    
+    this.pollingTimer = setInterval(() => {
+        if (!this.pedidoId || this.pagamentoConfirmado) return;
+        
+        this.pedidoService.buscarPorId(this.pedidoId, true).subscribe({
+            next: (pedido) => {
+                let pagamento = null;
+                if (this.pagamentoId) {
+                    pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
+                } else {
+                    pagamento = pedido.pagamentos?.find(p => p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+                }
+
+                if (pagamento && pagamento.pago) {
+                    this.pagamentoConfirmado = true;
+                    if (this.timer) clearInterval(this.timer);
+                    if (this.pollingTimer) clearInterval(this.pollingTimer);
+                    this.loading = false;
+                }
+            }
+        });
+    }, 5000); // Verifica a cada 5 segundos
   }
 
   copiarPix(): void {

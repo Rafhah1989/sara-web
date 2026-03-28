@@ -35,7 +35,7 @@ export class CarrinhoComponent implements OnInit {
   opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
   opcaoParcelamentoSelecionada?: OpcaoParcelamento;
   quantidadeParcelas: number = 1;
-  parcelasGeradas: { dataVencimento: string, valor: number, pago: boolean }[] = [];
+  parcelasGeradas: { dataVencimento: string, valor: number, pago: boolean, pagamentoOnline?: boolean }[] = [];
 
   exibirModalLimpar: boolean = false;
   exibirModalGerarPedido: boolean = false;
@@ -323,7 +323,8 @@ export class CarrinhoComponent implements OnInit {
           this.parcelasGeradas.push({
               dataVencimento: data.toISOString().split('T')[0],
               valor: v,
-              pago: false
+              pago: false,
+              pagamentoOnline: this.pagamentoOnline
           });
       }
   }
@@ -434,10 +435,13 @@ export class CarrinhoComponent implements OnInit {
       const usuarioId = this.authService.getUsuarioIdDoToken();
       if (!usuarioId) return;
 
+      const descFormaAplicado = (Number(this.quantidadeParcelas) === 1 && this.ativarDescontoAVista) ? this.descontoForma : 0;
+      const descontoTotalPedido = this.descontoUsuario + descFormaAplicado;
+
       const novoPedido = {
           usuarioId: usuarioId,
           formaPagamentoId: this.formaPagamentoSelecionada,
-          desconto: (this.descontoUsuario + this.descontoForma),
+          desconto: descontoTotalPedido,
           frete: this.freteSugerido,
           valorTotal: this.valorTotalGeral,
           observacao: this.observacaoPedido,
@@ -448,8 +452,16 @@ export class CarrinhoComponent implements OnInit {
               quantidade: item.quantidade,
               valor: item.produtoPreco
           })),
-          pagamentos: this.parcelasGeradas.length > 0 ? this.parcelasGeradas : [
-              { dataVencimento: new Date().toISOString().split('T')[0], valor: this.valorTotalGeral, pago: false }
+          pagamentos: this.parcelasGeradas.length > 0 ? this.parcelasGeradas.map(p => ({
+              ...p,
+              pagamentoOnline: this.pagamentoOnline
+          })) : [
+              { 
+                  dataVencimento: new Date().toISOString().split('T')[0], 
+                  valor: this.valorTotalGeral, 
+                  pago: false,
+                  pagamentoOnline: this.pagamentoOnline
+              }
           ]
       };
 
@@ -459,7 +471,11 @@ export class CarrinhoComponent implements OnInit {
                   next: () => {
                       this.fecharModalGerarPedido();
                       if (novoPedido.pagamentoOnline) {
-                          this.router.navigate(['/pedidos/pix', res.id]);
+                          // Tenta encontrar a primeira parcela online para passar o ID
+                          const proximo = res.pagamentos?.find((p: any) => p.pagamentoOnline && !p.pago);
+                          this.router.navigate(['/pedidos/pix', res.id], { 
+                              queryParams: proximo ? { pagamentoId: proximo.id } : {} 
+                          });
                       } else {
                           this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: res.id } });
                       }

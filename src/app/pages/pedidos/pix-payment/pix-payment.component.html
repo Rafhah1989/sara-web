@@ -1,8 +1,9 @@
 <div class="pix-container" *ngIf="!loading; else spinner">
-  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao">
+  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao && !pagamentoConfirmado">
     <div class="pix-header" style="text-align: center;">
       <h2 class="cinzel-font color-primary-gold-dark">Pagamento via PIX</h2>
-      <p>Pedido <strong>#{{ pedidoId }}</strong> - Total: <strong>{{ totalPedido | currency:'BRL' }}</strong></p>
+      <p>Pedido <strong>#{{ pedidoId }}</strong> - Valor da Parcela: <strong>{{ totalParcela | currency:'BRL' }}</strong></p>
+      <p *ngIf="totalPedido !== totalParcela" style="font-size: 0.9rem; color: #777;">Valor Total do Pedido: {{ totalPedido | currency:'BRL' }}</p>
       
       <div class="pix-timer" *ngIf="tempoRestante" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
         <i class="fa fa-clock-o"></i> 
@@ -37,6 +38,23 @@
     </div>
   </div>
 
+  <!-- Estado de Pagamento Confirmado (Sucesso) -->
+  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && pagamentoConfirmado">
+    <div class="success-content" style="text-align: center; padding: 40px 20px;">
+      <i class="fa fa-check-circle fa-5x" style="color: #28a745; margin-bottom: 20px;"></i>
+      <h2 class="cinzel-font" style="color: #28a745;">Pagamento Confirmado!</h2>
+      <p style="font-size: 1.2rem; margin-top: 15px; color: #555;">
+        Recebemos a confirmação do seu pagamento para o pedido <strong>#{{ pedidoId }}</strong>.
+      </p>
+      <p style="color: #666; margin-top: 10px;">
+        Sua parcela foi baixada com sucesso. Você já pode acompanhar o andamento na sua área de pedidos.
+      </p>
+      <div style="margin-top: 30px;">
+        <button class="btn-gold" (click)="irParaListagem()">Ver Meus Pedidos</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Estado de Aguardando Confirmação -->
   <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && erroSituacaoPendente">
     <div class="pix-header" style="text-align: center;">
@@ -65,8 +83,8 @@
     <div class="error-content">
       <i class="fa fa-exclamation-triangle error-icon"></i>
       <h2 class="cinzel-font color-primary-gold-dark">Erro ao Gerar PIX</h2>
-      <p>Ocorreu um problema ao gerar os dados para pagamento PIX no momento.</p>
-      <p class="instruction">Por favor, tente visualizar novamente em alguns minutos ou finalize o pagamento na entrega.</p>
+      <p>{{ mensagemErro || 'Ocorreu um problema ao gerar os dados para pagamento PIX no momento.' }}</p>
+      <p class="instruction" *ngIf="!mensagemErro">Por favor, tente visualizar novamente em alguns minutos ou finalize o pagamento na entrega.</p>
       
       <div class="actions">
         <button class="btn-gold" (click)="irParaListagem()">

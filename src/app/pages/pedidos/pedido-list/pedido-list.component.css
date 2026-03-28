@@ -245,7 +245,26 @@
     transition: all 0.3s ease;
     border: none;
     font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
+
+.btn-modal:disabled {
+    background: #e0e0e0 !important;
+    color: #9e9e9e !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.btn-save-invoice {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white;
+}
+
 
 .btn-modal-cancel {
     background: linear-gradient(135deg, #f06157 0%, #ee2432 100%);
@@ -300,9 +319,42 @@
     transition: all 0.3s;
 }
 
-.btn-outline:hover {
+.btn-outline:disabled {
+    border-color: #ddd !important;
+    color: #999 !important;
+    background: #f9f9f9 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+.btn-outline-purple {
+    width: 100%;
+    border: 2px solid #6f42c1;
+    color: #6f42c1;
+    font-weight: 600;
+}
+
+.btn-outline-green {
+    width: 100% !important;
+    margin-top: 5px !important;
+    border: 2px solid #28a745 !important;
+    color: #28a745 !important;
+    font-weight: 600 !important;
+}
+
+.btn-outline:hover:not(:disabled) {
     background: rgba(0, 123, 255, 0.1);
 }
+
+.btn-outline-purple:hover:not(:disabled) {
+    background: rgba(111, 66, 193, 0.1);
+}
+
+.btn-outline-green:hover:not(:disabled) {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+
 
 .btn-danger {
     background: #dc3545;
@@ -313,9 +365,22 @@
     transition: all 0.3s;
 }
 
-.btn-danger:hover {
+.btn-full-width {
+    width: 100% !important;
+    padding: 10px !important;
+    margin-top: 5px !important;
+}
+
+.btn-danger:hover:not(:disabled) {
     background: #c82333;
 }
+
+.btn-danger:disabled {
+    background: #e0e0e0 !important;
+    color: #9e9e9e !important;
+    cursor: not-allowed !important;
+}
+
 
 .select-situacao-tabela {
     width: 140px;
@@ -637,3 +702,13 @@
     .text-right { text-align: right !important; }
 }
 @media (max-width: 768px) { .select-situacao-tabela { width: 105px !important; padding: 2px 4px !important; font-size: 0.75rem !important; height: auto !important; } }
+
+.input-nota-small {
+    width: 50% !important;
+}
+
+@media (max-width: 768px) {
+    .input-nota-small {
+        width: 100% !important;
+    }
+}

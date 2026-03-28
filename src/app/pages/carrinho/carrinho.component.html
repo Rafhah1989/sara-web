@@ -126,6 +126,20 @@
                     </label>
                 </div>
 
+                <!-- Pagamento Online (Opcional para ENTREGA_E_ONLINE com PIX) -->
+                <div class="online-payment-option mt-15" *ngIf="deveMostrarCampoPagamentoOnline()">
+                    <div class="online-payment-card" style="background: #fdf8e6; padding: 12px; border-radius: 8px; border: 1px solid #d4af37;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
+                            <input type="checkbox" [(ngModel)]="pagamentoOnline" (change)="gerarParcelasPreview()" 
+                                   style="width: 18px; height: 18px; margin: 0;">
+                            <span style="font-weight: bold; color: #333; font-size: 0.95rem;">Pagamento Online (Gerar QR Code)</span>
+                        </label>
+                        <p style="margin: 5px 0 0 28px; font-size: 0.8rem; color: #666; line-height: 1.2;">
+                            O QR Code será gerado imediatamente após clicar em "Confirmar Pedido".
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Parcelamento -->
                 <div class="installment-selection mt-15" *ngIf="permitirParcelamento && opcaoParcelamentoSelecionada">
                     <h4>Condições de Parcelamento</h4>

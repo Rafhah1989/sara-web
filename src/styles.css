@@ -92,8 +92,16 @@ ul {
   font-size: 18px;
 }
 
-.btn-gold:hover {
+.btn-gold:hover:not(:disabled) {
   background-color: var(--primary-gold-dark);
+}
+
+.btn-gold:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Global Form Controls */

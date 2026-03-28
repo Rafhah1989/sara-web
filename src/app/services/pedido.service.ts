@@ -3,6 +3,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface Pagamento {
+    id?: number;
+    formaPagamentoId?: number;
+    formaPagamentoDescricao?: string;
+    dataVencimento: string;
+    pago: boolean;
+    valor: number;
+    pagamentoOnline?: boolean;
+    pixCopiaECola?: string;
+    pixQrCode?: string;
+    mercadopagoPagamentoId?: string;
+    dataExpiracaoPix?: string;
+}
+
 export interface Pedido {
     id: number;
     usuarioId: number;
@@ -19,13 +33,11 @@ export interface Pedido {
     dataPedido: string;
     pago: boolean;
     pagamentoOnline: boolean;
-    mercadopagoPagamentoId?: string;
-    pixCopiaECola?: string;
-    pixQrCode?: string;
-    dataExpiracaoPix?: string;
     notaFiscalPath?: string;
+    numeroNotaFiscal?: string;
+    dataFaturamento?: string;
     produtos?: PedidoProduto[];
-    pagamentos?: any[];
+    pagamentos?: Pagamento[];
 }
 
 export interface PedidoProduto {
@@ -66,8 +78,10 @@ export class PedidoService {
         return this.http.get<any>(this.apiUrl, { params });
     }
 
-    buscarPorId(id: number): Observable<Pedido> {
-        return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
+    buscarPorId(id: number, skipSpinner: boolean = false): Observable<Pedido> {
+        let params = new HttpParams();
+        if (skipSpinner) params = params.set('skipSpinner', 'true');
+        return this.http.get<Pedido>(`${this.apiUrl}/${id}`, { params });
     }
 
     salvar(pedido: any): Observable<Pedido> {
@@ -115,22 +129,36 @@ export class PedidoService {
         return this.http.patch<void>(`${this.apiUrl}/${id}/status-pago`, { pago });
     }
 
-    verificarPagamentoManual(id: number): Observable<any> {
-        return this.http.post<any>(`${environment.apiUrl}/mercadopago/verificar-pagamento/${id}`, {});
+    verificarPagamentoManual(idPagamento: number): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/mercadopago/verificar-pagamento/${idPagamento}`, {});
     }
 
-    gerarPix(id: number): Observable<Pedido> {
-        return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pix`, {});
+    gerarPix(id: number, pagamentoId?: number, skipSpinner: boolean = false): Observable<Pedido> {
+        let params = new HttpParams();
+        if (pagamentoId) {
+            params = params.set('pagamentoId', pagamentoId.toString());
+        }
+        if (skipSpinner) {
+            params = params.set('skipSpinner', 'true');
+        }
+        return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pix`, {}, { params });
     }
 
-    uploadNotaFiscal(id: number, file: File, notificar: boolean): Observable<void> {
+    uploadNotaFiscal(id: number, numeroNotaFiscal: string, file: File | null, notificar: boolean): Observable<void> {
         const formData = new FormData();
-        formData.append('file', file);
+        if (file) {
+            formData.append('file', file);
+        }
+        formData.append('numeroNotaFiscal', numeroNotaFiscal);
         return this.http.post<void>(`${this.apiUrl}/${id}/nota-fiscal?notificar=${notificar}`, formData);
     }
 
     enviarEmailNotaFiscal(id: number): Observable<void> {
         return this.http.post<void>(`${this.apiUrl}/${id}/nota-fiscal/notificar`, {});
+    }
+
+    notificarCobrancaPix(id: number, pagamentoId: number): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/pagamentos/${pagamentoId}/notificar-pix`, {});
     }
 
     excluirNotaFiscal(id: number): Observable<void> {

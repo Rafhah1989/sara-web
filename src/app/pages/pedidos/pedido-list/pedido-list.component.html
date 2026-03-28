@@ -158,12 +158,12 @@
                                 <i class="fa fa-file-pdf"></i>
                             </button>
                             <button class="btn-action btn-pix" title="Visualizar PIX"
-                                *ngIf="!pedido.pago && pedido.pagamentoOnline && (isAdmin || pedido.situacao !== 'PENDENTE')" (click)="visualizarPix(pedido.id)">
+                                *ngIf="!pedido.pago && getProximoPagamentoPix(pedido)" (click)="visualizarPix(pedido)">
                                 <i class="fa fa-qrcode"></i>
                             </button>
                             <button class="btn-action btn-sync" title="Sincronizar Mercado Pago"
-                                *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline"
-                                (click)="verificarPagamentoManual(pedido.id)">
+                                *ngIf="isAdmin && !pedido.pago && temPagamentoPixOnlinePendente(pedido)"
+                                (click)="verificarPagamentoManual(pedido)">
                                 <i class="fa fa-sync"></i>
                             </button>
                             <button class="btn-action btn-edit" title="Editar/Visualizar"
@@ -192,8 +192,8 @@
                             </button>
                             <div class="actions-menu" *ngIf="itemMenuAberto === pedido.id">
                                 <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF</button>
-                                <button *ngIf="!pedido.pago && pedido.pagamentoOnline && (isAdmin || pedido.situacao !== 'PENDENTE')" (click)="visualizarPix(pedido.id)"><i class="fa fa-qrcode"></i> PIX</button>
-                                <button *ngIf="isAdmin && !pedido.pago && pedido.pagamentoOnline" (click)="verificarPagamentoManual(pedido.id)"><i class="fa fa-sync"></i> Sync MP</button>
+                                <button *ngIf="!pedido.pago && getProximoPagamentoPix(pedido)" (click)="visualizarPix(pedido)"><i class="fa fa-qrcode"></i> PIX</button>
+                                <button *ngIf="isAdmin && !pedido.pago && temPagamentoPixOnlinePendente(pedido)" (click)="verificarPagamentoManual(pedido)"><i class="fa fa-sync"></i> Sync MP</button>
                                 <button (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado"><i class="fa fa-pencil-alt"></i> Detalhes</button>
                                 <button *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))" 
                                     (click)="cancelarPedido(pedido)" class="text-danger"><i class="fa fa-trash-alt"></i> Cancelar</button>
@@ -290,7 +290,12 @@
             pedidoParaNotaFiscal?.id }}</h2>
 
         <div *ngIf="!pedidoParaNotaFiscal?.notaFiscalPath">
-            <p style="margin-bottom: 20px;">Anexe o arquivo PDF da nota fiscal para este pedido.</p>
+            <p style="margin-bottom: 20px;">Anexe o arquivo PDF da nota fiscal para este pedido e informe o número.</p>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="numeroNota" style="display: block; margin-bottom: 8px; font-weight: bold; color: #444;">Número da Nota Fiscal <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="numeroNota" [(ngModel)]="numeroNotaFiscal" class="form-control input-nota-small" placeholder="Informe o número da nota" required>
+            </div>
 
             <div class="file-input-wrapper" (click)="fileInput.click()" (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.drag-over]="isDragging">
@@ -317,9 +322,8 @@
             <div class="d-flex justify-content-end" style="gap: 15px; margin-top: 25px;">
                 <button class="btn-modal btn-modal-back" (click)="fecharModalNotaFiscal()"
                     [disabled]="uploadingNotaFiscal">Voltar</button>
-                <button class="btn-modal"
-                    style="margin-left: 10px;background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white;"
-                    (click)="salvarNotaFiscal()" [disabled]="!arquivoSelecionado || uploadingNotaFiscal">
+                <button class="btn-modal btn-save-invoice" style="margin-left: 10px;"
+                    (click)="salvarNotaFiscal()" [disabled]="!numeroNotaFiscal || !arquivoSelecionado || uploadingNotaFiscal">
                     <i class="fa fa-save"></i> {{ uploadingNotaFiscal ? 'Enviando...' : 'Salvar Nota' }}
                 </button>
             </div>
@@ -328,19 +332,27 @@
         <div *ngIf="pedidoParaNotaFiscal?.notaFiscalPath">
             <p style="margin-bottom: 20px; color: #28a745; font-weight: bold;">Este pedido já possui uma Nota Fiscal
                 vinculada.</p>
-            <p style="margin-bottom: 25px;">Você pode visualizar o arquivo atual ou removê-lo para anexar um novo.</p>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="numeroNotaEdit" style="display: block; margin-bottom: 8px; font-weight: bold; color: #444;">Número da Nota Fiscal</label>
+                <input type="text" id="numeroNotaEdit" [(ngModel)]="numeroNotaFiscal" class="form-control input-nota-small" placeholder="Informe o número da nota">
+            </div>
+
+            <p style="margin-bottom: 20px;">Você pode visualizar o arquivo atual, alterar o número ou removê-lo para anexar um novo.</p>
 
             <div class="d-flex flex-column" style="gap: 12px;">
+                <button class="btn-outline btn-outline-purple" (click)="salvarNotaFiscal()" 
+                    [disabled]="uploadingNotaFiscal || !numeroNotaFiscal || (numeroNotaFiscal === pedidoParaNotaFiscal?.numeroNotaFiscal && !arquivoSelecionado)">
+                    <i class="fa fa-save"></i> Salvar Alterações (Número/Arquivo)
+                </button>
                 <button class="btn btn-outline" (click)="visualizarNotaFiscal(pedidoParaNotaFiscal!)"
                     style="width: 100%; border: 2px solid #007bff; color: #007bff;">
                     <i class="fa fa-eye"></i> Visualizar Nota Atual
                 </button>
-                <button class="btn btn-outline" (click)="reenviarEmailNotaFiscal()" [disabled]="uploadingNotaFiscal"
-                    style="margin-top: 5px; width: 100%; border: 2px solid #28a745; color: #28a745;">
+                <button class="btn-outline btn-outline-green" (click)="reenviarEmailNotaFiscal()" [disabled]="uploadingNotaFiscal">
                     <i class="fa fa-paper-plane"></i> Reenviar E-mail de Notificação
                 </button>
-                <button class="btn btn-danger" (click)="excluirNotaFiscal()" [disabled]="uploadingNotaFiscal"
-                    style="margin-top: 5px; width: 100%; padding: 10px;">
+                <button class="btn-danger btn-full-width" (click)="excluirNotaFiscal()" [disabled]="uploadingNotaFiscal">
                     <i class="fa fa-trash-alt"></i> Excluir e Desvincular Nota
                 </button>
             </div>

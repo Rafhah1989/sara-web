@@ -54,7 +54,7 @@
                 <div class="form-group">
                     <label>Desconto (%)</label>
                     <input type="number" formControlName="desconto" (input)="onDescontoManualChange()"
-                        placeholder="0.00">
+                        placeholder="0.00" min="0">
                 </div>
 
                 <div class="form-group">
@@ -111,7 +111,7 @@
                     <div class="online-payment-confirm"
                         style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline"
+                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline" (change)="onPagamentoOnlineChange()"
                                 style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
                             <label for="pagamentoOnline"
                                 style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
@@ -158,8 +158,9 @@
                                         <th>Valor</th>
                                         <th>Vencimento</th>
                                         <th>Forma</th>
+                                        <th *ngIf="isAdmin" class="text-center">Online</th>
                                         <th>Status</th>
-                                        <th *ngIf="isAdmin" style="width: 50px;"></th>
+                                        <th *ngIf="isAdmin">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -191,25 +192,48 @@
                                                     }}</span>
                                             </span>
                                         </td>
-                                        <td>
-                                            <button type="button" class="badge"
-                                                [ngClass]="p.pago ? 'badge-success' : 'badge-warning'" *ngIf="isAdmin"
-                                                style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; border: none; cursor: pointer; min-width: 80px;"
-                                                (click)="toggleParcelaPago(p)">
-                                                {{ p.pago ? 'PAGO' : 'PENDENTE' }}
-                                            </button>
-                                            <span class="badge" [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
-                                                *ngIf="!isAdmin"
-                                                style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-block; min-width: 80px; text-align: center;">
-                                                {{ p.pago ? 'PAGO' : 'PENDENTE' }}
-                                            </span>
+                                        <td *ngIf="isAdmin" class="text-center">
+                                            <input type="checkbox" [(ngModel)]="p.pagamentoOnline" 
+                                                   [ngModelOptions]="{standalone: true}"
+                                                   style="width: 18px; height: 18px; cursor: pointer;">
                                         </td>
-                                        <td *ngIf="isAdmin">
-                                            <button type="button" class="btn-remove-parc"
-                                                (click)="removerPagamentoManual(i)" title="Remover Pagamento">
-                                                <i class="fa fa-times-circle"
-                                                    style="color: #dc3545; font-size: 1.2rem;"></i>
-                                            </button>
+                                        <td>
+                                            <div class="d-flex flex-column gap-1">
+                                                <button type="button" class="badge"
+                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'" *ngIf="isAdmin"
+                                                    style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; border: none; cursor: pointer; min-width: 80px;"
+                                                    (click)="toggleParcelaPago(p)">
+                                                    {{ p.pago ? 'PAGO' : 'PENDENTE' }}
+                                                </button>
+                                                <span class="badge" [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
+                                                    *ngIf="!isAdmin"
+                                                    style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-block; min-width: 80px; text-align: center;">
+                                                    {{ p.pago ? 'PAGO' : 'PENDENTE' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <button type="button" class="btn-action btn-sync" 
+                                                        *ngIf="podeExibirSincronizacao(p) && isAdmin"
+                                                        (click)="verificarPagamentoManualParcela(p)" title="Validar Mercado Pago">
+                                                    <i class="fa fa-sync"></i>
+                                                </button>
+                                                <button type="button" class="btn-action btn-email" 
+                                                        *ngIf="podeExibirNotificacaoPix(p)"
+                                                        (click)="notificarCobrancaPix(p)" title="Enviar Cobrança PIX por E-mail">
+                                                    <i class="fa fa-envelope"></i>
+                                                </button>
+                                                <button type="button" class="btn-action btn-pix" 
+                                                        *ngIf="podeExibirPix(p, i)"
+                                                        (click)="visualizarPixParcela(p)" title="Ver PIX">
+                                                    <i class="fa fa-qrcode"></i>
+                                                </button>
+                                                <button type="button" class="btn-action btn-cancel" *ngIf="isAdmin"
+                                                    (click)="removerPagamentoManual(i)" title="Remover Pagamento">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>

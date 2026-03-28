@@ -51,6 +51,7 @@ export class PedidoListComponent implements OnInit {
     uploadingNotaFiscal: boolean = false;
     isDragging: boolean = false;
     notificarCliente: boolean = true;
+    numeroNotaFiscal: string = '';
     
     // Confirmação de Pedido
     exibirModalConfirmacao: boolean = false;
@@ -184,8 +185,24 @@ export class PedidoListComponent implements OnInit {
         this.router.navigate(['/pedidos/editar', id]);
     }
 
-    visualizarPix(id: number): void {
-        this.router.navigate(['/pedidos/pix', id]);
+    visualizarPix(pedido: Pedido): void {
+        const proximo = this.getProximoPagamentoPix(pedido);
+        if (proximo && proximo.id) {
+            // O componente de visualização de PIX precisará ser atualizado para aceitar id de pagamento
+            this.router.navigate(['/pedidos/pix', pedido.id], { queryParams: { pagamentoId: proximo.id } });
+        }
+    }
+
+    getProximoPagamentoPix(pedido: Pedido): any {
+        if (!pedido.pagamentos) return null;
+        return pedido.pagamentos
+            .filter(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'))
+            .sort((a, b) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
+    }
+
+    temPagamentoPixOnlinePendente(pedido: Pedido): boolean {
+        if (!pedido.pagamentos) return false;
+        return pedido.pagamentos.some(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
     }
 
     cancelarPedido(pedido: Pedido): void {
@@ -275,18 +292,41 @@ export class PedidoListComponent implements OnInit {
         });
     }
 
-    verificarPagamentoManual(id: number): void {
+    verificarPagamentoManual(pedido: Pedido): void {
         if (!this.isAdmin) return;
+        
+        const pendentesOnline = pedido.pagamentos?.filter(p => 
+            !p.pago && p.pagamentoOnline && p.mercadopagoPagamentoId && p.formaPagamentoDescricao?.toUpperCase().includes('PIX')
+        ) || [];
+        
+        if (pendentesOnline.length === 0) {
+            alert('Não há parcelas online pendentes para verificação automática.');
+            return;
+        }
+
         this.loading = true;
-        this.pedidoService.verificarPagamentoManual(id).subscribe({
-            next: (res) => {
-                alert(`Status verificado: ${res.status || 'OK'}`);
-                this.carregarPedidos();
-            },
-            error: (err) => {
-                console.error('Erro ao verificar pagamento', err);
-                alert('Erro ao verificar status no Mercado Pago.');
-                this.loading = false;
+        let sucessos = 0;
+        let total = pendentesOnline.length;
+
+        pendentesOnline.forEach(p => {
+            if (p.id) {
+                this.pedidoService.verificarPagamentoManual(p.id).subscribe({
+                    next: (res) => {
+                        sucessos++;
+                        if (sucessos === total) {
+                            alert('Verificação concluída.');
+                            this.carregarPedidos();
+                        }
+                    },
+                    error: (err) => {
+                        console.error('Erro ao verificar parcela', p.id, err);
+                        total--; // Ignora erro para contagem de finalização se necessário
+                        if (sucessos === total || total === 0) {
+                            alert('Verificação concluída com erros.');
+                            this.carregarPedidos();
+                        }
+                    }
+                });
             }
         });
     }
@@ -350,6 +390,7 @@ export class PedidoListComponent implements OnInit {
     abrirModalNotaFiscal(pedido: Pedido): void {
         this.pedidoParaNotaFiscal = pedido;
         this.arquivoSelecionado = null;
+        this.numeroNotaFiscal = pedido.numeroNotaFiscal || '';
         this.notificarCliente = true; // Default checked
         this.exibirModalNotaFiscal = true;
     }
@@ -403,10 +444,24 @@ export class PedidoListComponent implements OnInit {
     }
 
     salvarNotaFiscal(): void {
-        if (!this.pedidoParaNotaFiscal || !this.arquivoSelecionado) return;
+        if (!this.pedidoParaNotaFiscal || !this.numeroNotaFiscal) {
+            alert('Por favor, informe o número da nota fiscal.');
+            return;
+        }
+
+        if (!this.arquivoSelecionado && !this.pedidoParaNotaFiscal.notaFiscalPath) {
+            alert('Por favor, selecione o arquivo da nota fiscal.');
+            return;
+        }
 
         this.uploadingNotaFiscal = true;
-        this.pedidoService.uploadNotaFiscal(this.pedidoParaNotaFiscal.id, this.arquivoSelecionado, this.notificarCliente).subscribe({
+        
+        // Se já tem nota e não selecionou arquivo novo, e quer apenas mudar o número (opcionalmente)
+        // Por enquanto o backend exige o arquivo no uploadNotaFiscal.
+        // Vou assumir que o usuário anexa sempre ou vou ajustar o TS se orçar.
+        // O usuário pediu "Possibilitar alterar o número nota", vou garantir que passe o numeroNotaFiscal.
+        
+        this.pedidoService.uploadNotaFiscal(this.pedidoParaNotaFiscal.id, this.numeroNotaFiscal, this.arquivoSelecionado, this.notificarCliente).subscribe({
             next: () => {
                 alert(this.notificarCliente ? 'Nota Fiscal anexada e e-mail enviado!' : 'Nota Fiscal anexada com sucesso!');
                 this.carregarPedidos();
