@@ -115,12 +115,11 @@
                                 style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
                             <label for="pagamentoOnline"
                                 style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
-                                Pagamento Online via PIX (Gerar QR Code)
+                                Pagamento Online (Gerar {{ getLabelMeioPagamentoOnline() }})
                             </label>
                         </div>
                         <p style="margin: 8px 0 0 30px; font-size: 0.9rem; color: #666;">
-                            Ao marcar esta opção, o QR Code para pagamento será gerado imediatamente após salvar o
-                            pedido.
+                            Ao marcar esta opção, {{ getDescricaoPagamentoOnline() }} imediatamente após salvar o pedido.
                         </p>
                     </div>
                 </div>
@@ -183,8 +182,10 @@
                                         <td>
                                             <select [(ngModel)]="p.formaPagamentoId"
                                                 [ngModelOptions]="{standalone: true}" *ngIf="isAdmin"
+                                                [compareWith]="compareFormas"
+                                                (change)="onFormaPagamentoParcelaChange(p)"
                                                 class="form-select-gold-sm" style="width: 130px;">
-                                                <option *ngFor="let forma of formasPagamento" [value]="forma.id">{{
+                                                <option *ngFor="let forma of formasPagamento" [ngValue]="forma.id">{{
                                                     forma.descricao }}</option>
                                             </select>
                                             <span *ngFor="let f of formasPagamento">
@@ -220,14 +221,15 @@
                                                     <i class="fa fa-sync"></i>
                                                 </button>
                                                 <button type="button" class="btn-action btn-email" 
-                                                        *ngIf="podeExibirNotificacaoPix(p)"
-                                                        (click)="notificarCobrancaPix(p)" title="Enviar Cobrança PIX por E-mail">
+                                                        *ngIf="podeExibirNotificacaoPagamento(p)"
+                                                        (click)="notificarCobrancaPagamento(p)" title="Enviar Cobrança por E-mail">
                                                     <i class="fa fa-envelope"></i>
                                                 </button>
-                                                <button type="button" class="btn-action btn-pix" 
-                                                        *ngIf="podeExibirPix(p, i)"
-                                                        (click)="visualizarPixParcela(p)" title="Ver PIX">
-                                                    <i class="fa fa-qrcode"></i>
+                                                <button *ngIf="podeExibirBotaoPagamento(p, i)"
+                                                    class="btn-action" [ngClass]="isBoleto(p) ? 'btn-pdf' : 'btn-pix'"
+                                                    (click)="visualizarPagamentoOnlineParcela(p)"
+                                                    [title]="isBoleto(p) ? 'Ver Boleto' : 'Ver QR Code PIX'">
+                                                    <i class="fa" [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
                                                 </button>
                                                 <button type="button" class="btn-action btn-cancel" *ngIf="isAdmin"
                                                     (click)="removerPagamentoManual(i)" title="Remover Pagamento">

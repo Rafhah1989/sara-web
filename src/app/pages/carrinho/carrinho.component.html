@@ -132,10 +132,10 @@
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
                             <input type="checkbox" [(ngModel)]="pagamentoOnline" (change)="gerarParcelasPreview()" 
                                    style="width: 18px; height: 18px; margin: 0;">
-                            <span style="font-weight: bold; color: #333; font-size: 0.95rem;">Pagamento Online (Gerar QR Code)</span>
+                            <span style="font-weight: bold; color: #333; font-size: 0.95rem;">Pagamento Online ({{ getLabelMeioPagamentoOnline() }})</span>
                         </label>
                         <p style="margin: 5px 0 0 28px; font-size: 0.8rem; color: #666; line-height: 1.2;">
-                            O QR Code será gerado imediatamente após clicar em "Confirmar Pedido".
+                            {{ getDescricaoPagamentoOnline() }} imediatamente após clicar em "Confirmar Pedido".
                         </p>
                     </div>
                 </div>

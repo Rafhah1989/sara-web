@@ -13,8 +13,11 @@ export interface Pagamento {
     pagamentoOnline?: boolean;
     pixCopiaECola?: string;
     pixQrCode?: string;
+    boletoPdfUrl?: string;
+    boletoLinhaDigitavel?: string;
+    boletoCodigoBarras?: string;
     mercadopagoPagamentoId?: string;
-    dataExpiracaoPix?: string;
+    dataExpiracao?: string;
 }
 
 export interface Pedido {
@@ -133,7 +136,7 @@ export class PedidoService {
         return this.http.post<any>(`${environment.apiUrl}/mercadopago/verificar-pagamento/${idPagamento}`, {});
     }
 
-    gerarPix(id: number, pagamentoId?: number, skipSpinner: boolean = false): Observable<Pedido> {
+    gerarPagamentoOnline(id: number, pagamentoId?: number, skipSpinner: boolean = false): Observable<Pedido> {
         let params = new HttpParams();
         if (pagamentoId) {
             params = params.set('pagamentoId', pagamentoId.toString());
@@ -141,7 +144,7 @@ export class PedidoService {
         if (skipSpinner) {
             params = params.set('skipSpinner', 'true');
         }
-        return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pix`, {}, { params });
+        return this.http.post<Pedido>(`${this.apiUrl}/${id}/gerar-pagamento-online`, {}, { params });
     }
 
     uploadNotaFiscal(id: number, numeroNotaFiscal: string, file: File | null, notificar: boolean): Observable<void> {
@@ -157,8 +160,8 @@ export class PedidoService {
         return this.http.post<void>(`${this.apiUrl}/${id}/nota-fiscal/notificar`, {});
     }
 
-    notificarCobrancaPix(id: number, pagamentoId: number): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/${id}/pagamentos/${pagamentoId}/notificar-pix`, {});
+    notificarCobrancaPagamento(id: number, pagamentoId: number): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/${id}/pagamentos/${pagamentoId}/notificar-cobranca`, {});
     }
 
     excluirNotaFiscal(id: number): Observable<void> {

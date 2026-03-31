@@ -548,6 +548,7 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield !important;
+  appearance: textfield !important;
 }
 
 /* Quantity Control */
@@ -743,6 +744,10 @@ fieldset[disabled] input {
     background: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
+.btn-pdf {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
 .btn-sync {
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
@@ -753,6 +758,10 @@ fieldset[disabled] input {
 
 .btn-cancel {
     background: linear-gradient(135deg, #f06157 0%, #ee2432 100%);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
 }
 
 .d-flex {

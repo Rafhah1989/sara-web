@@ -26,6 +26,9 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   mensagemErro: string = '';
   pagamentoConfirmado: boolean = false;
   pollingTimer: any;
+  isBoleto: boolean = false;
+  boletoPdfUrl: string = '';
+  boletoLinhaDigitavel: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -56,15 +59,14 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     
     this.pedidoService.buscarPorId(this.pedidoId).subscribe({
       next: (pedido) => {
-
         this.totalPedido = pedido.valorTotal || 0;
 
         let pagamento = null;
         if (this.pagamentoId) {
           pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
         } else {
-          // Se não passou ID, pega o primeiro PIX online pendente
-          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+          // Se não passou ID, pega o primeiro online pendente
+          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline);
         }
 
         if (!pagamento) {
@@ -73,29 +75,38 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
           return;
         }
 
-        if (pagamento.dataExpiracaoPix) {
-          this.dataExpiracao = new Date(pagamento.dataExpiracaoPix);
-          if (this.dataExpiracao < new Date() && !pagamento.pago) {
-            this.tentarGerarPix(false);
-            return;
-          }
-          this.iniciarTimer();
-        }
+        this.totalParcela = pagamento.valor || 0;
+        this.isBoleto = !!pagamento.boletoPdfUrl;
 
-        if (!pagamento.pixQrCode && !pagamento.pago && pagamento.pagamentoOnline) {
-          this.tentarGerarPix();
-        } else {
-          this.pixCopiaECola = pagamento.pixCopiaECola || '';
-          this.pixQrCodeBase64 = pagamento.pixQrCode || '';
-          this.totalParcela = pagamento.valor || 0;
+        if (this.isBoleto) {
+          this.boletoPdfUrl = pagamento.boletoPdfUrl || '';
+          this.boletoLinhaDigitavel = pagamento.boletoLinhaDigitavel || '';
           this.loading = false;
+        } else {
+          // Lógica PIX
+          if (pagamento.dataExpiracao) {
+            this.dataExpiracao = new Date(pagamento.dataExpiracao);
+            if (this.dataExpiracao < new Date() && !pagamento.pago) {
+              this.tentarGerarPix(false);
+              return;
+            }
+            this.iniciarTimer();
+          }
+
+          if (!pagamento.pixQrCode && !pagamento.pago && pagamento.pagamentoOnline) {
+            this.tentarGerarPix();
+          } else {
+            this.pixCopiaECola = pagamento.pixCopiaECola || '';
+            this.pixQrCodeBase64 = pagamento.pixQrCode || '';
+            this.loading = false;
+          }
         }
       },
       error: (err) => {
-        console.error('Erro ao carregar dados do PIX', err);
+        console.error('Erro ao gerar pagamento', err);
         this.loading = false;
         this.erroGeracao = true;
-        this.mensagemErro = err.error?.message || err.message || 'Erro ao carregar dados do PIX';
+        this.mensagemErro = err.error?.message || err.message || 'Erro ao gerar pagamento';
       }
     });
   }
@@ -107,22 +118,29 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     if (showLoading) this.loading = true;
     this.loadingGeracao = true;
 
-    this.pedidoService.gerarPix(this.pedidoId, this.pagamentoId as number, skipSpinner).subscribe({
+    this.pedidoService.gerarPagamentoOnline(this.pedidoId, this.pagamentoId as number, skipSpinner).subscribe({
       next: (pedido) => {
         let pagamento = null;
         if (this.pagamentoId) {
           pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
         } else {
-          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+          pagamento = pedido.pagamentos?.find(p => !p.pago && p.pagamentoOnline);
         }
 
         if (pagamento) {
-          this.pixCopiaECola = pagamento.pixCopiaECola || '';
-          this.pixQrCodeBase64 = pagamento.pixQrCode || '';
           this.totalParcela = pagamento.valor || 0;
-          if (pagamento.dataExpiracaoPix) {
-            this.dataExpiracao = new Date(pagamento.dataExpiracaoPix);
-            this.iniciarTimer();
+          if (pagamento.boletoPdfUrl) {
+            this.isBoleto = true;
+            this.boletoPdfUrl = pagamento.boletoPdfUrl;
+            this.boletoLinhaDigitavel = pagamento.boletoLinhaDigitavel || '';
+          } else {
+            this.isBoleto = false;
+            this.pixCopiaECola = pagamento.pixCopiaECola || '';
+            this.pixQrCodeBase64 = pagamento.pixQrCode || '';
+            if (pagamento.dataExpiracao) {
+              this.dataExpiracao = new Date(pagamento.dataExpiracao);
+              this.iniciarTimer();
+            }
           }
         }
         
@@ -130,7 +148,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.loadingGeracao = false;
         
-        if (!this.pixQrCodeBase64) {
+        if (!this.pixQrCodeBase64 && !this.isBoleto) {
           this.erroGeracao = true;
         }
       },
@@ -183,7 +201,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
                 if (this.pagamentoId) {
                     pagamento = pedido.pagamentos?.find(p => p.id === this.pagamentoId);
                 } else {
-                    pagamento = pedido.pagamentos?.find(p => p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+                    pagamento = pedido.pagamentos?.find(p => p.pagamentoOnline);
                 }
 
                 if (pagamento && pagamento.pago) {
@@ -195,6 +213,19 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
             }
         });
     }, 5000); // Verifica a cada 5 segundos
+  }
+
+  copiarBoleto(): void {
+    if (!this.boletoLinhaDigitavel) return;
+    navigator.clipboard.writeText(this.boletoLinhaDigitavel).then(() => {
+      alert('Linha digitável do boleto copiada para a área de transferência!');
+    });
+  }
+
+  abrirPdfBoleto(): void {
+    if (this.boletoPdfUrl) {
+      window.open(this.boletoPdfUrl, '_blank');
+    }
   }
 
   copiarPix(): void {

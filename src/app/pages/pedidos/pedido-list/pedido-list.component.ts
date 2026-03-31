@@ -185,24 +185,23 @@ export class PedidoListComponent implements OnInit {
         this.router.navigate(['/pedidos/editar', id]);
     }
 
-    visualizarPix(pedido: Pedido): void {
-        const proximo = this.getProximoPagamentoPix(pedido);
-        if (proximo && proximo.id) {
-            // O componente de visualização de PIX precisará ser atualizado para aceitar id de pagamento
-            this.router.navigate(['/pedidos/pix', pedido.id], { queryParams: { pagamentoId: proximo.id } });
-        }
+    visualizarPagamentoOnline(pedido: Pedido): void {
+        const proximo = this.getProximoPagamentoOnline(pedido);
+        if (!proximo || !proximo.id) return;
+
+        this.router.navigate(['/pedidos/pix', pedido.id], { queryParams: { pagamentoId: proximo.id } });
     }
 
-    getProximoPagamentoPix(pedido: Pedido): any {
+    getProximoPagamentoOnline(pedido: Pedido): any {
         if (!pedido.pagamentos) return null;
         return pedido.pagamentos
-            .filter(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'))
+            .filter(p => !p.pago && p.pagamentoOnline && (p.boletoPdfUrl || p.pixCopiaECola || p.mercadopagoPagamentoId))
             .sort((a, b) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
     }
 
-    temPagamentoPixOnlinePendente(pedido: Pedido): boolean {
+    temPagamentoOnlinePendente(pedido: Pedido): boolean {
         if (!pedido.pagamentos) return false;
-        return pedido.pagamentos.some(p => !p.pago && p.pagamentoOnline && p.formaPagamentoDescricao?.toUpperCase().includes('PIX'));
+        return pedido.pagamentos.some(p => !p.pago && p.pagamentoOnline && (p.boletoPdfUrl || p.pixCopiaECola || p.mercadopagoPagamentoId));
     }
 
     cancelarPedido(pedido: Pedido): void {
@@ -296,7 +295,7 @@ export class PedidoListComponent implements OnInit {
         if (!this.isAdmin) return;
         
         const pendentesOnline = pedido.pagamentos?.filter(p => 
-            !p.pago && p.pagamentoOnline && p.mercadopagoPagamentoId && p.formaPagamentoDescricao?.toUpperCase().includes('PIX')
+            !p.pago && p.pagamentoOnline && p.mercadopagoPagamentoId
         ) || [];
         
         if (pendentesOnline.length === 0) {

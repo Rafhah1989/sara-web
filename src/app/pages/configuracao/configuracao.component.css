@@ -28,16 +28,29 @@
 }
 
 .form-group label {
+    display: block;
     font-weight: 600;
     color: #555;
     margin-bottom: 5px;
 }
 
+.form-text {
+    display: block;
+    margin-top: 5px;
+}
+
 .form-control {
+    display: block;
+    width: 100%;
+    max-width: 400px;
     border-radius: 8px;
     padding: 10px 15px;
     border: 1px solid #ddd;
     transition: all 0.3s;
+}
+
+textarea.form-control {
+    max-width: 100%;
 }
 
 .form-control:focus {
@@ -96,4 +109,29 @@
     display: inline-block !important;
     margin-bottom: 0 !important;
     cursor: pointer;
+}
+
+.input-group {
+    display: flex;
+    align-items: stretch;
+    max-width: 400px;
+}
+
+.input-group .form-control {
+    width: auto;
+    flex: 1 1 auto;
+    max-width: none;
+}
+
+.input-group select.form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    background-color: #f8f9fa;
+    max-width: 150px;
+}
+
+.input-group input.form-control {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }

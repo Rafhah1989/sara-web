@@ -157,12 +157,16 @@
                             <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
                                 <i class="fa fa-file-pdf"></i>
                             </button>
-                            <button class="btn-action btn-pix" title="Visualizar PIX"
-                                *ngIf="!pedido.pago && getProximoPagamentoPix(pedido)" (click)="visualizarPix(pedido)">
-                                <i class="fa fa-qrcode"></i>
+                            <button class="btn-action" 
+                                [class.btn-pix]="getProximoPagamentoOnline(pedido)?.pixCopiaECola"
+                                [class.btn-pdf]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl"
+                                [title]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'Ver Boleto' : 'Visualizar PIX'"
+                                *ngIf="!pedido.pago && getProximoPagamentoOnline(pedido)" 
+                                (click)="visualizarPagamentoOnline(pedido)">
+                                <i class="fa" [ngClass]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'fa-barcode' : 'fa-qrcode'"></i>
                             </button>
                             <button class="btn-action btn-sync" title="Sincronizar Mercado Pago"
-                                *ngIf="isAdmin && !pedido.pago && temPagamentoPixOnlinePendente(pedido)"
+                                *ngIf="isAdmin && !pedido.pago && temPagamentoOnlinePendente(pedido)"
                                 (click)="verificarPagamentoManual(pedido)">
                                 <i class="fa fa-sync"></i>
                             </button>
@@ -191,9 +195,12 @@
                                 <i class="fa fa-ellipsis-v"></i>
                             </button>
                             <div class="actions-menu" *ngIf="itemMenuAberto === pedido.id">
-                                <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF</button>
-                                <button *ngIf="!pedido.pago && getProximoPagamentoPix(pedido)" (click)="visualizarPix(pedido)"><i class="fa fa-qrcode"></i> PIX</button>
-                                <button *ngIf="isAdmin && !pedido.pago && temPagamentoPixOnlinePendente(pedido)" (click)="verificarPagamentoManual(pedido)"><i class="fa fa-sync"></i> Sync MP</button>
+                                <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF Resumo</button>
+                                <button *ngIf="!pedido.pago && getProximoPagamentoOnline(pedido)" (click)="visualizarPagamentoOnline(pedido)">
+                                    <i class="fa" [ngClass]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'fa-barcode' : 'fa-qrcode'"></i> 
+                                    {{ getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'Ver Boleto' : 'Ver PIX' }}
+                                </button>
+                                <button *ngIf="isAdmin && !pedido.pago && temPagamentoOnlinePendente(pedido)" (click)="verificarPagamentoManual(pedido)"><i class="fa fa-sync"></i> Sync MP</button>
                                 <button (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado"><i class="fa fa-pencil-alt"></i> Detalhes</button>
                                 <button *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))" 
                                     (click)="cancelarPedido(pedido)" class="text-danger"><i class="fa fa-trash-alt"></i> Cancelar</button>

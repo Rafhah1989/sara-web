@@ -1,33 +1,57 @@
 <div class="pix-container" *ngIf="!loading; else spinner">
   <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao && !pagamentoConfirmado">
     <div class="pix-header" style="text-align: center;">
-      <h2 class="cinzel-font color-primary-gold-dark">Pagamento via PIX</h2>
+      <h2 class="cinzel-font color-primary-gold-dark">Pagamento via {{ isBoleto ? 'Boleto' : 'PIX' }}</h2>
       <p>Pedido <strong>#{{ pedidoId }}</strong> - Valor da Parcela: <strong>{{ totalParcela | currency:'BRL' }}</strong></p>
       <p *ngIf="totalPedido !== totalParcela" style="font-size: 0.9rem; color: #777;">Valor Total do Pedido: {{ totalPedido | currency:'BRL' }}</p>
       
-      <div class="pix-timer" *ngIf="tempoRestante" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
+      <div class="pix-timer" *ngIf="tempoRestante && !isBoleto" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
         <i class="fa fa-clock-o"></i> 
         <span> Expira em: <strong>{{ tempoRestante }}</strong></span>
       </div>
     </div>
 
     <div class="pix-content">
-      <div class="qr-code-section" *ngIf="pixQrCodeBase64">
-        <p class="section-title">Escaneie o QR Code abaixo:</p>
-        <div class="qr-code-wrapper">
-          <img [src]="'data:image/png;base64,' + pixQrCodeBase64" alt="QR Code PIX">
+      <!-- Seção PIX -->
+      <ng-container *ngIf="!isBoleto">
+        <div class="qr-code-section" *ngIf="pixQrCodeBase64">
+          <p class="section-title">Escaneie o QR Code abaixo:</p>
+          <div class="qr-code-wrapper">
+            <img [src]="'data:image/png;base64,' + pixQrCodeBase64" alt="QR Code PIX">
+          </div>
         </div>
-      </div>
 
-      <div class="copy-paste-section" *ngIf="pixCopiaECola">
-        <p class="section-title">Ou use o código Copia e Cola:</p>
-        <div class="copy-input-group">
-          <input type="text" [value]="pixCopiaECola" readonly>
-          <button class="btn-copy" (click)="copiarPix()" title="Copiar código">
-            <i class="fa fa-copy"></i>
+        <div class="copy-paste-section" *ngIf="pixCopiaECola">
+          <p class="section-title">Ou use o código Copia e Cola:</p>
+          <div class="copy-input-group">
+            <input type="text" [value]="pixCopiaECola" readonly>
+            <button class="btn-copy" (click)="copiarPix()" title="Copiar código">
+              <i class="fa fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Seção Boleto -->
+      <ng-container *ngIf="isBoleto">
+        <div class="qr-code-section" style="padding-top: 10px;">
+          <i class="fa fa-file-pdf fa-5x" style="color: #c00; margin-bottom: 15px;"></i>
+          <p class="section-title">Seu boleto foi gerado com sucesso!</p>
+          <button class="btn-gold" (click)="abrirPdfBoleto()" style="margin-top: 10px; width: 100%; max-width: 300px;">
+            <i class="fa fa-external-link"></i> Abrir PDF do Boleto
           </button>
         </div>
-      </div>
+
+        <div class="copy-paste-section" *ngIf="boletoLinhaDigitavel" style="margin-top: 25px;">
+          <p class="section-title">Copie a Linha Digitável:</p>
+          <div class="copy-input-group">
+            <input type="text" [value]="boletoLinhaDigitavel" readonly style="font-size: 0.85rem;">
+            <button class="btn-copy" (click)="copiarBoleto()" title="Copiar linha digitável">
+              <i class="fa fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </ng-container>
     </div>
 
     <div class="pix-footer">
@@ -82,8 +106,8 @@
   <div class="pix-card shadow-card error-card animate-fade-in" *ngIf="!loading && erroGeracao">
     <div class="error-content">
       <i class="fa fa-exclamation-triangle error-icon"></i>
-      <h2 class="cinzel-font color-primary-gold-dark">Erro ao Gerar PIX</h2>
-      <p>{{ mensagemErro || 'Ocorreu um problema ao gerar os dados para pagamento PIX no momento.' }}</p>
+      <h2 class="cinzel-font color-primary-gold-dark">Erro ao Gerar Pagamento</h2>
+      <p>{{ mensagemErro || 'Ocorreu um problema ao gerar os dados para o seu pagamento no momento.' }}</p>
       <p class="instruction" *ngIf="!mensagemErro">Por favor, tente visualizar novamente em alguns minutos ou finalize o pagamento na entrega.</p>
       
       <div class="actions">

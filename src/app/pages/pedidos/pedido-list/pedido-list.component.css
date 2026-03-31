@@ -71,6 +71,11 @@
     text-align: left;
 }
 
+input[type=number] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
 .text-center {
     text-align: center !important;
 }
@@ -136,7 +141,7 @@
 }
 
 .btn-pdf {
-    background: linear-gradient(135deg, #f16609 0%, #f0892f 100%);
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
 }
 
 .btn-pdf:hover:not(:disabled) {

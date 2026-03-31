@@ -35,7 +35,7 @@ export class CarrinhoComponent implements OnInit {
   opcoesParcelamentoAutorizadas: OpcaoParcelamento[] = [];
   opcaoParcelamentoSelecionada?: OpcaoParcelamento;
   quantidadeParcelas: number = 1;
-  parcelasGeradas: { dataVencimento: string, valor: number, pago: boolean, pagamentoOnline?: boolean }[] = [];
+  parcelasGeradas: { dataVencimento: string, valor: number, pago: boolean, pagamentoOnline?: boolean, formaPagamentoId?: number }[] = [];
 
   exibirModalLimpar: boolean = false;
   exibirModalGerarPedido: boolean = false;
@@ -57,6 +57,25 @@ export class CarrinhoComponent implements OnInit {
     private usuarioService: UsuarioService,
     private router: Router
   ) {}
+
+  getLabelMeioPagamentoOnline(): string {
+    const forma = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
+    if (forma && (
+        (forma.descricao && (forma.descricao.toUpperCase().includes('BOLETO'))) || 
+        (forma.nome && (forma.nome.toUpperCase().includes('BOLETO')))
+    )) {
+        return 'Boleto Bancário';
+    }
+    return 'QR Code (PIX)';
+  }
+
+  getDescricaoPagamentoOnline(): string {
+    const label = this.getLabelMeioPagamentoOnline();
+    if (label === 'Boleto Bancário') {
+      return 'A linha digitável e o PDF do boleto serão gerados';
+    }
+    return 'O QR Code para pagamento será gerado';
+  }
 
   ngOnInit(): void {
     this.carregarDadosIniciais();
@@ -324,22 +343,23 @@ export class CarrinhoComponent implements OnInit {
               dataVencimento: data.toISOString().split('T')[0],
               valor: v,
               pago: false,
-              pagamentoOnline: this.pagamentoOnline
+              pagamentoOnline: this.pagamentoOnline,
+              formaPagamentoId: this.formaPagamentoSelecionada
           });
       }
   }
 
   verificarRegrasPagamentoOnline(): void {
       const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
-      const isPix = fp && (
-          (fp.descricao && fp.descricao.toUpperCase().includes('PIX')) || 
-          (fp.nome && fp.nome.toUpperCase().includes('PIX'))
+      const isOnlineMetodo = fp && (
+          (fp.descricao && (fp.descricao.toUpperCase().includes('PIX') || fp.descricao.toUpperCase().includes('BOLETO'))) || 
+          (fp.nome && (fp.nome.toUpperCase().includes('PIX') || fp.nome.toUpperCase().includes('BOLETO')))
       );
 
       if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
-          this.pagamentoOnline = isPix ? true : false;
+          this.pagamentoOnline = isOnlineMetodo ? true : false;
       } else if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE) {
-          if (!isPix) {
+          if (!isOnlineMetodo) {
               this.pagamentoOnline = false;
           }
       } else {
@@ -349,12 +369,12 @@ export class CarrinhoComponent implements OnInit {
 
   deveMostrarCampoPagamentoOnline(): boolean {
       const fp = this.formasPagamento.find(f => f.id == this.formaPagamentoSelecionada);
-      const isPix = fp && (
-          (fp.descricao && fp.descricao.toUpperCase().includes('PIX')) || 
-          (fp.nome && fp.nome.toUpperCase().includes('PIX'))
+      const isOnlineMetodo = fp && (
+          (fp.descricao && (fp.descricao.toUpperCase().includes('PIX') || fp.descricao.toUpperCase().includes('BOLETO'))) || 
+          (fp.nome && (fp.nome.toUpperCase().includes('PIX') || fp.nome.toUpperCase().includes('BOLETO')))
       );
 
-      return isPix && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
+      return !!isOnlineMetodo && this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE;
   }
 
   atualizarQuantidade(item: CarrinhoResponseDTO, value: string | number): void {
@@ -456,12 +476,13 @@ export class CarrinhoComponent implements OnInit {
               ...p,
               pagamentoOnline: this.pagamentoOnline
           })) : [
-              { 
-                  dataVencimento: new Date().toISOString().split('T')[0], 
-                  valor: this.valorTotalGeral, 
-                  pago: false,
-                  pagamentoOnline: this.pagamentoOnline
-              }
+               { 
+                   dataVencimento: new Date().toISOString().split('T')[0], 
+                   valor: this.valorTotalGeral, 
+                   pago: false,
+                   pagamentoOnline: this.pagamentoOnline,
+                   formaPagamentoId: this.formaPagamentoSelecionada
+               }
           ]
       };
 

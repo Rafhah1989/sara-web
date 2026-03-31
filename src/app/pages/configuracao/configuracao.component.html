@@ -16,43 +16,43 @@
 
       <form (ngSubmit)="salvar()" #configForm="ngForm">
         <h4 class="section-title">Servidor de E-mail</h4>
-        <div class="row">
+        <div class="row mt-4">
           <div class="col-md-4 form-group">
             <label for="mailHost">Host SMTP</label>
-            <input type="text" id="mailHost" name="mailHost" style="width: 20%;" [(ngModel)]="config.mailHost"
-              class="form-control" required placeholder="ex: smtp.gmail.com">
+            <input type="text" id="mailHost" name="mailHost" [(ngModel)]="config.mailHost" class="form-control" required
+              placeholder="ex: smtp.gmail.com">
           </div>
-          <div class="col-md-2 form-group" style="margin-top: 20px">
+          <div class="col-md-2 form-group">
             <label for="mailPort">Porta</label>
-            <input type="number" id="mailPort" name="mailPort" style="width: 10%;" [(ngModel)]="config.mailPort"
-              class="form-control" required>
+            <input type="number" id="mailPort" name="mailPort" [(ngModel)]="config.mailPort" class="form-control"
+              required>
           </div>
-          <div class="col-md-3 form-group" style="margin-top: 20px">
+          <div class="col-md-3 form-group">
             <label for="mailUsername">Usuário (E-mail)</label>
-            <input type="email" id="mailUsername" name="mailUsername" style="width: 20%"
-              [(ngModel)]="config.mailUsername" class="form-control" required placeholder="seu-email@gmail.com">
+            <input type="email" id="mailUsername" name="mailUsername" [(ngModel)]="config.mailUsername"
+              class="form-control" required placeholder="seu-email@gmail.com">
           </div>
-          <div class="col-md-3 form-group" style="margin-top: 20px">
+          <div class="col-md-3 form-group">
             <label for="mailPassword">Senha de App</label>
-            <input type="password" id="mailPassword" name="mailPassword" style="width: 20%;"
-              [(ngModel)]="config.mailPassword" class="form-control" placeholder="Mantenha vazio para não alterar">
+            <input type="password" id="mailPassword" name="mailPassword" [(ngModel)]="config.mailPassword"
+              class="form-control" placeholder="Mantenha vazio para não alterar">
           </div>
         </div>
 
-        <div class="row mt-6" style="margin-top: 20px">
-          <div class="col-md-3 form-group pt-4">
+        <div class="row mt-2">
+          <div class="col-md-3 form-group pt-2">
             <div class="checkbox-container">
               <input type="checkbox" id="emailAtivo" name="emailAtivo" [(ngModel)]="config.emailAtivo">
               <label class="font-weight-bold" for="emailAtivo">Envio de E-mail Ativo</label>
             </div>
           </div>
-          <div class="col-md-3 form-group pt-4">
+          <div class="col-md-3 form-group pt-2">
             <div class="checkbox-container">
               <input type="checkbox" id="mailAuth" name="mailAuth" [(ngModel)]="config.mailAuth">
               <label for="mailAuth">Autenticação SMTP</label>
             </div>
           </div>
-          <div class="col-md-3 form-group pt-4">
+          <div class="col-md-3 form-group pt-2">
             <div class="checkbox-container">
               <input type="checkbox" id="mailStarttls" name="mailStarttls" [(ngModel)]="config.mailStarttls">
               <label for="mailStarttls">Controle STARTTLS</label>
@@ -60,15 +60,65 @@
           </div>
         </div>
 
+        <h4 class="section-title mt-4">Configurações de Boleto</h4>
+        <div class="row mt-3">
+          <!-- Multa -->
+          <div class="col-md-3 form-group">
+            <label>Multa após vencimento</label>
+            <div class="input-group">
+              <select class="form-control" name="multaTipo" [(ngModel)]="configBoleto.multaTipo">
+                <option value="percentage">Percentual (%)</option>
+                <option value="fixed">Valor Fixo (R$)</option>
+              </select>
+              <input type="text" class="form-control" name="multaValor" [(ngModel)]="exibicaoMulta"
+                (blur)="processarInputDecimal('multa')" (focus)="$any($event.target).select()">
+            </div>
+          </div>
+
+          <!-- Juros -->
+          <div class="col-md-3 form-group">
+            <label>Juros de mora (ao mês)</label>
+            <div class="input-group">
+              <select class="form-control" name="jurosTipo" [(ngModel)]="configBoleto.jurosTipo">
+                <option value="percentage">Percentual (%)</option>
+                <option value="fixed">Valor Fixo (R$)</option>
+              </select>
+              <input type="text" class="form-control" name="jurosValor" [(ngModel)]="exibicaoJuros"
+                (blur)="processarInputDecimal('juros')" (focus)="$any($event.target).select()">
+            </div>
+          </div>
+
+          <!-- Desconto -->
+          <div class="col-md-3 form-group">
+            <label>Desconto por antecipação</label>
+            <div class="input-group">
+              <select class="form-control" name="descontoTipo" [(ngModel)]="configBoleto.descontoTipo">
+                <option value="percentage">Percentual (%)</option>
+                <option value="fixed">Valor Fixo (R$)</option>
+              </select>
+              <input type="text" class="form-control" name="descontoValor" [(ngModel)]="exibicaoDesconto"
+                (blur)="processarInputDecimal('desconto')" (focus)="$any($event.target).select()">
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-2 form-group">
+            <label for="descontoDias">Dias de antecedência</label>
+            <input type="number" id="descontoDias" name="descontoDiasAntecedencia"
+              [(ngModel)]="configBoleto.descontoDiasAntecedencia" class="form-control">
+            <small class="form-text text-muted">A quantidade de dias antes do vencimento para aplicar o
+              desconto.</small>
+          </div>
+        </div>
+
         <h4 class="section-title mt-4">Notificações</h4>
-        <div class="form-group">
-          <label for="emailsNotificacao">E-mails de Alerta (Administradores - Separar por
-            vírgula)</label>
-          <textarea id="emailsNotificacao" name="emailsNotificacao" style="width: 40%;"
-            [(ngModel)]="config.emailsNotificacao" class="form-control" rows="4"
-            placeholder="admin@empresa.com, vendas@empresa.com"></textarea>
-          <br /><small class="form-text text-muted">Estes endereços receberão notificações detalhadas de novos
-            pedidos.</small>
+        <div class="form-group mt-3">
+          <label for="emailsNotificacao">E-mails de Alerta</label>
+          <textarea id="emailsNotificacao" name="emailsNotificacao" [(ngModel)]="config.emailsNotificacao"
+            class="form-control" rows="4" placeholder="admin@empresa.com, vendas@empresa.com"></textarea>
+          <small class="form-text text-muted">Administradores - Separar por vírgula. Estes endereços receberão
+            notificações detalhadas de novos pedidos.</small>
         </div>
 
         <div class="mt-4 text-right">
