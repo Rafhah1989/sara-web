@@ -94,8 +94,10 @@
 .logs-table-container {
     background: white;
     border-radius: 15px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    -webkit-overflow-scrolling: touch;
 }
 
 .logs-table {
@@ -254,6 +256,10 @@
     
     .hide-mobile { display: none !important; }
     
+    .logs-table {
+        min-width: 480px; /* Garante largura mínima para as 4 colunas restantes */
+    }
+
     .logs-table th, .logs-table td { 
         padding: 0.75rem 0.5rem; 
         font-size: 0.75rem; 
