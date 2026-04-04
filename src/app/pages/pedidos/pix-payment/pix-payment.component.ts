@@ -29,6 +29,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   isBoleto: boolean = false;
   boletoPdfUrl: string = '';
   boletoLinhaDigitavel: string = '';
+  isRenovando: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -117,6 +118,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     if (this.timer) clearInterval(this.timer);
     if (showLoading) this.loading = true;
     this.loadingGeracao = true;
+    this.isRenovando = true;
 
     this.pedidoService.gerarPagamentoOnline(this.pedidoId, this.pagamentoId as number, skipSpinner).subscribe({
       next: (pedido) => {
@@ -147,6 +149,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
         this.totalPedido = pedido.valorTotal || 0;
         this.loading = false;
         this.loadingGeracao = false;
+        this.isRenovando = false;
         
         if (!this.pixQrCodeBase64 && !this.isBoleto) {
           this.erroGeracao = true;
@@ -156,6 +159,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
         console.error('Erro ao gerar PIX', err);
         this.loading = false;
         this.loadingGeracao = false;
+        this.isRenovando = false;
         this.erroGeracao = true;
         this.mensagemErro = err.error?.message || err.message || 'Erro ao gerar PIX';
       }

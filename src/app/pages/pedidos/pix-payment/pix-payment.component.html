@@ -6,8 +6,14 @@
       <p *ngIf="totalPedido !== totalParcela" style="font-size: 0.9rem; color: #777;">Valor Total do Pedido: {{ totalPedido | currency:'BRL' }}</p>
       
       <div class="pix-timer" *ngIf="tempoRestante && !isBoleto" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
-        <i class="fa fa-clock-o"></i> 
-        <span> Expira em: <strong>{{ tempoRestante }}</strong></span>
+        <div class="pix-expiration-box" *ngIf="tempoRestante && !pagamentoConfirmado">
+          <span class="expiration-label" *ngIf="!isRenovando">
+            <i class="fa fa-clock-o"></i> Expira em: <strong>{{ tempoRestante }}</strong>
+          </span>
+          <span class="expiration-label text-primary" *ngIf="isRenovando">
+            <i class="fa fa-sync fa-spin"></i> Regerando novo código PIX...
+          </span>
+        </div>
       </div>
     </div>
 

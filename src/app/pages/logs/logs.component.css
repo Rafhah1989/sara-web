@@ -176,6 +176,19 @@
     display: block;
 }
 
+.local-info {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.local-info i {
+    color: var(--primary-gold-dark);
+    font-size: 0.9rem;
+}
+
 /* Pagination */
 .table-footer {
     padding: 1.5rem;
@@ -234,9 +247,26 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-    .logs-page { padding: 1rem; }
-    .page-title-banner h1 { font-size: 1.8rem; }
-    .filter-grid { grid-template-columns: 1fr; }
-    .hide-mobile { display: none; }
-    .logs-table th:nth-child(3), .logs-table td:nth-child(3) { display: none; }
+    .logs-page { padding: 0.5rem; }
+    .page-title-banner h1 { font-size: 1.5rem; }
+    .filters-wrapper { padding: 1rem; border-radius: 10px; }
+    .filter-grid { grid-template-columns: 1fr; gap: 1rem; }
+    
+    .hide-mobile { display: none !important; }
+    
+    .logs-table th, .logs-table td { 
+        padding: 0.75rem 0.5rem; 
+        font-size: 0.75rem; 
+    }
+
+    .user-info .name { font-size: 0.8rem; }
+    .user-info .doc { font-size: 0.7rem; }
+    .local-info { font-size: 0.75rem; }
+    .badge { padding: 0.2rem 0.5rem; font-size: 0.65rem; }
+
+    .table-footer {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
 }

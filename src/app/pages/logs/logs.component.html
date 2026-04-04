@@ -62,6 +62,7 @@
                             <i class="fa" [ngClass]="sortField === 'usuario.nome' ? (sortDir === 'ASC' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort text-muted'"></i>
                         </th>
                         <th class="hide-mobile">Perfil</th>
+                        <th>Localização</th>
                         <th>Status</th>
                         <th class="hide-mobile">Dispositivo / Navegador</th>
                     </tr>
@@ -84,6 +85,12 @@
                             </span>
                         </td>
                         <td>
+                            <span class="local-info" [title]="log.local">
+                                <i class="fa fa-map-marker-alt text-muted mr-1"></i>
+                                {{ log.local || 'Local Indisponível' }}
+                            </span>
+                        </td>
+                        <td>
                             <span class="badge" [ngClass]="log.status === 'SUCESSO' ? 'status-sucesso' : 'status-falha'">
                                 {{ log.status }}
                             </span>
@@ -94,7 +101,7 @@
                     </tr>
                     
                     <tr *ngIf="logs.length === 0">
-                        <td colspan="5" class="text-center py-5">
+                        <td colspan="6" class="text-center py-5">
                             <i class="fa fa-search fa-3x" style="opacity: 0.1; display: block; margin-bottom: 1rem;"></i>
                             Nenhum registro encontrado para este filtro.
                         </td>

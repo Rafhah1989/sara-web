@@ -571,6 +571,76 @@ input[type=number] {
   .btn-qty { width: 24px !important; height: 28px !important; display: flex !important; }
   .valor-input-mobile { width: 68px !important; height: 28px !important; font-size: 0.75rem !important; padding: 2px !important; }
   
+  /* Parcelamento Mobile */
+  .installment-table-preview table { font-size: 0.75rem !important; }
+  .installment-table-preview th, .installment-table-preview td { padding: 6px 4px !important; }
+  .installment-table-preview input.form-control-sm { width: 85px !important; font-size: 0.75rem !important; height: 28px !important; }
+  .installment-table-preview input[type="date"] { width: 110px !important; font-size: 0.7rem !important; height: 28px !important; padding: 2px !important; }
+  .badge { font-size: 0.65rem !important; min-width: 60px !important; padding: 3px 6px !important; }
+
+  .mobile-actions {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-sandwich {
+    background: none;
+    border: 1px solid #ddd;
+    color: #666;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .actions-menu {
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    z-index: 1000;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #eee;
+  }
+
+  .actions-menu button {
+    background: none;
+    border: none;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #444;
+    width: 100%;
+    transition: background 0.2s;
+  }
+
+  .actions-menu button:hover {
+    background: #f8f9fa;
+  }
+
+  .actions-menu i {
+    width: 16px;
+    text-align: center;
+    color: var(--primary-gold-dark);
+  }
+
+  .actions-menu .text-danger i {
+    color: #dc3545;
+  }
+
   .qtd-control { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; }
   
   .actions { display: table-cell !important; vertical-align: middle !important; text-align: center !important; white-space: nowrap !important; padding: 4px !important; }
@@ -748,6 +818,11 @@ fieldset[disabled] input {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
 }
 
+.btn-invoice {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+
 .btn-sync {
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
@@ -771,6 +846,13 @@ fieldset[disabled] input {
 .gap-2 {
     gap: 0.5rem !important;
 }
+
+.installment-actions-desktop {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 
 .align-items-center {
     align-items: center !important;

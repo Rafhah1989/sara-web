@@ -6,9 +6,11 @@
         <h1 class="cinzel-font color-primary-gold-dark">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}
         </h1>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn btn-info text-white" *ngIf="modoEdicao && notaFiscalPath"
-                (click)="visualizarNotaFiscal()">
-                <i class="fa fa-file-invoice"></i> Ver Nota Fiscal
+            <button type="button" class="btn-action btn-invoice" *ngIf="modoEdicao && notaFiscalPath"
+                (click)="visualizarNotaFiscal()" title="Ver Nota Fiscal">
+                <i class="fa fa-file-invoice"></i>
+                <span style="margin-left: 5px;" class="hide-mobile">Ver Nota Fiscal</span>
+                <span style="margin-left: 5px;" class="show-mobile">Nota</span>
             </button>
         </div>
     </div>
@@ -39,7 +41,7 @@
                     <label>Usuário (Cliente) *</label>
                     <div style="position: relative;">
                         <input type="text" formControlName="usuarioNome" placeholder="Digite 3 letras para buscar..."
-                            class="form-control" autocomplete="off" (click)="showUsuariosDropdown = true">
+                            class="form-control" autocomplete="off">
                         <div class="autocomplete-dropdown" *ngIf="showUsuariosDropdown">
                             <div *ngFor="let u of usuariosFiltrados" (click)="selecionarUsuario(u)"
                                 class="dropdown-item">
@@ -111,7 +113,8 @@
                     <div class="online-payment-confirm"
                         style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline" (change)="onPagamentoOnlineChange()"
+                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline"
+                                (change)="onPagamentoOnlineChange()"
                                 style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
                             <label for="pagamentoOnline"
                                 style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
@@ -119,7 +122,8 @@
                             </label>
                         </div>
                         <p style="margin: 8px 0 0 30px; font-size: 0.9rem; color: #666;">
-                            Ao marcar esta opção, {{ getDescricaoPagamentoOnline() }} imediatamente após salvar o pedido.
+                            Ao marcar esta opção, {{ getDescricaoPagamentoOnline() }} imediatamente após salvar o
+                            pedido.
                         </p>
                     </div>
                 </div>
@@ -156,10 +160,10 @@
                                         <th>Parcela</th>
                                         <th>Valor</th>
                                         <th>Vencimento</th>
-                                        <th>Forma</th>
-                                        <th *ngIf="isAdmin" class="text-center">Online</th>
+                                        <th class="hide-mobile">Forma</th>
+                                        <th *ngIf="isAdmin" class="text-center hide-mobile">Online</th>
                                         <th>Status</th>
-                                        <th *ngIf="isAdmin">Ações</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,12 +183,12 @@
                                                 style="width: 135px; display: inline-block;">
                                             <span *ngIf="!isAdmin">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
                                         </td>
-                                        <td>
+                                        <td class="hide-mobile">
                                             <select [(ngModel)]="p.formaPagamentoId"
                                                 [ngModelOptions]="{standalone: true}" *ngIf="isAdmin"
                                                 [compareWith]="compareFormas"
-                                                (change)="onFormaPagamentoParcelaChange(p)"
-                                                class="form-select-gold-sm" style="width: 130px;">
+                                                (change)="onFormaPagamentoParcelaChange(p)" class="form-select-gold-sm"
+                                                style="width: 130px;">
                                                 <option *ngFor="let forma of formasPagamento" [ngValue]="forma.id">{{
                                                     forma.descricao }}</option>
                                             </select>
@@ -193,20 +197,22 @@
                                                     }}</span>
                                             </span>
                                         </td>
-                                        <td *ngIf="isAdmin" class="text-center">
-                                            <input type="checkbox" [(ngModel)]="p.pagamentoOnline" 
-                                                   [ngModelOptions]="{standalone: true}"
-                                                   style="width: 18px; height: 18px; cursor: pointer;">
+                                        <td *ngIf="isAdmin" class="text-center hide-mobile">
+                                            <input type="checkbox" [(ngModel)]="p.pagamentoOnline"
+                                                [ngModelOptions]="{standalone: true}"
+                                                style="width: 18px; height: 18px; cursor: pointer;">
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column gap-1">
                                                 <button type="button" class="badge"
-                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'" *ngIf="isAdmin"
+                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
+                                                    *ngIf="isAdmin"
                                                     style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; border: none; cursor: pointer; min-width: 80px;"
                                                     (click)="toggleParcelaPago(p)">
                                                     {{ p.pago ? 'PAGO' : 'PENDENTE' }}
                                                 </button>
-                                                <span class="badge" [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
+                                                <span class="badge"
+                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
                                                     *ngIf="!isAdmin"
                                                     style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-block; min-width: 80px; text-align: center;">
                                                     {{ p.pago ? 'PAGO' : 'PENDENTE' }}
@@ -214,27 +220,61 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <button type="button" class="btn-action btn-sync" 
-                                                        *ngIf="podeExibirSincronizacao(p) && isAdmin"
-                                                        (click)="verificarPagamentoManualParcela(p)" title="Validar Mercado Pago">
+                                            <!-- Ações Desktop -->
+                                            <div class="installment-actions-desktop hide-mobile">
+                                                <button type="button" class="btn-action btn-sync"
+                                                    *ngIf="podeExibirSincronizacao(p) && isAdmin"
+                                                    (click)="verificarPagamentoManualParcela(p)"
+                                                    title="Validar Mercado Pago">
                                                     <i class="fa fa-sync"></i>
                                                 </button>
-                                                <button type="button" class="btn-action btn-email" 
-                                                        *ngIf="podeExibirNotificacaoPagamento(p)"
-                                                        (click)="notificarCobrancaPagamento(p)" title="Enviar Cobrança por E-mail">
+                                                <button type="button" class="btn-action btn-email"
+                                                    *ngIf="podeExibirNotificacaoPagamento(p)"
+                                                    (click)="notificarCobrancaPagamento(p)"
+                                                    title="Enviar Cobrança por E-mail">
                                                     <i class="fa fa-envelope"></i>
                                                 </button>
-                                                <button *ngIf="podeExibirBotaoPagamento(p, i)"
-                                                    class="btn-action" [ngClass]="isBoleto(p) ? 'btn-pdf' : 'btn-pix'"
+                                                <button *ngIf="podeExibirBotaoPagamento(p, i)" class="btn-action"
+                                                    [ngClass]="isBoleto(p) ? 'btn-pdf' : 'btn-pix'"
                                                     (click)="visualizarPagamentoOnlineParcela(p)"
                                                     [title]="isBoleto(p) ? 'Ver Boleto' : 'Ver QR Code PIX'">
-                                                    <i class="fa" [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
+                                                    <i class="fa"
+                                                        [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
                                                 </button>
                                                 <button type="button" class="btn-action btn-cancel" *ngIf="isAdmin"
                                                     (click)="removerPagamentoManual(i)" title="Remover Pagamento">
                                                     <i class="fa fa-times"></i>
                                                 </button>
+                                            </div>
+
+                                            <!-- Ações Mobile (Menu Sanduíche) -->
+                                            <div class="mobile-actions show-mobile">
+                                                <button type="button" class="btn-sandwich"
+                                                    (click)="alternarMenuAcoesParcela(i, $event)">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="actions-menu" *ngIf="itemMenuAcoesParcelaAberto === i"
+                                                    (click)="$event.stopPropagation()">
+                                                    <button type="button" *ngIf="podeExibirSincronizacao(p) && isAdmin"
+                                                        (click)="verificarPagamentoManualParcela(p); itemMenuAcoesParcelaAberto = null">
+                                                        <i class="fa fa-sync"></i> Validar MP
+                                                    </button>
+                                                    <button type="button" *ngIf="podeExibirNotificacaoPagamento(p)"
+                                                        (click)="notificarCobrancaPagamento(p); itemMenuAcoesParcelaAberto = null">
+                                                        <i class="fa fa-envelope"></i> Notificar E-mail
+                                                    </button>
+                                                    <button type="button" *ngIf="podeExibirBotaoPagamento(p, i)"
+                                                        (click)="visualizarPagamentoOnlineParcela(p); itemMenuAcoesParcelaAberto = null">
+                                                        <i class="fa"
+                                                            [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
+                                                        {{ isBoleto(p) ? 'Ver Boleto' : 'Ver PIX' }}
+                                                    </button>
+                                                    <button type="button" *ngIf="isAdmin"
+                                                        (click)="removerPagamentoManual(i); itemMenuAcoesParcelaAberto = null"
+                                                        class="text-danger">
+                                                        <i class="fa fa-times"></i> Remover
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

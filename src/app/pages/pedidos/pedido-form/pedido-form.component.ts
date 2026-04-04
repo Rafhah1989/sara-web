@@ -78,6 +78,7 @@ export class PedidoFormComponent implements OnInit {
     filtroModalPrecoMin: string = '';
     filtroModalPrecoMax: string = '';
     produtosModalAgrupadosPorTamanho: { tamanho: string, produtos: any[] }[] = [];
+    itemMenuAcoesParcelaAberto: number | null = null;
 
     produtoService: ProdutoService;
     route: ActivatedRoute;
@@ -990,7 +991,7 @@ export class PedidoFormComponent implements OnInit {
                     situacao: pedido.situacao,
                     observacao: pedido.observacao,
                     pagamentoOnline: pedido.pagamentoOnline
-                }, { emitEvent: true });
+                }, { emitEvent: false });
 
                 if (!this.isAdmin) {
                     this.pedidoForm.get('formaPagamentoId')?.disable();
@@ -1458,5 +1459,14 @@ export class PedidoFormComponent implements OnInit {
             console.error('Erro ao visualizar nota fiscal', error);
             alert('Erro ao carregar a nota fiscal para visualização.');
         });
+    }
+
+    alternarMenuAcoesParcela(index: number, event: Event): void {
+        event.stopPropagation();
+        if (this.itemMenuAcoesParcelaAberto === index) {
+            this.itemMenuAcoesParcelaAberto = null;
+        } else {
+            this.itemMenuAcoesParcelaAberto = index;
+        }
     }
 }
