@@ -30,39 +30,136 @@
     box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    border: 3px solid #000;
-}
+.filter-section.card {
+     background: white;
+     padding: 25px 30px;
+     border-radius: 12px;
+     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.06);
+     margin-bottom: 25px;
+     border: 1px solid #f0f0f0;
+     border-top: 5px solid var(--primary-gold-dark, #AA8C2C);
+ }
+ 
+ .sara-filters-row {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 25px; /* Mantém o espaçamento inflexível */
+     align-items: end;
+     margin-bottom: 20px;
+     width: 100%;
+ }
+ 
+ .sara-filter-col {
+     display: flex;
+     flex-direction: column;
+     gap: 8px;
+ }
 
-.filter-section .row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
+ .field-cliente { width: 320px; }
+ .field-numero  { width: 90px; }
+ .field-data    { width: 160px; }
+ .field-situacao { width: 220px; }
+ 
+ .sara-filter-col label {
+     font-weight: 600;
+     font-size: 0.85rem;
+     color: #555;
+     text-transform: uppercase;
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     margin-bottom: 0;
+     white-space: nowrap;
+ }
+ 
+ .sara-filter-col label i {
+     color: var(--primary-gold, #D4AF37);
+     font-size: 0.9rem;
+     width: 16px;
+     text-align: center;
+ }
+ 
+ .sara-input {
+     width: 100%;
+     padding: 10px 15px;
+     border: 1.5px solid #ccc !important;
+     border-radius: 8px !important;
+     font-size: 0.95rem;
+     transition: all 0.3s ease;
+     background-color: #fafafa;
+     color: #333;
+     box-shadow: none !important;
+     margin: 0 !important;
+     box-sizing: border-box !important;
+ }
+ 
+ .sara-input:focus {
+     border-color: var(--primary-gold, #D4AF37) !important;
+     background-color: #fff;
+     box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1) !important;
+     outline: none;
+ }
+ 
+ .btn-clear-filters {
+     background-color: #f8f9fa;
+     color: #777;
+     border: 1.5px solid #ddd;
+     border-radius: 8px;
+     padding: 10px 15px;
+     font-weight: 600;
+     font-size: 0.9rem;
+     cursor: pointer;
+     transition: all 0.3s;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 8px;
+     height: 43px;
+     align-self: flex-end;
+ }
+ 
+ .btn-clear-filters span {
+     display: inline-block;
+ }
 
-.filter-section .col-md-3,
-.filter-section .col-md-2,
-.filter-section .col-md-1 {
-    flex: 1;
-    min-width: 150px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 8px;
-    border: 2px solid #000;
-    border-radius: 4px;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
+ .filter-actions-group {
+     display: flex;
+     align-items: flex-end;
+     padding-bottom: 2px;
+ }
+ 
+ .checkbox-container {
+     margin-top: 15px;
+     padding-top: 15px;
+     border-top: 1px dashed #eee;
+ }
+ 
+ .modern-checkbox {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     cursor: pointer;
+     padding: 5px 0;
+ }
+ 
+ .modern-checkbox input[type="checkbox"] {
+     width: 22px;
+     height: 22px;
+     cursor: pointer;
+     border: 2px solid var(--primary-gold-dark, #AA8C2C);
+     accent-color: var(--primary-gold-dark, #AA8C2C);
+ }
+ 
+ .modern-checkbox span {
+     font-weight: 600;
+     font-size: 0.9rem;
+     color: #444;
+ }
+ 
+ .table {
+     width: 100%;
+     border-collapse: collapse;
+ }
 
 .table th,
 .table td {

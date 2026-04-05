@@ -20,47 +20,44 @@
 
     <!-- Filtros Desktop -->
     <div class="filter-section card hide-mobile">
-        <div class="row">
-            <div class="col-md-3" *ngIf="isAdmin">
-                <label>Por Cliente</label>
+        <div class="sara-filters-row">
+            <div class="sara-filter-col field-cliente" *ngIf="isAdmin">
+                <label><i class="fa fa-user"></i> Por Cliente</label>
                 <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente"
-                    class="form-control">
+                    class="sara-input">
             </div>
-            <div class="col-md-2">
-                <label>Número do Pedido</label>
+            <div class="sara-filter-col field-numero">
+                <label><i class="fa fa-hashtag"></i> Número</label>
                 <input type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="ID"
-                    class="form-control">
+                    class="sara-input">
             </div>
-            <div class="col-md-2">
-                <label>Data Início</label>
-                <input type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()" class="form-control">
+            <div class="sara-filter-col field-data">
+                <label><i class="fa fa-calendar-alt"></i> Início</label>
+                <input type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()" class="sara-input">
             </div>
-            <div class="col-md-2">
-                <label>Data Fim</label>
-                <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="form-control">
+            <div class="sara-filter-col field-data">
+                <label><i class="fa fa-calendar-alt"></i> Fim</label>
+                <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="sara-input">
             </div>
-            <div class="col-md-2">
-                <label>Situação</label>
-                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="form-control">
+            <div class="sara-filter-col field-situacao">
+                <label><i class="fa fa-info-circle"></i> Situação</label>
+                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="sara-input">
                     <option value="">Todas</option>
                     <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
                 </select>
             </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+            <div class="filter-actions-group">
+                <button class="btn-clear-filters" (click)="limparFiltros()" title="Limpar Filtros">
+                    <i class="fa fa-eraser"></i>
+                    <span>Limpar</span>
+                </button>
             </div>
         </div>
-        <div class="row" style="margin-top: 10px;">
-            <div class="col-md-12 checkbox-container">
-                <div class="form-check" style="display: flex; flex-direction: row; align-items: center;">
-                    <input class="form-check-input" type="checkbox" id="exibirCancelados" [(ngModel)]="exibirCancelados"
-                        (change)="filtrarPedidos()"
-                        style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
-                    <label class="form-check-label" for="exibirCancelados" style="margin-bottom: 0; cursor: pointer;">
-                        Exibir Cancelados
-                    </label>
-                </div>
-            </div>
+        <div class="checkbox-container">
+            <label class="modern-checkbox" for="exibirCancelados">
+                <input type="checkbox" id="exibirCancelados" [(ngModel)]="exibirCancelados" (change)="filtrarPedidos()">
+                <span>Exibir Pedidos Cancelados</span>
+            </label>
         </div>
     </div>
 
@@ -124,7 +121,6 @@
                     <th>Valor Total</th>
                     <th class="hide-mobile">Situação</th>
                     <th class="text-center">Pago</th>
-                    <th class="hide-mobile">Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -150,7 +146,6 @@
                             (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)">
                         </i>
                     </td>
-                    <td class="hide-mobile">{{ pedido.cancelado ? 'Cancelado' : 'Ativo' }}</td>
                     <td>
                         <!-- Ações Desktop -->
                         <div class="actions hide-mobile">
@@ -211,7 +206,7 @@
                     </td>
                 </tr>
                 <tr *ngIf="pedidos.length === 0 && !loading">
-                    <td [attr.colspan]="isAdmin ? 8 : 7" class="text-center">Nenhum pedido encontrado.</td>
+                    <td [attr.colspan]="isAdmin ? 7 : 6" class="text-center">Nenhum pedido encontrado.</td>
                 </tr>
             </tbody>
         </table>
