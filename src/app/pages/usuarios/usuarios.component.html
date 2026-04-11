@@ -3,271 +3,36 @@
 </div>
 
 <section class="users-page container">
-    <!-- NOVO: Link de Pesquisa no topo da página -->
+    <!-- Topo: Botão de Cadastro -->
     <div class="top-actions-row">
-        <button class="btn-gold anchor-search-btn" (click)="scrollToSearch()">
-            <i class="fa fa-search"></i> Pesquisar
+        <button class="btn-gold" (click)="cadastrarNovo()">
+            <i class="fa fa-plus"></i> Cadastrar Usuário
         </button>
     </div>
 
-    <!-- Formulário -->
-    <div class="user-form-container card">
-        <h2>{{ modoEdicao ? 'Alterar Usuário' : 'Novo Usuário' }}</h2>
-        <form [formGroup]="userForm" (ngSubmit)="salvar()">
-            <fieldset class="form-section">
-                <legend>Dados Básicos</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nome">Nome Completo</label>
-                        <input type="text" id="nome" formControlName="nome" [class.error]="isInvalid('nome')"
-                            placeholder="Digite o nome completo">
-                        <span class="error-msg" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100
-                            caracteres).</span>
-                    </div>
+    <!-- Container de Consulta -->
+    <div class="search-container card">
+        <h3>Consulta de Usuários</h3>
+        <div class="search-form-row">
+            <div class="form-group">
+                <label>Pesquisar por Nome</label>
+                <div class="input-with-icon">
+                    <i class="fa fa-search"></i>
+                    <input type="text" [(ngModel)]="filtroNome" (input)="onNomeInput()" placeholder="Mínimo 3 caracteres...">
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cpfCnpj">CPF / CNPJ</label>
-                        <input type="text" id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)"
-                            [class.error]="isInvalid('cpfCnpj')" placeholder="000.000.000-00">
-                        <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" formControlName="email" [class.error]="isInvalid('email')"
-                            placeholder="exemplo@email.com">
-                        <span class="error-msg" *ngIf="isInvalid('email')">E-mail válido é obrigatório.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="telefone">Telefone</label>
-                        <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
-                            [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
-                        <span class="error-msg" *ngIf="isInvalid('telefone')">Formato (xx) xxxxx-xxxx.</span>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Endereço</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cep">CEP</label>
-                        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
-                            [class.error]="isInvalid('cep')" placeholder="00000000">
-                        <span class="error-msg" *ngIf="isInvalid('cep')">CEP deve ter 8 dígitos numéricos.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="endereco">Endereço</label>
-                        <input type="text" id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
-                    </div>
-                    <div class="form-group small">
-                        <label for="numero">Número</label>
-                        <input type="text" id="numero" formControlName="numero" placeholder="Nº">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cidade">Cidade</label>
-                        <input type="text" id="cidade" formControlName="cidade" [class.error]="isInvalid('cidade')"
-                            placeholder="Cidade">
-                        <span class="error-msg" *ngIf="isInvalid('cidade')">Cidade é obrigatória.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="bairro">Bairro</label>
-                        <input type="text" id="bairro" formControlName="bairro" [class.error]="isInvalid('bairro')"
-                            placeholder="Bairro">
-                        <span class="error-msg" *ngIf="isInvalid('bairro')">Bairro é obrigatório.</span>
-                    </div>
-                    <div class="form-group small">
-                        <label for="uf">UF</label>
-                        <select id="uf" formControlName="uf" [class.error]="isInvalid('uf')">
-                            <option value="">UF</option>
-                            <option *ngFor="let uf of ufs" [value]="uf">{{ uf }}</option>
-                        </select>
-                        <span class="error-msg" *ngIf="isInvalid('uf')">UF obrigatória.</span>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Paróquia</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="paroco">Pároco</label>
-                        <input type="text" id="paroco" formControlName="paroco" placeholder="Nome do Pároco">
-                    </div>
-                    <div class="form-group">
-                        <label for="secretario">Secretário(a)</label>
-                        <input type="text" id="secretario" formControlName="secretario"
-                            placeholder="Nome do(a) Secretário(a)">
-                    </div>
-                    <div class="form-group">
-                        <label for="tesoureiro">Tesoureiro</label>
-                        <input type="text" id="tesoureiro" formControlName="tesoureiro"
-                            placeholder="Nome do Tesoureiro">
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Parcelamento</legend>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="permitirParcelamento" formControlName="permitirParcelamento">
-                        <label for="permitirParcelamento">Permitir Parcelamento para este usuário</label>
-                    </div>
-                </div>
-
-                <div class="form-row" *ngIf="userForm.get('permitirParcelamento')?.value">
-                    <div class="form-group">
-                        <label>Opções de Parcelamento Autorizadas</label>
-                        <div class="installment-options-grid">
-                            <div *ngFor="let opt of todasOpcoesParcelamento" class="installment-option-item">
-                                <input type="checkbox" [id]="'opt-' + opt.id" [checked]="isOpcaoSelected(opt.id!)" (change)="onOpcaoToggle(opt.id!, $event)">
-                                <label [for]="'opt-' + opt.id">
-                                    <strong>{{ opt.formaPagamentoDescricao }}</strong>: 
-                                    Até {{ opt.qtdMaxParcelas }}x (Intervalo: {{ opt.diasVencimentoIntervalo }} dias)
-                                </label>
-                            </div>
-                        </div>
-                        <div *ngIf="todasOpcoesParcelamento.length === 0" class="no-data" style="padding: 10px !important;">
-                            Nenhuma opção de parcelamento cadastrada no sistema.
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Pagamento e Frete</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="formaPagamento">Forma de Pagamento</label>
-                        <select id="formaPagamento" formControlName="formaPagamento">
-                            <option value="">Selecione...</option>
-                            <option *ngFor="let forma of formasPagamento" [value]="forma.id">{{ forma.descricao }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="desconto">Desconto (%)</label>
-                        <input type="text" id="desconto" formControlName="desconto"
-                            (input)="applyPercentualMask($event)" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label for="modalidadeEntrega">Modalidade de Entrega</label>
-                        <input type="text" id="modalidadeEntrega" formControlName="modalidadeEntrega"
-                            placeholder="Ex: Correios">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="setorId">Setor</label>
-                        <select id="setorId" formControlName="setorId" (change)="onSetorChange()">
-                            <option value="">Selecione o Setor...</option>
-                            <option *ngFor="let setor of setoresAtivos" [value]="setor.id">{{ setor.descricao }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tabelaFreteId">Tabela de Frete</label>
-                        <select id="tabelaFreteId" formControlName="tabelaFreteId"
-                            [disabled]="!userForm.get('setorId')?.value">
-                            <option value="">{{ !userForm.get('setorId')?.value ? 'Selecione um setor primeiro' :
-                                'Selecione a Tabela...' }}</option>
-                            <option *ngFor="let frete of tabelasFreteFiltradas" [value]="frete.id">{{ frete.descricao }}
-                                (R$ {{ frete.valor }})</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="role">Tipo de Usuário</label>
-                        <select id="role" formControlName="role">
-                            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="metodoPagamentoAutorizado">Método de Pagamento Autorizado</label>
-                        <select id="metodoPagamentoAutorizado" formControlName="metodoPagamentoAutorizado">
-                            <option *ngFor="let metodo of metodosAutorizados" [value]="metodo.id">{{ metodo.descricao }}</option>
-                        </select>
-                        <span class="error-msg" *ngIf="isInvalid('metodoPagamentoAutorizado')">Obrigatório.</span>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="ativarDescontoAVista" formControlName="ativarDescontoAVista">
-                        <label for="ativarDescontoAVista">Ativar Desconto à Vista da Forma de Pagamento para este usuário</label>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Observações</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="observacao">Observação</label>
-                        <textarea id="observacao" formControlName="observacao" rows="2"
-                            placeholder="Observações adicionais..."></textarea>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Autenticação</legend>
-                <div class="form-row">
-                    <div class="form-group password-field">
-                        <label for="senha">Senha (6 números) {{ modoEdicao ? '(Opcional)' : '' }}</label>
-                        <div class="input-wrapper">
-                            <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
-                                [class.error]="isInvalid('senha')">
-                            <button type="button" class="eye-icon" (click)="showSenha = !showSenha">
-                                <i class="fas" [ngClass]="showSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group password-field">
-                        <label for="confirmarSenha">Confirmar Senha {{ modoEdicao ? '(Opcional)' : '' }}</label>
-                        <div class="input-wrapper">
-                            <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
-                                formControlName="confirmarSenha"
-                                [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
-                            <button type="button" class="eye-icon" (click)="showConfirmSenha = !showConfirmSenha">
-                                <i class="fas" [ngClass]="showConfirmSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <div class="form-actions">
-                <button type="submit" class="btn-gold" [disabled]="userForm.invalid">
-                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Usuário' }}
-                </button>
-                <button type="button" class="btn-outline" (click)="finalizarAcao()" *ngIf="modoEdicao">Cancelar</button>
             </div>
-        </form>
+        </div>
     </div>
 
-    <hr class="divider">
-
-    <div id="secaoPesquisa" class="search-container">
-        <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome..." (keyup.enter)="pesquisar()">
-        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
-    </div>
-
+    <!-- Listagem -->
     <div class="user-list">
         <table class="card">
             <thead>
                 <tr>
                     <th>Nome</th>
                     <th>CPF/CNPJ</th>
-                    <th>Role</th>
+                    <th class="hide-mobile">Telefone</th>
+                    <th class="hide-mobile">Tipo</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -276,7 +41,8 @@
                 <tr *ngFor="let user of users">
                     <td>{{ user.nome }}</td>
                     <td>{{ user.cpfCnpj }}</td>
-                    <td>{{ user.role }}</td>
+                    <td class="hide-mobile">{{ user.telefone }}</td>
+                    <td class="hide-mobile">{{ user.role }}</td>
                     <td>
                         <span class="status-badge" [class.active]="user.ativo" [class.inactive]="!user.ativo">
                             {{ user.ativo ? 'Ativo' : 'Inativo' }}
@@ -285,12 +51,21 @@
                     <td>
                         <!-- Ações Desktop -->
                         <div class="actions hide-mobile">
-                            <button class="btn-edit" (click)="editar(user)" title="Editar">✏️</button>
-                            <button class="btn-info" (click)="reenviarConvite(user)" title="Reenviar Convite" style="margin: 0 5px; background: none; border: 1px solid #c5a059; border-radius: 4px; padding: 4px 8px; cursor: pointer;">📧</button>
-                            <button class="btn-delete" (click)="desativar(user.id)" *ngIf="user.ativo"
-                                title="Desativar">🚫</button>
-                            <button class="btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo"
-                                title="Ativar">✅</button>
+                            <button class="btn-action btn-edit" (click)="editar(user)" title="Editar/Visualizar">
+                                <i class="fa fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn-action btn-history" (click)="verHistorico(user)" title="Histórico do Cliente">
+                                <i class="fa fa-history"></i>
+                            </button>
+                            <button class="btn-action btn-invite" (click)="reenviarConvite(user)" title="Reenviar Convite">
+                                <i class="fa fa-envelope"></i>
+                            </button>
+                            <button class="btn-action btn-danger" (click)="desativar(user.id)" *ngIf="user.ativo" title="Desativar">
+                                <i class="fa fa-ban"></i>
+                            </button>
+                            <button class="btn-action btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo" title="Ativar">
+                                <i class="fa fa-check"></i>
+                            </button>
                         </div>
 
                         <!-- Ações Mobile (Menu Sanduíche) -->
@@ -300,6 +75,7 @@
                             </button>
                             <div class="actions-menu" *ngIf="itemMenuAberto === user.id">
                                 <button (click)="editar(user)"><i class="fa fa-pencil-alt"></i> Editar</button>
+                                <button (click)="verHistorico(user)"><i class="fa fa-history"></i> Histórico</button>
                                 <button (click)="reenviarConvite(user)"><i class="fa fa-envelope"></i> Convite</button>
                                 <button (click)="desativar(user.id)" *ngIf="user.ativo" class="text-danger"><i class="fa fa-ban"></i> Desativar</button>
                                 <button (click)="ativar(user.id)" *ngIf="!user.ativo" class="text-success"><i class="fa fa-check"></i> Ativar</button>
@@ -308,9 +84,17 @@
                     </td>
                 </tr>
                 <tr *ngIf="users.length === 0">
-                    <td colspan="5" class="no-data">Nenhum usuário encontrado.</td>
+                    <td colspan="6" class="no-data">Nenhum usuário encontrado com os filtros aplicados.</td>
                 </tr>
             </tbody>
         </table>
     </div>
 </section>
+
+<!-- Modal de Histórico -->
+<app-historico-cliente-modal 
+    *ngIf="exibirModalHistorico" 
+    [usuarioId]="usuarioSelecionadoHistorico?.id!" 
+    [usuarioNome]="usuarioSelecionadoHistorico?.nome!"
+    (fechar)="fecharHistorico()">
+</app-historico-cliente-modal>

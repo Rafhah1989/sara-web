@@ -17,6 +17,8 @@ import { HomeComponent } from './pages/home/home.component';
 import { AboutComponent } from './pages/about/about.component';
 import { ProductsComponent } from './pages/products/products.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { UsuarioFormComponent } from './pages/usuarios/usuario-form/usuario-form.component';
+import { HistoricoClienteModalComponent } from './components/historico-cliente-modal/historico-cliente-modal.component';
 import { FreteComponent } from './pages/frete/frete.component';
 import { SetorComponent } from './pages/setor/setor.component';
 import { PedidoListComponent } from './pages/pedidos/pedido-list/pedido-list.component';
@@ -44,6 +46,8 @@ const routes: Routes = [
   { path: 'quem-somos', component: AboutComponent },
   { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+  { path: 'usuarios/novo', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+  { path: 'usuarios/editar/:id', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: 'formas-pagamento', component: FormaPagamentoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
@@ -66,6 +70,8 @@ const routes: Routes = [
     AboutComponent,
     ProductsComponent,
     UsuariosComponent,
+    UsuarioFormComponent,
+    HistoricoClienteModalComponent,
     FreteComponent,
     SetorComponent,
     PedidoListComponent,

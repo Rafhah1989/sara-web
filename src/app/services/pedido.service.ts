@@ -65,12 +65,13 @@ export class PedidoService {
 
     constructor(private http: HttpClient) { }
 
-    listar(id?: number, clienteNome?: string, dataInicio?: string, dataFim?: string, situacao?: string, page: number = 0, size: number = 10, sort?: string, exibirCancelados?: boolean): Observable<any> {
+    listar(id?: number, clienteNome?: string, dataInicio?: string, dataFim?: string, situacao?: string, page: number = 0, size: number = 10, sort?: string, exibirCancelados?: boolean, usuarioId?: number): Observable<any> {
         let params = new HttpParams()
             .set('page', page.toString())
             .set('size', size.toString());
 
         if (id) params = params.set('id', id.toString());
+        if (usuarioId) params = params.set('usuarioId', usuarioId.toString());
         if (clienteNome) params = params.set('clienteNome', clienteNome);
         if (dataInicio) params = params.set('dataInicio', dataInicio);
         if (dataFim) params = params.set('dataFim', dataFim);

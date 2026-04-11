@@ -1,0 +1,97 @@
+<div class="modal-overlay" (click)="onFechar()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="cinzel-font">Histórico de Pedidos</h2>
+            <p><strong>Cliente:</strong> {{ usuarioNome }}</p>
+            <button class="close-btn" (click)="onFechar()">&times;</button>
+        </div>
+
+        <div class="modal-filters">
+            <div class="filter-group">
+                <label for="situacaoSelect">Situação:</label>
+                <select id="situacaoSelect" [(ngModel)]="filtroSituacao" (change)="carregarHistorico()">
+                    <option value="">Todas</option>
+                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
+                </select>
+            </div>
+            <div class="filter-group checkbox-group">
+                <input type="checkbox" id="exibirCancelados" [(ngModel)]="exibirCancelados" (change)="carregarHistorico()">
+                <label for="exibirCancelados">Cancelados</label>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <div *ngIf="loading" class="loading-spinner">
+                <i class="fa fa-spinner fa-spin fa-2x"></i>
+                <p>Carregando histórico...</p>
+            </div>
+
+            <div *ngIf="!loading && pedidos.length === 0" class="no-data">
+                Nenhum pedido encontrado.
+            </div>
+
+            <!-- Tabela Desktop -->
+            <table class="history-table hide-mobile" *ngIf="!loading && pedidos.length > 0">
+                <thead>
+                    <tr>
+                        <th>Pedido</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let pedido of pedidos" [class.cancelled]="pedido.cancelado">
+                        <td>#{{ pedido.id }}</td>
+                        <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
+                        <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="getSituacaoBadgeClass(pedido.situacao)">
+                                {{ pedido.situacaoDescricao }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon" (click)="editarPedido(pedido.id)" title="Ver Detalhes">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Lista Compacta Mobile -->
+            <div class="history-cards show-mobile" *ngIf="!loading && pedidos.length > 0">
+                <div class="history-card" *ngFor="let pedido of pedidos" [class.cancelled]="pedido.cancelado">
+                    <div class="card-main-content">
+                        <div class="card-top-row">
+                            <span class="order-id">#{{ pedido.id }}</span>
+                            <span class="badge" [ngClass]="getSituacaoBadgeClass(pedido.situacao)">
+                                {{ pedido.situacaoDescricao }}
+                            </span>
+                        </div>
+                        <div class="card-mid-row">
+                            <div class="detail-item">
+                                <i class="fa fa-calendar-alt"></i>
+                                <span>{{ pedido.dataPedido | date:'dd/MM/yy HH:mm' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa fa-dollar-sign"></i>
+                                <strong>{{ pedido.valorTotal | currency:'BRL' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions-col">
+                        <button class="btn-visualizar-mobile" (click)="editarPedido(pedido.id)">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-outline" (click)="onFechar()">Fechar</button>
+        </div>
+    </div>
+</div>
