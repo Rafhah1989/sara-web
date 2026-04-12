@@ -26,18 +26,18 @@
     </div>
 
     <!-- Navegação Mobile (Acesso Rápido + Sanduíche) -->
-    <div class="layout-topbar-mobile flex lg:hidden align-items-center gap-2">
-        <button pButton pRipple icon="pi pi-home" class="p-button-text gold-text" routerLink="/"></button>
-        <button pButton pRipple icon="pi pi-shopping-cart" class="p-button-text gold-text" routerLink="/loja" *ngIf="isAutenticado"></button>
-        <button pButton pRipple icon="pi pi-list" class="p-button-text gold-text" routerLink="/pedidos" *ngIf="isAutenticado"></button>
+    <div class="layout-topbar-mobile flex lg:hidden align-items-center gap-1 sm:gap-2 ml-auto">
+        <button pButton pRipple icon="pi pi-home" class="p-button-text gold-text p-1 sm:p-2" routerLink="/" title="Início"></button>
+        <button pButton pRipple icon="pi pi-shopping-cart" class="p-button-text gold-text p-1 sm:p-2" routerLink="/loja" *ngIf="isAutenticado" title="Loja"></button>
+        <button pButton pRipple icon="pi pi-list" class="p-button-text gold-text p-1 sm:p-2" routerLink="/pedidos" *ngIf="isAutenticado" title="Pedidos"></button>
+        <button pButton pRipple icon="pi pi-shopping-bag" class="p-button-text gold-text p-1 sm:p-2 relative" 
+                routerLink="/carrinho" *ngIf="isAutenticado" title="Carrinho">
+            <span *ngIf="qtdCarrinho > 0" class="cart-badge-custom">{{ qtdCarrinho }}</span>
+        </button>
         
-        <!-- Carrinho (Ícone de Cesta) -->
-        <button pButton pRipple icon="pi pi-shopping-bag" class="p-button-text gold-text" routerLink="/carrinho" *ngIf="isAutenticado"></button>
+        <div class="h-2rem border-left-1 border-400 mx-1"></div>
 
-        <p-divider layout="vertical"></p-divider>
-
-        <!-- Menu Sanduíche -->
-        <button pButton pRipple icon="pi pi-bars" class="p-button-text gold-text" (click)="mobileMenu.toggle($event)"></button>
-        <p-tieredMenu #mobileMenu [model]="burgerItems" [popup]="true"></p-tieredMenu>
+        <button pButton pRipple icon="pi pi-bars" class="p-button-text gold-text p-1 sm:p-2" (click)="mobileMenu.toggle($event)"></button>
+        <p-tieredMenu #mobileMenu [model]="burgerItems" [popup]="true" appendTo="body"></p-tieredMenu>
     </div>
 </div>

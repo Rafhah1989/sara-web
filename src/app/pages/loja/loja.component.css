@@ -1,276 +1,326 @@
-* {
-    box-sizing: border-box;
+.cinzel-font {
+    font-family: 'Cinzel', serif;
 }
 
-.loja-page {
-    padding: 40px 20px;
+.montserrat-font {
+    font-family: 'Montserrat', sans-serif;
 }
 
-.loja-layout {
-    display: flex;
-    gap: 30px;
-    align-items: flex-start;
+.gold-text {
+    color: var(--primary-gold) !important;
 }
 
-.loja-vitrine {
-    flex: 1;
+.bg-gold-gradient {
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+    border-bottom: 3px solid var(--primary-gold);
 }
 
-.color-warning-banner {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: linear-gradient(to right, #fdfbf7 0%, #fff 100%);
-    border-left: 4px solid var(--primary-gold);
-    padding: 12px 20px;
-    margin-bottom: 25px;
+.bg-gold-faded {
+    background-color: rgba(212, 175, 55, 0.1) !important;
+}
+
+.product-tag-custom {
+    background-color: rgba(212, 175, 55, 0.15);
+    color: var(--primary-gold-dark);
+    padding: 0.25rem 0.6rem;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    white-space: nowrap;
 }
 
-.color-warning-banner i {
-    color: var(--primary-gold);
-    font-size: 1.4rem;
-}
-
-.color-warning-banner p {
-    margin: 0;
-    font-size: 0.92rem;
-    color: #555;
-    line-height: 1.4;
-    text-transform: none;
-    letter-spacing: normal;
-}
-
-/* Modais Específicos da Loja (Sugestão de Tamanho) */
-.sugestao-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid var(--color-border);
+.code-tag-custom {
+    background-color: #f1f1f1;
+    color: #495057;
+    padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    background: #fafafa;
-    gap: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #e0e0e0;
 }
 
-.sugestao-img-container {
-    width: 150px;
-    height: 150px;
-    flex-shrink: 0;
+/* Filtros Sidebar */
+.sidebar-panel .p-panel-header {
+    background: #fdfdfd;
+    border-bottom: 2px solid var(--primary-gold);
+}
+
+.chip-filter {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.chip-filter.active {
+    background: var(--primary-gold);
+    color: white;
+    border-color: var(--primary-gold);
+}
+
+/* DataView Styles */
+.product-dataview {
+    border: 1px solid #f0f0f0;
+}
+
+.product-image-container {
+    height: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    overflow: hidden;
+    background: #fdfdfd;
+    cursor: zoom-in;
 }
 
-.sugestao-img {
+.product-image-container img {
+    max-height: 90%;
+    object-fit: contain;
+    transition: transform 0.5s;
+}
+
+.product-grid-item:hover .product-image-container img {
+    transform: scale(1.1);
+}
+
+.product-image-container-list {
+    width: 8rem;
+    height: 10rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-in;
+    background: #fdfdfd;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+}
+
+@media (min-width: 768px) {
+    .product-image-container-list {
+        width: 10rem;
+        height: 12rem;
+    }
+}
+
+.product-image-container-list img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    transition: transform 0.3s;
 }
 
-.sugestao-placeholder {
-    font-size: 0.7rem;
-    color: #999;
-    text-align: center;
+.product-image-container-list:hover img {
+    transform: scale(1.05);
 }
 
-.sugestao-info {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+.limit-lines-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 3rem;
 }
 
-.sugestao-tamanho {
-    font-weight: bold;
-    color: var(--color-text);
+/* Botões e Inputs */
+::ng-deep .btn-gold {
+    background: var(--primary-gold) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
-.sugestao-preco {
-    color: var(--color-primary-dark);
-    font-size: 0.9rem;
+::ng-deep .btn-gold:hover {
+    background: var(--primary-gold-dark) !important;
 }
 
-.sugestao-action {
+::ng-deep .p-inputnumber-buttons-horizontal .p-inputnumber-button {
+    background: #f8f9fa !important;
+    color: #495057 !important;
+    border-color: #dee2e6 !important;
+}
+
+::ng-deep .p-inputnumber-buttons-horizontal .p-inputnumber-button:hover {
+    background: #e9ecef !important;
+    color: var(--primary-gold) !important;
+}
+
+::ng-deep .p-inputnumber input:focus,
+::ng-deep .p-inputnumber .p-inputnumber-button:focus {
+    box-shadow: 0 0 0 0.1rem rgba(212, 175, 55, 0.2) !important;
+    border-color: var(--primary-gold) !important;
+    outline: none !important;
+}
+
+/* SelectButton Custom Styles */
+::ng-deep .p-selectbutton .p-button.p-highlight {
+    background: var(--primary-gold) !important;
+    border-color: var(--primary-gold) !important;
+    color: #ffffff !important;
+}
+
+::ng-deep .p-selectbutton .p-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+}
+
+/* Modais/Dialogs */
+::ng-deep .zoom-dialog-minimal .p-dialog-content {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+
+::ng-deep .zoom-dialog-minimal.p-dialog {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+::ng-deep .darker-overlay {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(3px);
+}
+
+.close-zoom-btn {
+    position: absolute;
+    top: -1rem;
+    right: -1rem;
+    z-index: 1100;
+    color: white !important;
+    background: rgba(0,0,0,0.6) !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    border: 2px solid rgba(255,255,255,0.4) !important;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.close-zoom-btn:hover {
+    background: var(--primary-gold) !important;
+    transform: scale(1.1);
+}
+
+::ng-deep .close-zoom-btn .pi {
+    font-size: 1.5rem !important;
+}
+
+::ng-deep .bulk-dialog .p-dialog-header {
+    background: #fdfdfd;
+    border-bottom: 2px solid var(--primary-gold);
+}
+
+.compact-table th {
+    padding: 0.5rem 0.5rem;
+}
+
+.compact-table td {
+    padding: 0.35rem 0.5rem !important;
+    border-top: 1px solid #f1f1f1;
+}
+
+.compact-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.compact-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Compactar botões do inputNumber na tabela */
+::ng-deep .compact-qty .p-inputnumber-button {
+    width: 2rem !important;
+    padding: 0 !important;
+}
+
+::ng-deep .compact-qty .p-inputnumber-input {
+    padding: 0.25rem !important;
+    font-size: 0.85rem !important;
+}
+
+/* Utilitários */
+.zoom-img-fixed {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.anim-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.placeholder-img {
+    background: #f8f9fa;
+    color: #adb5bd;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    font-size: 0.8rem;
+    height: 100%;
+    width: 100%;
 }
 
-.sugestao-action input {
-    width: 60px;
-    padding: 5px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+.color-warning-card {
+    border-left: 4px solid var(--primary-gold) !important;
 }
 
-.hide-mobile {
-    display: block;
-}
-
-.show-mobile {
-    display: none;
-}
-
+/* Mobile Overrides (Force List) */
 @media (max-width: 768px) {
-    .loja-page {
-        padding: 10px 10px;
-    }
-
-    .loja-layout {
-        flex-direction: column;
-        gap: 0;
-    }
-
     .hide-mobile {
         display: none !important;
     }
 
-    .show-mobile {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    ::ng-deep .product-dataview .grid {
+        display: flex;
+        flex-direction: column;
     }
 
-    .color-warning-banner {
-        padding: 10px 15px;
-        gap: 10px;
-        margin-bottom: 20px;
-        margin-left: 8px;
-        margin-right: 8px;
+    .product-list-item {
+        margin-bottom: 1.5rem;
+        padding: 1.5rem !important;
     }
 
-    .color-warning-banner i {
-        font-size: 1.2rem;
+    .product-list-item .flex.align-items-center.gap-2 {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem !important;
     }
 
-    .color-warning-banner p {
-        font-size: 0.85rem;
+    .product-list-item .btn-gold {
+        width: 100% !important;
+        padding: 0.8rem !important;
+    }
+
+    ::ng-deep .product-list-item .p-inputnumber {
+        width: 100% !important;
+    }
+
+    ::ng-deep .product-list-item .p-inputnumber input {
+        width: 100% !important;
+    }
+
+    .p-sidebar-md {
+        height: auto !important;
     }
 }
 
-/* Modal de Zoom de Imagem - ESTILO EXCLUSIVO E REFORÇADO */
-.zoom-overlay-exclusive {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999999 !important; /* Valor extremo para garantir visibilidade */
-    cursor: zoom-out;
-    animation: fadeInZoom 0.25s ease-out;
-}
-
-.zoom-modal-container-exclusive {
-    position: relative;
-    max-width: 95%;
-    max-height: 95%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: scaleInZoom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.zoom-img-exclusive {
-    max-width: 100%;
-    max-height: 90vh;
-    border-radius: 12px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-    object-fit: contain;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-}
-
-.zoom-close-btn-exclusive {
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    background: #fff;
-    border: none;
+.placeholder-img-sm {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
+    background: #f1f1f1;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    z-index: 100;
-    color: #ff0000;
-    font-size: 1.8rem;
-    transition: all 0.2s;
+    border-radius: 8px;
+    font-size: 0.6rem;
+    color: #999;
 }
-
-.zoom-close-btn-exclusive:hover {
-    transform: scale(1.1);
-    background: #eee;
-}
-
-@keyframes fadeInZoom {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes scaleInZoom {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-@media (max-width: 768px) {
-    .zoom-modal-container-exclusive {
-        width: 90vw;
-    }
-    .zoom-close-btn-exclusive {
-        top: 10px;
-        right: 10px;
-        width: 54px;
-        height: 54px;
-        font-size: 1.5rem;
-    }
-}
-
-/* Modern Button Styles */
-.btn-modern-secondary {
-    background-color: #3b6b91;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(59, 107, 145, 0.2);
-}
-
-.btn-modern-secondary:hover {
-    background-color: #2c5170;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(59, 107, 145, 0.3);
-}
-
-.mobile-btn-modern-accent {
-    background-color: #3b6b91;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 10px rgba(59, 107, 145, 0.2);
-}
-

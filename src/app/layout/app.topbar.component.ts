@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { LayoutService } from "./service/app.layout.service";
 import { AuthService } from '../services/auth.service';
+import { CarrinhoService } from '../services/carrinho.service';
 
 @Component({
     selector: 'app-topbar',
@@ -20,14 +21,32 @@ export class AppTopBarComponent implements OnInit {
 
     constructor(
         public layoutService: LayoutService,
-        private authService: AuthService
+        private authService: AuthService,
+        private carrinhoService: CarrinhoService
     ) { }
+
+    qtdCarrinho: number = 0;
 
     ngOnInit() {
         this.authService.isAuthenticated$.subscribe(autenticado => {
             this.isAutenticado = autenticado;
             this.nomeUsuario = autenticado ? this.authService.getSubjectDoToken() : '';
+            
+            if (autenticado) {
+                const userId = this.authService.getUsuarioIdDoToken();
+                if (userId) {
+                    this.carrinhoService.atualizarContagem(userId);
+                }
+            } else {
+                this.carrinhoService.limparContagem();
+            }
+
             this.configurarMenus();
+        });
+
+        this.carrinhoService.quantidadeItensUnicos$.subscribe(qtd => {
+            this.qtdCarrinho = qtd;
+            this.configurarMenus(); // Reconfigura para atualizar o badge no MenuItem
         });
     }
 
@@ -61,7 +80,13 @@ export class AppTopBarComponent implements OnInit {
                     ]
                 });
             }
-            privateItems.push({ label: 'Carrinho', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/carrinho'] });
+            privateItems.push({ 
+                label: 'Carrinho', 
+                icon: 'pi pi-fw pi-shopping-bag', 
+                routerLink: ['/carrinho'],
+                badge: this.qtdCarrinho > 0 ? this.qtdCarrinho.toString() : undefined,
+                badgeStyleClass: 'p-badge-success'
+            });
         }
 
         // Montagem do menuItems (Desktop)

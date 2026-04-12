@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Produto } from '../../models/produto.model';
@@ -9,16 +9,12 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
 import { UsuarioService } from '../../services/usuario.service';
+import { MessageService, SelectItem } from 'primeng/api';
 
 @Component({
   selector: 'app-loja',
   templateUrl: './loja.component.html',
-  styleUrls: [
-    './loja.component.css',
-    './loja-vitrine.css',
-    './loja-filtros.css',
-    './loja-modal.css'
-  ]
+  styleUrls: ['./loja.component.css']
 })
 export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -36,6 +32,17 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ordenacao: 'nome' | 'tamanho' | 'preco' = 'nome';
   itensPorLinha: 3 | 4 | 5 = 3;
+
+  layout: 'grid' | 'list' = 'grid';
+  sortOptions: SelectItem[] = [
+    { label: 'Nome', value: 'nome' },
+    { label: 'Tamanho', value: 'tamanho' },
+    { label: 'Preço', value: 'preco' }
+  ];
+  layoutOptions: any[] = [
+    { icon: 'pi pi-th-large', value: 'grid' },
+    { icon: 'pi pi-bars', value: 'list' }
+  ];
 
   // Pagination
   paginaAtual: number = 0;
@@ -87,7 +94,8 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     private produtoService: ProdutoService,
     private carrinhoService: CarrinhoService,
     private authService: AuthService,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+    private messageService: MessageService
   ) {
     this.nomeSubject.pipe(
       debounceTime(600),
@@ -101,9 +109,26 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.checkMobile();
     this.carregarTamanhos();
     this.carregarDadosUsuario();
     this.pesquisar();
+  }
+
+  isMobile: boolean = false;
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    if (window.innerWidth <= 768) {
+      this.isMobile = true;
+      this.layout = 'list';
+    } else {
+      this.isMobile = false;
+    }
   }
 
   carregarDadosUsuario(): void {
@@ -202,8 +227,12 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       return isNaN(parsed) ? undefined : parsed;
   }
 
+  onSortChange(event: any) {
+    this.ordenacao = event.value;
+    this.pesquisar(true);
+  }
+
   ordenarProdutos(): void {
-    // Agora a ordenação é feita pelo Backend para abranger todo o catálogo
     this.pesquisar(true);
   }
 
@@ -339,7 +368,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  processarAdicaoUnitaria(usuarioId: number, produto: Produto, qtd: number): Observable<any> {
+  processarAdicaoUnitaria(usuarioId: number, produto: Produto, qtd: number, mostrarMensagem: boolean = true): Observable<any> {
       return new Observable(observer => {
           this.produtosSendoAdicionados.add(produto.id!);
           
@@ -351,7 +380,9 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
             next: (res) => {
               this.produtosSendoAdicionados.delete(produto.id!);
               if (observer.closed) return;
-              this.mostrarToast('Carrinho atualizado');
+              if (mostrarMensagem) {
+                  this.mostrarToast('Carrinho atualizado');
+              }
               observer.next(res);
               observer.complete();
             },
@@ -365,19 +396,25 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
                  }, true).subscribe({ // true = skip global spinner
                     next: () => {
                         this.produtosSendoAdicionados.delete(produto.id!);
-                        this.mostrarToast('Carrinho atualizado');
+                        if (mostrarMensagem) {
+                            this.mostrarToast('Carrinho atualizado');
+                        }
                         observer.next(null);
                         observer.complete();
                     },
                     error: (e) => {
                         this.produtosSendoAdicionados.delete(produto.id!);
-                        this.mostrarToast(`Erro ao atualizar ${produto.nome}.`);
+                        if (mostrarMensagem) {
+                            this.mostrarToast(`Erro ao atualizar ${produto.nome}.`);
+                        }
                         observer.error(e);
                     }
                  });
               } else {
                 this.produtosSendoAdicionados.delete(produto.id!);
-                this.mostrarToast(`Erro ao adicionar ${produto.nome}.`);
+                if (mostrarMensagem) {
+                    this.mostrarToast(`Erro ao adicionar ${produto.nome}.`);
+                }
                 observer.error(err);
               }
             }
@@ -387,7 +424,7 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Ações da Modal de Sugestões
   getTamanhoImagemPx(tamanho: number | undefined): number {
-      const BASE_SIZE = 195; // 150px original + 30%
+      const BASE_SIZE = 140; // Reduzido para evitar scroll na modal
       if (!tamanho || this.sugestoesTamanhos.length === 0) return BASE_SIZE;
       
       const maxTamanho = this.sugestoesTamanhos[0].tamanho || 0;
@@ -430,14 +467,14 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       const adicoes = [];
       const qtdOriginal = this.quantidades[this.produtoOriginalSelecionado.id!] || 1;
       
-      const requisicaoOriginal = this.processarAdicaoUnitaria(usuarioId, this.produtoOriginalSelecionado, qtdOriginal)
+      const requisicaoOriginal = this.processarAdicaoUnitaria(usuarioId, this.produtoOriginalSelecionado, qtdOriginal, false)
           .pipe(catchError(e => of(null)));
       adicoes.push(requisicaoOriginal);
 
       this.sugestoesTamanhos.forEach(sugestao => {
           const qtdSugestao = this.quantidadesSugestao[sugestao.id!];
           if (qtdSugestao > 0) {
-              const req = this.processarAdicaoUnitaria(usuarioId, sugestao, qtdSugestao)
+              const req = this.processarAdicaoUnitaria(usuarioId, sugestao, qtdSugestao, false)
                   .pipe(catchError(e => of(null)));
               adicoes.push(req);
           }
@@ -450,17 +487,13 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.fecharModalSugestao();
   }
 
-  mostrarToast(mensagem: string): void {
-      this.mensagemToast = mensagem;
-      this.exibirToast = true;
-      
-      if (this.toastTimeout) {
-          clearTimeout(this.toastTimeout);
-      }
-      
-      this.toastTimeout = setTimeout(() => {
-          this.exibirToast = false;
-      }, 3000);
+  mostrarToast(mensagem: string, severity: 'success' | 'info' | 'warn' | 'error' = 'success'): void {
+      this.messageService.add({
+          severity: severity,
+          summary: severity === 'error' ? 'Erro' : 'Sucesso',
+          detail: mensagem,
+          life: 3000
+      });
   }
 
   abrirVisualizacaoImagem(prod: any): void {

@@ -1,67 +1,99 @@
-.about-page {
-    padding: 4rem 1rem;
+.landing-wrapper {
+    background-color: #000000;
 }
 
-.about-page h1 {
-    font-size: 3rem;
-    color: var(--primary-gold-dark);
-    text-align: center;
-    margin-bottom: 3rem;
+.gold-text {
+    color: var(--primary-gold) !important;
+}
+
+.cinzel-font {
+    font-family: 'Cinzel', serif;
+}
+
+.montserrat-font {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.section-title {
     position: relative;
+    padding-bottom: 0.5rem;
+    display: inline-block;
 }
 
-.about-page h1::after {
+.section-title::after {
     content: '';
-    display: block;
-    width: 100px;
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
     height: 3px;
-    background-color: var(--primary-gold);
-    margin: 1rem auto;
+    background: var(--primary-gold);
+    border-radius: 2px;
 }
 
-.about-text {
-    max-width: 800px;
-    margin: 0 auto 4rem;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: var(--text-dark);
-    text-align: justify;
+.section-title-white {
+    color: #ffffff;
+    position: relative;
+    padding-bottom: 0.5rem;
+    display: inline-block;
 }
 
-.about-text p {
+.section-title-white::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    width: 50%;
+    height: 3px;
+    background: var(--primary-gold);
+    border-radius: 2px;
+}
+
+.about-text-content {
+    color: #2c3e50 !important; /* Cinza grafite profundo para contraste máximo no fundo branco */
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Feature Cards (Replicado da Home) */
+.feature-card {
+    background: #1a1a1a;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary-gold);
+    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.1);
+}
+
+.feature-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1.5rem;
 }
 
-.values-section h2 {
-    text-align: center;
-    font-size: 2rem;
-    color: var(--secondary-dark);
-    margin-bottom: 2rem;
+.about-bg {
+    background: radial-gradient(circle at 70% 30%, #1a1a1a 0%, #000000 100%);
 }
 
-.values-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+.text-body {
+    color: #ced4da;
+    line-height: 1.6;
 }
 
-.value-card {
-    background-color: white;
-    padding: 2rem;
-    text-align: center;
-    border-radius: 8px;
-    border: 1px solid #eee;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s;
-}
-
-.value-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary-gold);
-}
-
-.value-card h3 {
-    color: var(--primary-gold-dark);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+@media (max-width: 991px) {
+    .section-title::after, .section-title-white::after {
+        left: 0;
+        width: 100%;
+    }
 }

@@ -1,403 +1,392 @@
-<!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
-<div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
-    <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
-        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Visualização"
-            class="zoom-img-exclusive" (error)="imagemUrlVisualizacao=''">
-        <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
-            <i class="fa fa-times"></i>
-        </button>
+<p-toast></p-toast>
+
+<!-- Modal de Visualização de Imagem (Zoom) - PrimeNG Dialog -->
+<p-dialog [(visible)]="exibirVisualizacaoImagem" [modal]="true" [dismissableMask]="true" 
+          [style]="{width: '90vw', maxWidth: '800px'}" [showHeader]="false"
+          styleClass="zoom-dialog-minimal" maskStyleClass="darker-overlay" (onHide)="fecharVisualizacaoImagem()">
+    <div class="flex flex-column align-items-center justify-content-center">
+        <div class="relative inline-block" style="width: fit-content;">
+            <button pButton icon="pi pi-times" class="close-zoom-btn p-button-rounded p-button-text" 
+                    (click)="fecharVisualizacaoImagem()"></button>
+            <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" 
+                 class="zoom-img-fixed"
+                 (error)="imagemUrlVisualizacao=''">
+        </div>
     </div>
+</p-dialog>
+
+<div class="page-title-banner p-5 text-center mb-5 bg-gold-gradient">
+    <h1 class="cinzel-font gold-text text-4xl lg:text-5xl font-bold m-0">Loja Sara</h1>
+    <p class="text-white opacity-80 mt-2 montserrat-font">Excelência e Fé em cada detalhe</p>
 </div>
 
-<div class="page-title-banner">
-    <h1>Loja Sara</h1>
-</div>
+<section class="container px-4 lg:px-8 mb-8">
+    <div class="grid">
+        <!-- Sidebar Filtros Desktop -->
+        <aside class="col-12 lg:col-3 hide-mobile pr-4">
+            <p-panel header="Filtros" styleClass="sidebar-panel mb-4 shadow-1 border-round-xl overflow-hidden">
+                <div class="p-fluid">
 
-<section class="loja-page container">
-    <div class="loja-layout">
+                    <div class="field mb-4">
+                        <label class="font-bold text-900 mb-2 block">Tamanhos (cm)</label>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="chip-filter" *ngFor="let t of tamanhosDisponiveis" 
+                                 [class.active]="isTamanhoSelecionado(t)" (click)="toggleTamanho(t)">
+                                {{ t }}
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Sidebar Filtros -->
-        <aside class="loja-sidebar card hide-mobile">
-            <h2>Filtros</h2>
-            <div class="form-group">
-                <label>Produto</label>
-                <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
-                    placeholder="Mínimo 3 caracteres...">
-            </div>
+                    <p-divider align="center">
+                        <span class="p-tag p-tag-rounded bg-gold-faded gold-text px-3">Preço</span>
+                    </p-divider>
 
-            <div class="form-group" style="margin-top: 15px;">
-                <label>Tamanhos</label>
-                <div class="chips-container">
-                    <div class="chip" *ngFor="let t of tamanhosDisponiveis" [class.active]="isTamanhoSelecionado(t)"
-                        (click)="toggleTamanho(t)">
-                        {{ t }} cm
+                    <div class="grid mt-3">
+                        <div class="col-6">
+                            <label class="text-700 text-xs block mb-1">Mínimo</label>
+                            <p-inputNumber [(ngModel)]="filtroPrecoMin" mode="currency" currency="BRL" locale="pt-BR"
+                                           placeholder="R$ 0,00" (onInput)="pesquisar()"></p-inputNumber>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-700 text-xs block mb-1">Máximo</label>
+                            <p-inputNumber [(ngModel)]="filtroPrecoMax" mode="currency" currency="BRL" locale="pt-BR"
+                                           placeholder="R$ 0,00" (onInput)="pesquisar()"></p-inputNumber>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex flex-column gap-2">
+                        <button pButton pRipple label="Limpar Filtros" icon="pi pi-filter-slash" 
+                                class="p-button-outlined p-button-secondary border-round-lg" (click)="limparFiltros()"></button>
+                        
+                        <button pButton pRipple label="Comprar por Tabela" icon="pi pi-table" 
+                                class="btn-gold shadow-2 border-round-lg mt-2" (click)="abrirModalProdutosAlternativo()"></button>
                     </div>
                 </div>
+            </p-panel>
+
+            <div class="color-warning-card p-3 border-round-lg border-1 border-gold-faded bg-yellow-50 flex gap-3 align-items-start shadow-1">
+                <i class="pi pi-info-circle gold-text text-xl"></i>
+                <p class="m-0 text-700 text-xs">Cores e tonalidades podem apresentar pequenas divergências em relação às fotos.</p>
             </div>
-
-            <fieldset class="filter-fieldset">
-                <legend>Faixa de Preço</legend>
-                <div class="price-range-group">
-                    <div class="form-group">
-                        <label>Mínimo</label>
-                        <input type="text" [(ngModel)]="filtroPrecoMinFMT" (input)="applyCurrencyMask($event, 'min')"
-                            placeholder="R$ 0,00">
-                    </div>
-                    <div class="form-group">
-                        <label>Máximo</label>
-                        <input type="text" [(ngModel)]="filtroPrecoMaxFMT" (input)="applyCurrencyMask($event, 'max')"
-                            placeholder="R$ 0,00">
-                    </div>
-                </div>
-            </fieldset>
-
-            <button class="btn-gold" style="width: 100%; margin-top: 15px;" (click)="pesquisar()">Aplicar
-                Filtros</button>
-            <button class="btn-clear" style="width: 100%; margin-top: 10px;" (click)="limparFiltros()">Limpar
-                Filtros</button>
-
-            <button class="btn-modern-secondary" style="width: 100%; margin-top: 20px;"
-                (click)="abrirModalProdutosAlternativo()">
-                <i class="fa fa-th-list"></i> Comprar por tabela
-            </button>
         </aside>
 
-        <!-- Vitrine de Produtos -->
-        <main class="loja-vitrine">
+        <!-- Vitrine Principal com DataView -->
+        <main class="col-12 lg:col-9">
+            <p-dataView #dv [value]="produtos" [layout]="layout" [rows]="tamanhoPagina" [paginator]="false" 
+                       gridStyleClass="grid" styleClass="product-dataview shadow-3 border-round-xl p-3 bg-white overflow-hidden">
+                
+                <!-- Header do DataView -->
+                <ng-template pTemplate="header">
+                    <div class="flex flex-column md:flex-row md:justify-content-between align-items-center gap-3">
+                        <div class="flex align-items-center gap-3 w-full md:w-auto">
+                            <span class="p-input-icon-left w-full md:w-20rem">
+                                <i class="pi pi-search gold-text"></i>
+                                <input type="text" pInputText [ngModel]="filtroNome" (keyup)="onNomeChange($event)" 
+                                       placeholder="Buscar na vitrine..." class="w-full border-round-pill">
+                            </span>
+                            <button pButton icon="pi pi-filter" 
+                                    class="lg:hidden btn-gold p-button-rounded flex align-items-center justify-content-center flex-shrink-0" 
+                                    style="height: 3rem; width: 3rem;"
+                                    (click)="toggleFiltrosMobile()"></button>
+                        </div>
 
-            <!-- NOVO: Cabeçalho Mobile (Filtro Nome + Botões de Ação) -->
-            <div class="mobile-filters-header show-mobile">
-                <div class="mobile-search-container">
-                    <input type="text" [ngModel]="filtroNome" (keyup)="onNomeChange($event)"
-                        placeholder="Buscar produto..." class="mobile-input-search">
-                    <i class="fa fa-search"></i>
-                </div>
-                <div class="mobile-actions-row">
-                    <button class="mobile-btn-modern-accent-full" (click)="abrirModalProdutosAlternativo()"
-                        type="button">
-                        <i class="fa fa-th-list"></i> Comprar por Tabela
-                    </button>
-                    <button class="mobile-btn-filters-full" (click)="toggleFiltrosMobile()" type="button">
-                        <i class="fa fa-filter"></i> Filtro
-                    </button>
-                </div>
-            </div>
-
-            <!-- NOVO: Drawer/Menu de Filtros Mobile -->
-            <div class="mobile-filters-drawer show-mobile" [class.open]="exibirFiltrosMobile">
-                <div class="drawer-handle" (click)="toggleFiltrosMobile()"></div>
-                <div class="drawer-header">
-                    <h3>Filtros & Ordenação</h3>
-                    <button class="close-drawer" (click)="toggleFiltrosMobile()">&times;</button>
-                </div>
-                <div class="drawer-content">
-                    <div class="filter-group">
-                        <label><i class="fa fa-arrows-h"></i> Selecione os Tamanhos</label>
-                        <div class="chips-container-mobile">
-                            <div class="chip-mobile" *ngFor="let t of tamanhosDisponiveis"
-                                [class.active]="isTamanhoSelecionado(t)" (click)="toggleTamanho(t)">
-                                {{ t }}cm
+                        <div class="flex align-items-end gap-3 w-full md:w-auto justify-content-between md:justify-content-end">
+                            <div class="flex flex-column gap-1 w-full md:w-auto">
+                                <span class="text-xs font-bold text-700 ml-2">Ordenar por:</span>
+                                <p-dropdown [options]="sortOptions" [(ngModel)]="ordenacao" placeholder="Ordenar por"
+                                            optionLabel="label" optionValue="value"
+                                            (onChange)="onSortChange($event)" styleClass="w-full md:w-12rem border-round-pill border-gold-faded"></p-dropdown>
+                            </div>
+                            
+                            <div class="flex flex-column gap-1 hide-mobile">
+                                <span class="text-xs font-bold text-700 ml-2">Visualização:</span>
+                                <p-selectButton [options]="layoutOptions" [(ngModel)]="layout" [disabled]="layout === 'list' && isMobile">
+                                    <ng-template let-item pTemplate="item">
+                                        <i [class]="item.icon"></i>
+                                    </ng-template>
+                                </p-selectButton>
                             </div>
                         </div>
                     </div>
+                </ng-template>
 
-                    <div class="filter-group section-divider">
-                        <label><i class="fa fa-tag"></i> Faixa de Preço</label>
-                        <div class="price-inputs">
-                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMinFMT"
-                                (input)="applyCurrencyMask($event, 'min')" placeholder="Mín R$">
-                            <span class="price-separator">até</span>
-                            <input type="text" class="modern-input input-w40" [(ngModel)]="filtroPrecoMaxFMT"
-                                (input)="applyCurrencyMask($event, 'max')" placeholder="Máx R$">
-                        </div>
-                    </div>
+                <!-- Grid Item -->
+                <ng-template let-product pTemplate="gridItem">
+                    <div class="col-12 sm:col-6 md:col-4 p-3 anim-fade-in">
+                        <div class="product-grid-item card border-round-xl shadow-1 p-0 overflow-hidden h-full flex flex-column">
+                            <div class="product-image-container relative overflow-hidden" (click)="abrirVisualizacaoImagem(product.imagem)">
+                                <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" class="w-full">
+                                <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
+                                
+                                <p-tag *ngIf="product.tamanho >= 40" severity="warning" value="Grande Porte" 
+                                       class="absolute top-0 right-0 m-2 shadow-2"></p-tag>
+                            </div>
 
-                    <div class="filter-group section-divider">
-                        <label><i class="fa fa-sort-amount-desc"></i> Ordenar por</label>
-                        <select class="modern-select select-w60" [(ngModel)]="ordenacao" (change)="ordenarProdutos()">
-                            <option value="nome">Nome</option>
-                            <option value="tamanho">Tamanho</option>
-                            <option value="preco">Preço</option>
-                        </select>
-                    </div>
+                            <div class="p-4 flex flex-column flex-grow-1">
+                                <div class="flex justify-content-between align-items-start mb-2">
+                                    <div class="text-900 font-bold text-lg card-title limit-lines-2">{{ product.nome }}</div>
+                                    <span class="product-tag-custom">{{ product.tamanho }}cm</span>
+                                </div>
+                                
+                                <span class="text-500 text-xs mb-3 block">Código: #{{ product.codigo }}</span>
+                                
+                                <div class="mt-auto">
+                                    <div class="text-2xl font-bold gold-text mb-1">{{ product.preco | currency:'BRL' }}</div>
+                                    <div class="text-500 text-xs mb-3" *ngIf="product.preco">{{ getParcelamentoInfo(product.preco) }}</div>
 
-                    <div class="drawer-footer">
-                        <button class="btn-clear-modern" (click)="limparFiltros(); toggleFiltrosMobile()">Limpar
-                            Tudo</button>
-                        <button class="btn-apply-modern" (click)="toggleFiltrosMobile()">Aplicar Filtros</button>
-                    </div>
-                </div>
-            </div>
+                                    <div class="flex align-items-center gap-2 mb-3">
+                                        <p-inputNumber [(ngModel)]="quantidades[product.id!]" [showButtons]="true" buttonLayout="horizontal" 
+                                                       spinnerMode="horizontal" inputStyleClass="text-center w-full"
+                                                       class="w-full" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                       [min]="1">
+                                        </p-inputNumber>
+                                    </div>
 
-            <!-- Controles Desktop (Ocultar em Mobile) -->
-            <div class="desktop-controls hide-mobile"
-                style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 24px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
-                    <label style="margin: 0; font-weight: 600; color: #555; white-space: nowrap;">Ordenar por:</label>
-                    <select class="form-control form-control-sm" [(ngModel)]="ordenacao" (change)="ordenarProdutos()"
-                        style="width: 150px; margin: 0;">
-                        <option value="nome">Nome</option>
-                        <option value="tamanho">Tamanho</option>
-                        <option value="preco">Preço</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; flex-direction: row; align-items: center; gap: 15px;">
-                    <label style="margin: 0; font-weight: 600; color: #555; white-space: nowrap;">Itens por
-                        linha:</label>
-                    <div class="grid-controls">
-                        <button type="button" class="btn-grid-view" [class.active]="itensPorLinha === 3"
-                            (click)="itensPorLinha = 3" title="3 Itens por linha">
-                            3
-                        </button>
-                        <button type="button" class="btn-grid-view" [class.active]="itensPorLinha === 4"
-                            (click)="itensPorLinha = 4" title="4 Itens por linha">
-                            4
-                        </button>
-                        <button type="button" class="btn-grid-view" [class.active]="itensPorLinha === 5"
-                            (click)="itensPorLinha = 5" title="5 Itens por linha">
-                            5
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="color-warning-banner">
-                <i class="fa fa-info-circle"></i>
-                <p>Podem ocorrer
-                    divergências nas cores e tonalidades das imagens em relação às fotos.</p>
-            </div>
-
-            <h2
-                style="text-align: center; margin-bottom: 20px; color: var(--color-primary-dark); font-weight: 600; text-transform: uppercase;">
-                Selecione seus Produtos</h2>
-            <div class="vitrine-grid" [ngStyle]="{'grid-template-columns': 'repeat(' + itensPorLinha + ', 1fr)'}">
-                <div class="vitrine-card" *ngFor="let product of produtos">
-                    <div class="card-image-wrapper" (click)="abrirVisualizacaoImagem(product.imagem)"
-                        title="Clique para ampliar">
-                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome"
-                            (error)="product.imagem = ''">
-                        <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
-                    </div>
-
-                    <div class="card-body">
-                        <h4 class="card-title" [class.small-font]="itensPorLinha === 5">{{ product.nome }} (#{{
-                            product.codigo }})</h4>
-                        <p class="card-size">Tamanho: {{ product.tamanho }} cm</p>
-                        <p class="card-price">{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</p>
-                        <p class="card-installment" *ngIf="product.preco">{{ getParcelamentoInfo(product.preco) }}</p>
-
-                        <div class="card-actions">
-                            <div class="qtd-control">
-                                <button class="btn-qty" (click)="decrementarQtd(product.id!)"
-                                    [disabled]="(quantidades[product.id!] || 1) <= 1">-</button>
-                                <input type="number" [(ngModel)]="quantidades[product.id!]">
-                                <button class="btn-qty" (click)="incrementarQtd(product.id!)">+</button>
+                                    <button pButton pRipple icon="pi pi-shopping-cart" label="Adicionar" 
+                                            class="w-full btn-gold shadow-2 p-button-raised border-round-lg"
+                                            (click)="adicionarAoCarrinho(product)" 
+                                            [loading]="produtosSendoAdicionados.has(product.id!)"></button>
+                                </div>
                             </div>
                         </div>
-                        <button class="btn-add" (click)="adicionarAoCarrinho(product)"
-                            [disabled]="produtosSendoAdicionados.has(product.id!)">
-                            <i *ngIf="produtosSendoAdicionados.has(product.id!)"
-                                class="fa fa-spinner fa-spin spinner-btn"></i>
-                            {{ produtosSendoAdicionados.has(product.id!) ? 'Adicionando...' : 'Adicionar' }}
-                        </button>
                     </div>
+                </ng-template>
+
+                <!-- List Item -->
+                <ng-template let-product pTemplate="listItem">
+                    <div class="col-12 p-3 anim-fade-in">
+                        <div class="product-list-item flex flex-column md:flex-row align-items-center p-4 border-round-xl shadow-1 gap-4 bg-white hover:surface-100 transition-duration-200">
+                            <div class="product-image-container-list flex-shrink-0" (click)="abrirVisualizacaoImagem(product.imagem)">
+                                <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome">
+                                <div *ngIf="!product.imagem" class="placeholder-img">Sem Imagem</div>
+                            </div>
+                            
+                            <div class="flex-grow-1 flex flex-column gap-2 text-center md:text-left">
+                                <div class="text-xl font-bold text-900">{{ product.nome }}</div>
+                                <div class="flex align-items-center justify-content-center md:justify-content-start gap-2">
+                                    <span class="code-tag-custom">#{{ product.codigo }}</span>
+                                    <span class="product-tag-custom">{{ product.tamanho }} cm</span>
+                                </div>
+                                </div>
+
+                            <div class="flex flex-column align-items-center md:align-items-end gap-3 flex-shrink-0">
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold gold-text">{{ product.preco | currency:'BRL' }}</div>
+                                    <div class="text-500 text-xs" *ngIf="product.preco">{{ getParcelamentoInfo(product.preco) }}</div>
+                                </div>
+                                
+                                <div class="flex align-items-center gap-2">
+                                    <p-inputNumber [(ngModel)]="quantidades[product.id!]" [showButtons]="true" buttonLayout="horizontal" 
+                                                   spinnerMode="horizontal" inputStyleClass="text-center w-3rem border-gold-faded"
+                                                   incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                   [min]="1">
+                                    </p-inputNumber>
+                                    
+                                    <button pButton pRipple icon="pi pi-shopping-cart" label="Adicionar" 
+                                            class="btn-gold shadow-2 px-4"
+                                            (click)="adicionarAoCarrinho(product)" 
+                                            [loading]="produtosSendoAdicionados.has(product.id!)"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-dataView>
+
+            <!-- Sentinel para Scroll Infinito -->
+            <div #infinitoSentinel class="flex align-items-center justify-content-center py-5">
+                <div *ngIf="carregando && !fimDosProdutos" class="flex flex-column align-items-center gap-2">
+                    <i class="pi pi-spin pi-spinner gold-text text-4xl"></i>
+                    <span class="text-500 text-sm">Carregando peças religiosas...</span>
                 </div>
-            </div>
-
-            <div *ngIf="carregando" class="loading-spinner">
-                <i class="fa fa-spinner fa-spin"></i> Carregando mais produtos...
-            </div>
-
-            <div *ngIf="fimDosProdutos && produtos.length > 0" class="end-of-catalog">
-                <p>Você chegou ao final do catálogo.</p>
-            </div>
-
-            <div *ngIf="!carregando && produtos.length === 0" class="no-products">
-                <p>Nenhum produto encontrado com estes filtros.</p>
+                <div *ngIf="fimDosProdutos && produtos.length > 0" class="text-center p-4 border-round-xl bg-gold-faded w-full">
+                    <i class="pi pi-star gold-text mr-2"></i>
+                    <span class="font-medium text-900">Você viu todo o nosso catálogo de arte sacra.</span>
+                </div>
             </div>
         </main>
     </div>
 </section>
 
-<!-- Modal de Sugestões de Compra -->
-<div class="modal-overlay" *ngIf="exibirModalSugestao">
-    <div class="modal-container">
-        <h3 class="modal-title">Incluir {{produtoOriginalSelecionado?.nome}} de outros tamanhos disponíveis?</h3>
-
-        <div class="modal-body">
-            <div class="sugestao-item" *ngFor="let sugestao of sugestoesTamanhos">
-                <div class="sugestao-img-container" (click)="abrirVisualizacaoImagem(sugestao)"
-                    title="Clique para ampliar"
-                    [ngStyle]="{'width.px': getTamanhoImagemPx(sugestao.tamanho), 'height.px': getTamanhoImagemPx(sugestao.tamanho)}">
-                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem | ociImage" [alt]="sugestao.nome"
-                        class="sugestao-img" (error)="sugestao.imagem = ''">
-                    <div *ngIf="!sugestao.imagem" class="sugestao-placeholder">Sem Img</div>
-                </div>
-                <div class="sugestao-info">
-                    <span class="sugestao-tamanho">Tamanho: {{sugestao.tamanho}}</span>
-                    <span class="sugestao-preco">{{sugestao.preco | currency:'BRL':'symbol':'1.2-2'}}</span>
-                </div>
-                <div class="sugestao-action">
-                    <label>Qtd:</label>
-                    <input type="number" min="0" [(ngModel)]="quantidadesSugestao[sugestao.id!]">
+<!-- Sidebar Filtros Mobile -->
+<p-sidebar [(visible)]="exibirFiltrosMobile" position="bottom" styleClass="p-sidebar-md h-auto border-round-top-3xl">
+    <div class="p-4 p-fluid">
+        <h3 class="cinzel-font gold-text text-center mb-4">Filtros & Ordenação</h3>
+        
+        <div class="field mb-4">
+            <label class="font-bold mb-2 block">Tamanhos</label>
+            <div class="flex flex-wrap gap-2 justify-content-center">
+                <div class="chip-filter" *ngFor="let t of tamanhosDisponiveis" 
+                     [class.active]="isTamanhoSelecionado(t)" (click)="toggleTamanho(t)">
+                    {{ t }}cm
                 </div>
             </div>
         </div>
 
-        <div class="modal-footer">
-            <button class="btn-cancelar" (click)="adicionarApenasOriginal()">Não, obrigado</button>
-            <button class="btn-confirmar" (click)="adicionarComSugestoes()">Adicionar</button>
+        <div class="field mb-4">
+            <label class="font-bold mb-2 block">Faixa de Preço</label>
+            <div class="grid">
+                <div class="col-6">
+                    <p-inputNumber [(ngModel)]="filtroPrecoMin" mode="currency" currency="BRL" locale="pt-BR"
+                                   placeholder="Min R$" class="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6">
+                    <p-inputNumber [(ngModel)]="filtroPrecoMax" mode="currency" currency="BRL" locale="pt-BR"
+                                   placeholder="Max R$" class="w-full"></p-inputNumber>
+                </div>
+            </div>
+        </div>
+
+        <div class="field mb-5">
+            <label class="font-bold mb-2 block">Ordenar por</label>
+            <p-dropdown [options]="sortOptions" [(ngModel)]="ordenacao" (onChange)="onSortChange($event)"
+                        styleClass="w-full border-round-lg"></p-dropdown>
+        </div>
+
+        <div class="flex gap-2">
+            <button pButton label="Limpar" class="p-button-secondary p-button-outlined flex-1" (click)="limparFiltros(); toggleFiltrosMobile()"></button>
+            <button pButton label="Aplicar" class="btn-gold flex-1 shadow-2" (click)="toggleFiltrosMobile()"></button>
         </div>
     </div>
-</div>
+</p-sidebar>
 
-<!-- Modal Moderno de Inclusão Alternativa (Bulk Add) -->
-<div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
-    <div class="modern-modal" (click)="$event.stopPropagation()">
-        <!-- Header -->
-        <div class="modal-header-modern">
-            <h2>Comprar Produtos</h2>
-            <button class="btn-close-modern" (click)="fecharModalProdutosAlternativo()">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
-
-        <!-- Filters Area -->
-        <div class="modal-filters-modern">
-            <div class="search-group-modern">
-                <i class="fa fa-search"></i>
-                <input type="text" [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()"
-                    placeholder="Pesquisar por nome ou código...">
-            </div>
-
-            <div class="filter-pills-modern">
-                <div class="modern-select-wrapper">
-                    <select [(ngModel)]="filtroModalTamanho" (change)="filtrarProdutosModal()">
-                        <option value="">Todos os Tamanhos</option>
-                        <option *ngFor="let t of tamanhosDisponiveisModal" [value]="t">{{ t }}cm</option>
-                    </select>
+<!-- Modal Comprar por Tabela (Bulk Add) - PrimeNG Dialog -->
+<p-dialog [(visible)]="exibirModalProdutosAlternativo" [header]="'Comprar por Tabela'" [modal]="true" 
+          [style]="{width: '95vw', maxWidth: '1000px'}" [maximizable]="true" styleClass="bulk-dialog"
+          [contentStyle]="{'padding': '0'}">
+    
+    <div class="flex flex-column h-full">
+        <div class="p-4 bg-gray-50 border-bottom-1 border-200">
+            <div class="flex flex-column md:flex-row gap-3">
+                <div class="p-input-icon-left flex-grow-1">
+                    <i class="pi pi-search gold-text"></i>
+                    <input type="text" pInputText [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()" 
+                           placeholder="Pesquisar por nome ou código..." class="w-full">
                 </div>
-                <button class="btn-modern-filter-action" (click)="gerarCatalogoPdfModal()"
-                    title="Gerar catálogo em PDF">
-                    <i class="fa fa-file-pdf"></i> Catálogo
-                </button>
-                <button class="btn-modern-filter-action clear" (click)="limparFiltrosModal()">
-                    <i class="fa fa-eraser"></i> Limpar
-                </button>
+                <div class="flex align-items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    <p-dropdown [options]="tamanhosDisponiveisModal" [(ngModel)]="filtroModalTamanho" 
+                                (onChange)="filtrarProdutosModal()" placeholder="Todos os Tamanhos" 
+                                [showClear]="true" class="flex-grow-1 md:flex-grow-0 md:w-15rem"></p-dropdown>
+                    
+                    <button pButton icon="pi pi-file-pdf" class="p-button-danger border-round-lg flex-shrink-0" 
+                            (click)="gerarCatalogoPdfModal()" label="Catálogo"></button>
+                </div>
             </div>
         </div>
 
-        <!-- Modal Body (Compact Tables Area) -->
-        <div class="modal-body-modern">
-            <div *ngFor="let grupo of produtosModalAgrupadosPorTamanho" class="group-section-modern">
-                <div class="group-title-modern">
+        <div class="overflow-y-auto flex-grow-1 p-3" style="max-height: 60vh;">
+            <div *ngIf="produtosModalAgrupadosPorTamanho.length === 0" class="text-center py-5">
+                <i class="pi pi-search text-4xl text-400 mb-3"></i>
+                <p class="text-600">Nenhum produto encontrado.</p>
+            </div>
+
+            <div *ngFor="let grupo of produtosModalAgrupadosPorTamanho" class="mb-4">
+                <div class="bg-gold-faded p-2 px-3 border-round-top-lg border-1 border-gold-faded gold-text font-bold">
                     Tamanho {{ grupo.tamanho }}cm
                 </div>
-
-                <div class="modern-table-container">
-                    <table class="modern-table-compact">
-                        <thead>
-                            <tr>
-                                <th class="col-id">Cód</th>
-                                <th class="col-name">Nome do Produto</th>
-                                <th class="col-img">Img</th>
-                                <th class="col-qty">Qtd</th>
-                                <th class="col-price">V. Unit</th>
-                                <th class="col-total">Total</th>
+                <div class="border-1 border-round-bottom-lg border-gold-faded overflow-hidden">
+                    <table class="w-full compact-table">
+                        <thead class="bg-white">
+                            <tr class="text-left text-sm text-600 border-bottom-1 border-200">
+                                <th class="p-2 pl-3">Cód</th>
+                                <th class="p-2">Produto</th>
+                                <th class="p-2 text-center">Qtd</th>
+                                <th class="p-2 text-right">Preço</th>
+                                <th class="p-2 pr-3 text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let p of grupo.produtos">
-                                <td class="col-id">{{ p.codigo }}</td>
-                                <td class="col-name">{{ p.nome }}</td>
-                                <td class="col-img">
-                                    <button class="btn-img-mini-icon" (click)="abrirVisualizacaoImagem(p)"
-                                        title="Ver Imagem">
-                                        <i class="fa fa-image"></i>
-                                    </button>
+                            <tr *ngFor="let p of grupo.produtos" class="hover:bg-gray-50 border-bottom-1 border-100">
+                                <td class="p-2 pl-3 text-sm text-700">{{ p.codigo }}</td>
+                                <td class="p-2 text-sm font-medium text-900">{{ p.nome }}</td>
+                                <td class="p-1 text-center">
+                                    <p-inputNumber [(ngModel)]="p.quantidadeSelecionada" [showButtons]="true" 
+                                                   buttonLayout="horizontal" spinnerMode="horizontal" 
+                                                   inputStyleClass="text-center w-2rem p-inputtext-sm p-1"
+                                                   incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                   [min]="0" class="inline-block p-inputnumber-sm compact-qty">
+                                    </p-inputNumber>
                                 </td>
-                                <td class="col-qty">
-                                    <div class="qtd-control-compact">
-                                        <button class="btn-qty-compact"
-                                            (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) > 0 ? p.quantidadeSelecionada - 1 : 0">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                        <input type="number" class="input-qty-compact"
-                                            [(ngModel)]="p.quantidadeSelecionada" min="0">
-                                        <button class="btn-qty-compact"
-                                            (click)="p.quantidadeSelecionada = (p.quantidadeSelecionada || 0) + 1">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </div>
+                                <td class="p-2 text-right text-sm">{{ p.preco | currency:'BRL' }}</td>
+                                <td class="p-2 pr-3 text-right text-sm font-bold gold-text">
+                                    {{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}
                                 </td>
-                                <td class="col-price">{{ p.preco | currency:'BRL' }}</td>
-                                <td class="col-total">{{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) |
-                                    currency:'BRL' }}</td>
                             </tr>
                         </tbody>
-                        <tfoot *ngIf="calcularQtdGrupo(grupo) > 0">
-                            <!-- Desktop View -->
-                            <tr class="modern-table-subtotal hide-mobile">
-                                <td [colSpan]="3" class="text-right">Total {{ grupo.tamanho }}cm:</td>
-                                <td class="col-qty">{{ calcularQtdGrupo(grupo) }}</td>
-                                <td class="col-price"></td>
-                                <td class="col-total">{{ calcularTotalGrupo(grupo) | currency:'BRL' }}</td>
-                            </tr>
-                            <!-- Mobile View -->
-                            <tr class="modern-table-subtotal show-mobile-only">
-                                <td [colSpan]="2" class="text-right">Total {{ grupo.tamanho }}cm:</td>
-                                <td class="col-qty">{{ calcularQtdGrupo(grupo) }} it.</td>
-                                <td class="col-price" style="text-align: right;">{{ calcularTotalGrupo(grupo) |
-                                    currency:'BRL' }}</td>
+                        <tfoot class="bg-gray-50 border-top-1 border-200" *ngIf="calcularQtdGrupo(grupo) > 0">
+                            <tr class="font-bold text-sm">
+                                <td colspan="2" class="p-2 pl-3 text-right">Total {{ grupo.tamanho }}cm:</td>
+                                <td class="p-2 text-center">{{ calcularQtdGrupo(grupo) }}</td>
+                                <td></td>
+                                <td class="p-2 pr-3 text-right gold-text">{{ calcularTotalGrupo(grupo) | currency:'BRL' }}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
-
-            <!-- Empty State -->
-            <div class="text-center py-5" *ngIf="produtosModalAgrupadosPorTamanho.length === 0">
-                <i class="fa fa-search fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Nenhum produto encontrado.</p>
-            </div>
         </div>
 
-        <!-- Footer Area -->
-        <div class="modal-footer-modern">
-            <div class="footer-stats-modern">
-                <div class="stat-item-modern">
-                    <span class="stat-label-modern">ITENS SELECIONADOS</span>
-                    <span class="stat-value-modern">{{ calcularTotalItensModal() }}</span>
+        <div class="p-4 border-top-1 border-200 flex flex-column md:flex-row md:justify-content-between align-items-center gap-3 bg-white">
+            <div class="flex gap-4">
+                <div class="flex flex-column align-items-start">
+                    <span class="text-xs text-500 font-bold uppercase">Itens Selecionados</span>
+                    <span class="text-xl font-bold text-900">{{ calcularTotalItensModal() }}</span>
                 </div>
-                <div class="stat-item-modern">
-                    <span class="stat-label-modern">VALOR TOTAL</span>
-                    <span class="stat-value-modern gold">{{ calcularTotalSomaModal() | currency:'BRL' }}</span>
+                <div class="flex flex-column align-items-start">
+                    <span class="text-xs text-500 font-bold uppercase">Valor Total</span>
+                    <span class="text-xl font-bold gold-text">{{ calcularTotalSomaModal() | currency:'BRL' }}</span>
                 </div>
             </div>
-
-            <div class="footer-btns-modern">
-                <button class="btn-modern-cancel" (click)="fecharModalProdutosAlternativo()">Cancelar</button>
-                <button class="btn-modern-primary" (click)="adicionarProdutosModalCarrinho()">
-                    <i class="fa fa-shopping-cart"></i>
-                    Adicionar no carrinho
-                </button>
+            <div class="flex gap-2 w-full md:w-auto">
+                <button pButton label="Cancelar" icon="pi pi-times" 
+                        class="p-button-text p-button-secondary border-round-lg flex-grow-1 md:flex-grow-0" 
+                        (click)="fecharModalProdutosAlternativo()"></button>
+                <button pButton label="Adicionar no Carrinho" icon="pi pi-shopping-cart" 
+                        class="btn-gold shadow-2 border-round-lg flex-grow-1 md:flex-grow-0" 
+                        (click)="adicionarProdutosModalCarrinho()"></button>
             </div>
         </div>
     </div>
-</div>
+</p-dialog>
 
-<!-- Frame de Aviso PDF -->
-<div class="modal-overlay" *ngIf="avisoPdf" style="z-index: 20000;">
-    <div class="modal-content"
-        style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 5px solid #d4af37; min-width: 400px;">
-        <h2 class="cinzel-font">Gerando Catálogo</h2>
-        <p>O catálogo em PDF está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize
-            pop-ups.</p>
-        <button class="btn-add" style="width: auto; padding: 10px 30px;" (click)="fecharAvisoPdf()">OK</button>
+<!-- Modal de Sugestões de Compra (Upsell) - PrimeNG Dialog -->
+<p-dialog [(visible)]="exibirModalSugestao" [modal]="true" [style]="{width: '90vw', maxWidth: '650px'}" 
+          [showHeader]="false" styleClass="suggestion-dialog border-round-2xl" (onHide)="fecharModalSugestao()">
+    
+    <div class="p-3 relative">
+        <button pButton icon="pi pi-times" class="p-button-rounded p-button-text absolute top-0 right-0 m-2 text-500" 
+                (click)="fecharModalSugestao()"></button>
+        <h4 class="montserrat-font text-center text-700 mb-4 px-3">
+            Gostaria de incluir <span class="gold-text font-bold">{{produtoOriginalSelecionado?.nome}}</span> em outros tamanhos?
+        </h4>
+
+        <div class="flex flex-column gap-3 pr-2">
+            <div *ngFor="let sugestao of sugestoesTamanhos" 
+                 class="flex align-items-center p-3 border-round-lg hover:bg-gray-50 border-1 border-transparent transition-duration-200">
+                <div class="flex-shrink-0 relative cursor-pointer" (click)="abrirVisualizacaoImagem(sugestao)">
+                    <img *ngIf="sugestao.imagem" [src]="sugestao.imagem | ociImage" 
+                         [style.width.px]="getTamanhoImagemPx(sugestao.tamanho)" 
+                         class="border-round shadow-1">
+                    <div *ngIf="!sugestao.imagem" class="placeholder-img-sm">Sem Img</div>
+                </div>
+                <div class="flex-grow-1 ml-4">
+                    <div class="font-bold text-900">Tamanho {{sugestao.tamanho}}cm</div>
+                    <div class="gold-text font-bold text-lg">{{sugestao.preco | currency:'BRL'}}</div>
+                </div>
+                <div class="text-right">
+                    <label class="text-600 text-xs font-bold block mb-1">QTD</label>
+                    <p-inputNumber [(ngModel)]="quantidadesSugestao[sugestao.id!]" [showButtons]="true" 
+                                   buttonLayout="horizontal" spinnerMode="horizontal"
+                                   inputStyleClass="text-center w-3rem border-gold-faded" 
+                                   [min]="0" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus">
+                    </p-inputNumber>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mt-5">
+            <button pButton label="Apenas o Selecionado" class="p-button-text p-button-secondary flex-1" (click)="adicionarApenasOriginal()"></button>
+            <button pButton label="Adicionar Tudo" icon="pi pi-shopping-cart" class="btn-gold shadow-2 flex-1" (click)="adicionarComSugestoes()"></button>
+        </div>
     </div>
-</div>
-
-<!-- Toast Notification -->
-<div class="toast-notification" *ngIf="exibirToast">
-    {{ mensagemToast }}
-</div>
+</p-dialog>

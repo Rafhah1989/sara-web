@@ -38,6 +38,22 @@ import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-pas
 import { LogsComponent } from './pages/logs/logs.component';
 import { OciImagePipe } from './shared/pipes/oci-image.pipe';
 
+// PrimeNG Modules
+import { DataViewModule } from 'primeng/dataview';
+import { DropdownModule } from 'primeng/dropdown';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { RatingModule } from 'primeng/rating';
+import { TagModule } from 'primeng/tag';
+import { PanelModule } from 'primeng/panel';
+import { AccordionModule } from 'primeng/accordion';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { RippleModule } from 'primeng/ripple';
+
 registerLocaleData(localePt);
 
 const routes: Routes = [
@@ -101,12 +117,26 @@ const routes: Routes = [
     FormsModule,
     ReactiveFormsModule,
     AppLayoutModule,
+    DataViewModule,
+    DropdownModule,
+    DialogModule,
+    InputNumberModule,
+    SelectButtonModule,
+    ToastModule,
+    RatingModule,
+    TagModule,
+    PanelModule,
+    AccordionModule,
+    ButtonModule,
+    InputTextModule,
+    RippleModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'pt-BR' },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: SpinnerInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: SpinnerInterceptor, multi: true },
+    MessageService
   ],
   bootstrap: [AppComponent]
 })
