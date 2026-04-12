@@ -130,8 +130,8 @@ export class PedidoListComponent implements OnInit {
     }
 
     getSortIcon(campo: string): string {
-        if (this.sortField !== campo) return 'fa-sort';
-        return this.sortDir === 'asc' ? 'fa-sort-asc' : 'fa-sort-desc';
+        if (this.sortField !== campo) return 'pi-sort-alt';
+        return this.sortDir === 'asc' ? 'pi-sort-amount-up' : 'pi-sort-amount-down';
     }
 
     onPageChange(event: any): void {

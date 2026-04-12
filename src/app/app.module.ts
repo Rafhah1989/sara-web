@@ -19,6 +19,8 @@ import { ProductsComponent } from './pages/products/products.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { UsuarioFormComponent } from './pages/usuarios/usuario-form/usuario-form.component';
 import { HistoricoClienteModalComponent } from './components/historico-cliente-modal/historico-cliente-modal.component';
+import { AppLayoutModule } from './layout/app.layout.module';
+import { AppLayoutComponent } from './layout/app.layout.component';
 import { FreteComponent } from './pages/frete/frete.component';
 import { SetorComponent } from './pages/setor/setor.component';
 import { PedidoListComponent } from './pages/pedidos/pedido-list/pedido-list.component';
@@ -39,25 +41,30 @@ import { OciImagePipe } from './shared/pipes/oci-image.pipe';
 registerLocaleData(localePt);
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
+  {
+    path: '', component: AppLayoutComponent,
+    children: [
+      { path: '', component: HomeComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'usuarios/novo', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'usuarios/editar/:id', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'formas-pagamento', component: FormaPagamentoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'configuracao', component: ConfiguracaoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'loja', component: LojaComponent, canActivate: [AuthGuard] }, { path: 'carrinho', component: CarrinhoComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos/pix/:id', component: PixPaymentComponent, canActivate: [AuthGuard] },
+      { path: 'logs', component: LogsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
+      { path: 'quem-somos', component: AboutComponent },
+    ]
+  },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'quem-somos', component: AboutComponent },
-  { path: 'produtos', component: ProductsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'usuarios/novo', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'usuarios/editar/:id', component: UsuarioFormComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'frete', component: FreteComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'setores', component: SetorComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'formas-pagamento', component: FormaPagamentoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'configuracao', component: ConfiguracaoComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
-  { path: 'loja', component: LojaComponent, canActivate: [AuthGuard] }, { path: 'carrinho', component: CarrinhoComponent, canActivate: [AuthGuard] },
-  { path: 'pedidos', component: PedidoListComponent, canActivate: [AuthGuard] },
-  { path: 'pedidos/novo', component: PedidoFormComponent, canActivate: [AuthGuard] },
-  { path: 'pedidos/editar/:id', component: PedidoFormComponent, canActivate: [AuthGuard] },
-  { path: 'pedidos/pix/:id', component: PixPaymentComponent, canActivate: [AuthGuard] },
-  { path: 'logs', component: LogsComponent, canActivate: [AuthGuard], data: { expectedRole: 'ADMIN' } },
   { path: '**', redirectTo: '' }
 ];
 
@@ -93,6 +100,7 @@ const routes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    AppLayoutModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
   ],
   providers: [

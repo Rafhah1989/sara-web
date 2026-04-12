@@ -1,194 +1,131 @@
-.hero-section {
-    background-color: var(--secondary-dark);
-    color: #fff;
-    padding: 4rem 1rem;
-    text-align: center;
-    /* Background image placeholder */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
-    background-size: cover;
-    background-position: center;
+.cinzel-font {
+    font-family: 'Cinzel', serif;
 }
 
-.hero-logo {
-    height: 210px;
-    width: auto;
-    margin-bottom: 1.5rem;
-    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+.montserrat-font {
+    font-family: 'Montserrat', sans-serif;
 }
 
-.hero-content .subtitle {
-    font-size: 1.5rem;
-    color: var(--text-light);
-    margin-bottom: 2rem;
-    font-weight: 300;
+.gold-text {
+    color: var(--primary-gold) !important;
 }
 
-.hero-content .description {
-    max-width: 600px;
-    margin: 0 auto 2rem;
-    font-size: 1.1rem;
-    color: #ddd;
+.btn-gold {
+    background-color: var(--primary-gold) !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 600 !important;
 }
 
-.featured-products {
-    padding: 4rem 1rem;
-    text-align: center;
+.btn-gold-outline {
+    border: 2px solid var(--primary-gold) !important;
+    color: var(--primary-gold) !important;
+    background: transparent !important;
 }
 
-.featured-products h2,
-.about-teaser h2 {
-    font-size: 2.5rem;
-    color: var(--primary-gold-dark);
-    margin-bottom: 2rem;
-    display: inline-block;
-    border-bottom: 2px solid var(--primary-gold);
-    padding-bottom: 0.5rem;
+.btn-gold-outline:hover {
+    background-color: rgba(212, 175, 55, 0.1) !important;
 }
 
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+.landing-wrapper {
+    background-color: #ffffff;
 }
 
-.product-card {
-    background: white;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
+#hero {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 10%, rgba(26, 26, 26, 0.8) 100%), 
+                radial-gradient(77.36% 256.97% at 77.36% 57.52%, #1a1a1a 0%, #000000 100%);
+    clip-path: ellipse(150% 87% at 93% 13%);
+    min-height: 500px;
 }
 
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+.hero-img {
+    max-height: 300px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
 }
 
-.product-image.placeholder {
-    width: 100%;
-    height: 250px;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ccc;
-}
-
-.product-image.placeholder::after {
-    content: 'Imagem';
-}
-
-.product-card h3 {
-    font-size: 1.2rem;
-    color: var(--text-dark);
-    margin-bottom: 0.5rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.product-card .price {
-    font-size: 1.1rem;
-    color: var(--primary-gold-dark);
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.btn-details {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--secondary-dark);
-    border-radius: 4px;
-    color: var(--secondary-dark);
-    transition: all 0.3s;
-    font-size: 0.9rem;
-}
-
-.btn-details:hover {
-    background-color: var(--secondary-dark);
-    color: var(--primary-gold);
-}
-
-.about-teaser {
-    background-color: #f0f0f0;
-    padding: 4rem 1rem;
-    text-align: center;
-}
-
-.about-teaser p {
-    max-width: 800px;
-    margin: 0 auto 2rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.btn-outline {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    border: 2px solid var(--primary-gold);
-    color: var(--primary-gold-dark);
-    border-radius: 4px;
-    font-weight: bold;
-    transition: all 0.3s;
-}
-
-.btn-outline:hover {
-    background-color: var(--primary-gold);
-    color: white;
-}
-
-.contact-section {
-    padding: 5rem 1rem;
-    text-align: center;
-    background-color: #fff;
-}
-
-.contact-section h2 {
-    font-size: 2.5rem;
-    color: var(--primary-gold-dark);
-    margin-bottom: 2rem;
-    display: inline-block;
-    border-bottom: 2px solid var(--primary-gold);
-    padding-bottom: 0.5rem;
-}
-
-.contact-section p {
-    max-width: 750px;
-    margin: 0 auto 2rem;
-    font-size: 1.2rem;
-    line-height: 1.7;
-    color: var(--text-dark);
-}
-
-.contact-email {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 1.4rem;
-    color: var(--secondary-dark);
-    font-weight: 600;
+.feature-card {
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0.1) 100%);
     transition: transform 0.3s;
 }
 
-.contact-email:hover {
-    transform: scale(1.02);
+.feature-card:hover {
+    transform: translateY(-8px);
 }
 
-.contact-email i {
-    color: var(--primary-gold);
+.feature-content {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 2rem;
+    height: 100%;
 }
 
-.contact-email a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.2s;
-    border-bottom: 1px solid transparent;
+.feature-icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 10px;
+    background-color: rgba(212, 175, 55, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
 }
 
-.contact-email a:hover {
-    color: var(--primary-gold);
-    border-bottom-color: var(--primary-gold);
+.section-title {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background-color: var(--primary-gold);
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.left-title::after {
+    left: 0;
+    transform: none;
+}
+
+.text-body {
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.8;
+    color: #4b5563;
+}
+
+.contact-card {
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-top: 5px solid var(--primary-gold);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.about-bg {
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                url('https://www.transparenttextures.com/patterns/cream-paper.png'); /* Textura sutil de papel antigo/pergaminho */
+    border-top: 1px solid rgba(212, 175, 55, 0.1);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+@media (max-width: 991px) {
+    #hero {
+        clip-path: none;
+        padding-bottom: 2rem;
+        min-height: 350px;
+    }
+
+    .feature-content {
+        padding: 1.5rem !important;
+    }
+
+    .section-title::after {
+        width: 40px;
+    }
 }

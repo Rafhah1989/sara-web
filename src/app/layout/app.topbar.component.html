@@ -1,0 +1,43 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="">
+        <img src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'logo-dark' : 'logo-white'}}.svg" alt="logo">
+        <span class="cinzel-font">SARA</span>
+    </a>
+
+    <!-- Navegação Desktop (Menubar Completa) -->
+    <div class="layout-topbar-menu-wrapper hidden lg:block">
+        <p-menubar [model]="menuItems">
+            <ng-template pTemplate="end">
+                <div class="user-display flex align-items-center gap-3">
+                    <ng-container *ngIf="isAutenticado">
+                        <span class="user-name montserrat-font text-white hidden md:inline">Olá, <strong>{{ nomeUsuario }}</strong></span>
+                        <button class="p-link logout-btn" (click)="onLogout()" title="Sair">
+                            <i class="pi pi-sign-out"></i>
+                        </button>
+                    </ng-container>
+                    
+                    <button pButton pRipple label="Entrar" icon="pi pi-sign-in" 
+                            class="p-button-outlined btn-login" 
+                            *ngIf="!isAutenticado" 
+                            [routerLink]="['/login']"></button>
+                </div>
+            </ng-template>
+        </p-menubar>
+    </div>
+
+    <!-- Navegação Mobile (Acesso Rápido + Sanduíche) -->
+    <div class="layout-topbar-mobile flex lg:hidden align-items-center gap-2">
+        <button pButton pRipple icon="pi pi-home" class="p-button-text gold-text" routerLink="/"></button>
+        <button pButton pRipple icon="pi pi-shopping-cart" class="p-button-text gold-text" routerLink="/loja" *ngIf="isAutenticado"></button>
+        <button pButton pRipple icon="pi pi-list" class="p-button-text gold-text" routerLink="/pedidos" *ngIf="isAutenticado"></button>
+        
+        <!-- Carrinho (Ícone de Cesta) -->
+        <button pButton pRipple icon="pi pi-shopping-bag" class="p-button-text gold-text" routerLink="/carrinho" *ngIf="isAutenticado"></button>
+
+        <p-divider layout="vertical"></p-divider>
+
+        <!-- Menu Sanduíche -->
+        <button pButton pRipple icon="pi pi-bars" class="p-button-text gold-text" (click)="mobileMenu.toggle($event)"></button>
+        <p-tieredMenu #mobileMenu [model]="burgerItems" [popup]="true"></p-tieredMenu>
+    </div>
+</div>

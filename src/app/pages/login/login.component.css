@@ -1,236 +1,136 @@
-.login-page-wrapper {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #ffffff;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Efeito sutil de luz dourada ao fundo no topo */
-.login-page-wrapper::before {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: var(--primary-gold);
-  filter: blur(180px);
-  opacity: 0.08;
-  top: -100px;
-  right: -100px;
-}
-
-.login-container {
-  width: 100%;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  z-index: 1;
-}
-
-.login-card {
-  background: #f3f3f3ec;
-  border: 8px solid #000000;
-  padding: 50px 40px;
-  border-radius: 20px;
-  box-shadow:
-    inset 0 0 0 4px var(--primary-gold),
-    0 25px 50px rgba(0, 0, 0, 0.3),
-    0 10px 15px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 450px;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.login-header {
-  margin-bottom: 40px;
-}
-
-.logo-icon {
-  font-size: 3rem;
-  color: var(--primary-gold);
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.2));
-}
-
-.login-header h2 {
-  font-family: 'Cinzel', serif;
-  color: #000;
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  letter-spacing: 3px;
-  font-weight: 700;
-}
-
-.login-header p {
-  color: #666;
-  font-size: 0.95rem;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.form-group {
-  margin-bottom: 25px;
-  text-align: left;
-}
-
-.form-group label {
-  color: #333;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
-  font-family: 'Montserrat', sans-serif;
-  letter-spacing: 1px;
-}
-
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-with-icon i {
-  position: absolute;
-  left: 15px;
-  color: var(--primary-gold);
-  font-size: 1.1rem;
-}
-
-.form-control {
-  width: 100%;
-  background: #fff !important;
-  border: 1.5px solid #eee !important;
-  color: #000 !important;
-  padding: 15px 15px 15px 45px !important;
-  border-radius: 12px !important;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.form-control::placeholder {
-  color: #999;
-}
-
-.form-control:focus {
-  border-color: var(--primary-gold) !important;
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
-  background: #fff !important;
-}
-
-.form-control.is-invalid {
-  border-color: #ff4757 !important;
-}
-
-.invalid-feedback {
-  color: #ff4757;
-  font-size: 0.8rem;
-  margin-top: 5px;
-  padding-left: 5px;
-}
-
-.alert-error-container {
-  background: #fff5f5;
-  border: 1px solid #ffe3e3;
-  color: #ff4757;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-}
-
-.btn-login-gold {
-  width: 100%;
-  padding: 16px;
-  background: var(--primary-gold);
-  border: none;
-  border-radius: 12px;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.1rem;
-  font-family: 'Cinzel', serif;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 8px 15px rgba(212, 175, 55, 0.2);
-}
-
-.btn-login-gold:hover:not(:disabled) {
-  background: var(--primary-gold-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px rgba(212, 175, 55, 0.3);
-}
-
-.btn-login-gold:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-login-gold:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-.login-footer {
-  margin-top: 40px;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 20px;
-}
-
-.login-footer p {
-  color: #888;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-}
-
-@media (max-width: 480px) {
-  .login-card {
-    padding: 40px 25px;
-  }
-}
-
-.forgot-password-link {
-    text-align: center;
-    margin-top: 15px;
-}
-
-.forgot-password-link a {
-    color: var(--primary-gold);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.forgot-password-link a:hover {
-    text-decoration: underline;
-}
-
-.eye-icon-login {
-    position: absolute;
-    right: 15px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: #444;
-    padding: 0;
+.login-wrapper {
+    min-height: 100vh;
     display: flex;
     align-items: center;
-    height: 100%;
-    z-index: 5;
+    justify-content: center;
+    background-color: #ffffff; /* Fundo branco solicitado */
+    padding: 1.5rem;
 }
 
-.eye-icon-login i {
-    opacity: 0.7;
-    transition: opacity 0.3s;
+.login-panel {
+    width: 100%;
+    max-width: 450px;
+    background: #f9f9f9 !important; /* Card levemente mais escuro que o fundo branco total */
+    padding: 3.5rem 2.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--primary-gold) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
 }
 
-.eye-icon-login:hover i {
-    opacity: 1;
+.cinzel-font {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+}
+
+.montserrat-font {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.gold-text {
+    color: var(--primary-gold) !important;
+}
+
+/* Cores escuras para textos sobre fundo branco */
+label {
+    color: #444 !important;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif !important;
+    margin-bottom: 0.5rem !important;
+    display: block;
+}
+
+.text-600 {
+    color: #666 !important;
+}
+
+/* Restaurando o padrão de inputs PrimeNG */
+.p-inputtext {
+    background: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem !important;
+    border-radius: 8px !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.p-inputtext:focus {
+    border-color: var(--primary-gold) !important;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Utilitários de Posicionamento para Ícones Manuais */
+.top-50 {
+    top: 50% !important;
+}
+
+.transform-translate-y-50 {
+    transform: translateY(-50%) !important;
+}
+
+.p-inputtext {
+    background: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+    padding: 0.75rem 3rem !important; /* Espaço para cadeado (esquerda) e olho (direita) */
+    border-radius: 8px !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.p-inputtext:focus {
+    border-color: var(--primary-gold) !important;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1) !important;
+}
+
+.p-input-icon-left i {
+    z-index: 11;
+    left: 1rem !important;
+    color: var(--primary-gold) !important;
+}
+
+.forgot-password-link-custom {
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    color: var(--primary-gold) !important;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-link-custom:hover {
+    color: var(--primary-gold-dark) !important;
+}
+
+/* Botão "Amigável" com ícone separado */
+::ng-deep .btn-gold {
+    background: var(--primary-gold) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-family: 'Montserrat', sans-serif !important;
+    border-radius: 50px !important;
+    padding: 1rem !important;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3) !important;
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1) !important;
+}
+
+::ng-deep .btn-gold .p-button-icon {
+    margin-right: 0.75rem !important; /* Separar ícone da palavra ENTRAR */
+}
+
+::ng-deep .btn-gold:hover {
+    background: var(--primary-gold-dark) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4) !important;
+}
+
+.p-error {
+    color: #d32f2f !important;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 576px) {
+    .login-panel {
+        padding: 3rem 1.5rem;
+        box-shadow: none;
+        border: none !important;
+    }
 }

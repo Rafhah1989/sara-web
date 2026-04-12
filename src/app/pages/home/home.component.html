@@ -1,27 +1,95 @@
-<section class="hero-section">
-    <div class="container hero-content">
-        <img src="assets/sara_logo.PNG" alt="Sara Logo" class="hero-logo">
-        <p class="subtitle">Arte Sacra em Resina</p>
-        <p class="description">Peças produzidas com o cuidado que sua fé merece.</p>
-    </div>
-</section>
-
-<section class="contact-section">
-    <div class="container">
-        <h2>Fale Conosco</h2>
-        <p>Havendo interesse em saber mais sobre nossas peças ou para qualquer outra dúvida, sinta-se à vontade para entrar em contato conosco! Ficaremos muito felizes em atendê-lo e tirar todas as suas dúvidas por este canal.</p>
-        <div class="contact-email">
-            <i class="fa fa-envelope"></i>
-            <a href="mailto:atendimento@saraimagens.com.br">atendimento@saraimagens.com.br</a>
+<div class="landing-wrapper">
+    <!-- Hero Section -->
+    <section id="hero" class="flex align-items-center justify-content-center py-5 lg:py-8 overflow-hidden">
+        <div class="grid grid-nogutter container lg:px-8 w-full">
+            <div class="col-12 lg:col-6 flex flex-column justify-content-center text-center lg:text-left px-4 mt-4 lg:mt-0">
+                <h1 class="text-4xl lg:text-6xl font-bold cinzel-font line-height-1 gold-text mb-2">
+                    Sara Imagens
+                </h1>
+                <div class="text-2xl lg:text-3xl font-bold text-white mb-4 montserrat-font opacity-80">Arte Sacra em Resina</div>
+                <p class="text-lg lg:text-xl montserrat-font text-white line-height-3 mb-5 lg:mb-8 opacity-70">
+                    Peças produzidas com o cuidado que sua fé merece. Qualidade impecável para momentos de devoção.
+                </p>
+                <div class="flex flex-column sm:flex-row gap-3 justify-content-center lg:justify-content-start lg:hidden">
+                    <button pButton pRipple label="Explorar Loja" class="p-button-lg btn-gold px-5 shadow-4 py-3" icon="pi pi-shopping-bag" (click)="irParaLoja()" *ngIf="isAutenticado"></button>
+                    <button pButton pRipple label="Entrar" class="p-button-lg btn-gold px-5 shadow-4 py-3" icon="pi pi-sign-in" routerLink="/login" *ngIf="!isAutenticado"></button>
+                    <button pButton pRipple label="Nossa História" class="p-button-lg btn-gold-outline px-5 py-3" icon="pi pi-star" (click)="scrollTo('quem-somos')"></button>
+                </div>
+            </div>
+            <div class="col-12 lg:col-6 flex align-items-center justify-content-center mt-5 lg:mt-0 p-4">
+                <img src="assets/sara_logo.PNG" alt="Sara Logo" class="hero-img w-7 lg:w-10">
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="about-teaser">
-    <div class="container">
-        <h2>Quem Somos</h2>
-        <p>Somos uma empresa familiar dedicada à fabricação de artigos religiosos. Cada peça é produzida com cuidado e
-            respeito, garantindo alta qualidade e acabamento impecável.</p>
-        <a routerLink="/quem-somos" class="btn-outline">Conheça Nossa História</a>
-    </div>
-</section>
+    <!-- Nossa Excelência -->
+    <section class="py-5 lg:py-8 bg-white overflow-hidden">
+        <div class="container px-4 lg:px-8">
+            <div class="text-center mb-5 lg:mb-8">
+                <h2 class="text-3xl lg:text-5xl cinzel-font font-bold mb-3 section-title">Nossa Excelência</h2>
+                <p class="text-lg text-body max-w-30rem mx-auto">O que torna cada peça única</p>
+            </div>
+            <div class="grid">
+                <div class="col-12 md:col-4 p-3">
+                    <div class="feature-card h-full">
+                        <div class="feature-content p-4 lg:p-5">
+                            <div class="feature-icon-wrapper">
+                                <i class="pi pi-heart text-2xl lg:text-3xl gold-text"></i>
+                            </div>
+                            <h3 class="text-xl lg:text-2xl cinzel-font gold-text font-bold mb-3">Feito com Cuidado</h3>
+                            <p class="text-body m-0">Cada detalhe é pensado para garantir que a peça transmita a paz e o respeito necessários.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4 p-3">
+                    <div class="feature-card h-full">
+                        <div class="feature-content p-4 lg:p-5">
+                            <div class="feature-icon-wrapper">
+                                <i class="pi pi-star text-2xl lg:text-3xl gold-text"></i>
+                            </div>
+                            <h3 class="text-xl lg:text-2xl cinzel-font gold-text font-bold mb-3">Qualidade em Resina</h3>
+                            <p class="text-body m-0">Utilizamos materiais de alta durabilidade e acabamento premium em todas as imagens.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4 p-3">
+                    <div class="feature-card h-full">
+                        <div class="feature-content p-4 lg:p-5">
+                            <div class="feature-icon-wrapper">
+                                <i class="pi pi-sun text-2xl lg:text-3xl gold-text"></i>
+                            </div>
+                            <h3 class="text-xl lg:text-2xl cinzel-font gold-text font-bold mb-3">Brilho e Fé</h3>
+                            <p class="text-body m-0">Artigos religiosos que iluminam o ambiente e fortalecem a sua conexão espiritual.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quem Somos -->
+    <section id="quem-somos" class="py-5 lg:py-8 about-bg">
+        <div class="container px-4 lg:px-8">
+            <div class="grid align-items-center">
+                <div class="col-12 lg:col-8 lg:col-offset-2 text-center">
+                    <h2 class="text-3xl lg:text-5xl cinzel-font font-bold mb-4 section-title">Quem Somos</h2>
+                    <p class="text-body text-lg mb-5 line-height-3">
+                        Somos uma empresa familiar dedicada à fabricação de artigos religiosos. Cada peça é produzida com cuidado e respeito, garantindo alta qualidade e acabamento impecável.
+                    </p>
+                </div>
+                <div class="col-12 lg:col-8 lg:col-offset-2">
+                    <div class="contact-card surface-card p-4 lg:p-5 border-round shadow-4 text-center">
+                        <h3 class="cinzel-font text-xl lg:text-2xl mb-4 gold-text border-bottom-1 border-gold pb-2 mx-auto" style="max-width: fit-content;">Fale Conosco</h3>
+                        <p class="text-body mb-5">Havendo interesse em saber mais sobre nossas peças ou para qualquer outra dúvida, sinta-se à vontade para entrar em contato conosco!</p>
+                        <div class="flex flex-column md:flex-row align-items-center justify-content-center gap-4">
+                            <div class="flex align-items-center gap-2">
+                                <i class="pi pi-envelope text-xl lg:text-2xl gold-text"></i>
+                                <a href="mailto:atendimento@saraimagens.com.br" class="text-900 font-bold text-lg no-underline hover:underline">atendimento@saraimagens.com.br</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

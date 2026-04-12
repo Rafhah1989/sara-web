@@ -1,122 +1,108 @@
-<div class="container page-container">
-    <div class="header-section">
-        <div class="header-main">
-            <h1 class="cinzel-font color-primary-gold-dark">Pedidos</h1>
-            <div class="header-actions">
-                <!-- Botão de Filtros Mobile -->
-                <button class="mobile-btn-filters show-mobile" (click)="abrirFiltrosMobile()">
-                    <i class="fa fa-filter"></i>
-                </button>
-                <button class="btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()">
-                    <i class="fa fa-sync"></i> <span class="hide-mobile">Sincronizar PIX</span>
-                </button>
-                <button class="btn-gold hide-mobile" (click)="novoPedido()">Novo Pedido</button>
-            </div>
+<div class="page-container p-4">
+    <!-- Header Section -->
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4 gap-3">
+        <div class="flex align-items-center gap-2">
+            <h1 class="cinzel-font text-900 m-0 text-4xl gold-text">Pedidos</h1>
         </div>
-        <div class="mobile-new-order-container show-mobile">
-            <button class="btn-gold" (click)="novoPedido()">Novo Pedido</button>
+        <div class="flex align-items-center gap-2">
+            <button pButton pRipple label="Filtros" icon="pi pi-filter" class="p-button-outlined btn-gold-outline show-mobile" (click)="abrirFiltrosMobile()"></button>
+            <button pButton pRipple label="Sincronizar PIX" icon="pi pi-refresh" class="p-button-raised btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()"></button>
+            <button pButton pRipple label="Novo Pedido" icon="pi pi-plus" class="p-button-raised btn-gold hidden md:inline-flex" (click)="novoPedido()"></button>
+        </div>
+        <!-- Botão Novo Pedido Mobile Centralizado opcional -->
+        <div class="w-full flex justify-content-center show-mobile md:hidden">
+            <button pButton pRipple label="Novo Pedido" icon="pi pi-plus" class="p-button-raised btn-gold w-8" (click)="novoPedido()"></button>
         </div>
     </div>
 
-    <!-- Filtros Desktop -->
-    <div class="filter-section card hide-mobile">
-        <div class="sara-filters-row">
-            <div class="sara-filter-col field-cliente" *ngIf="isAdmin">
-                <label><i class="fa fa-user"></i> Por Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente"
-                    class="sara-input">
+    <!-- Filtros Desktop (PrimeNG Design) -->
+    <div class="surface-card p-4 shadow-2 border-round mb-4 hidden md:block border-top-3 border-gold">
+        <div class="grid formgrid p-fluid">
+            <div class="field col-12 md:col-3" *ngIf="isAdmin">
+                <label class="font-bold block mb-2"><i class="pi pi-user mr-1 gold-text"></i> Por Cliente</label>
+                <input pInputText type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente">
             </div>
-            <div class="sara-filter-col field-numero">
-                <label><i class="fa fa-hashtag"></i> Número</label>
-                <input type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="ID"
-                    class="sara-input">
+            <div class="field col-12 md:col-2">
+                <label class="font-bold block mb-2"><i class="pi pi-hashtag mr-1 gold-text"></i> Número</label>
+                <input pInputText type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="ID">
             </div>
-            <div class="sara-filter-col field-data">
-                <label><i class="fa fa-calendar-alt"></i> Início</label>
-                <input type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()" class="sara-input">
+            <div class="field col-12 md:col-2">
+                <label class="font-bold block mb-2"><i class="pi pi-calendar mr-1 gold-text"></i> Início</label>
+                <input pInputText type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()">
             </div>
-            <div class="sara-filter-col field-data">
-                <label><i class="fa fa-calendar-alt"></i> Fim</label>
-                <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="sara-input">
+            <div class="field col-12 md:col-2">
+                <label class="font-bold block mb-2"><i class="pi pi-calendar mr-1 gold-text"></i> Fim</label>
+                <input pInputText type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()">
             </div>
-            <div class="sara-filter-col field-situacao">
-                <label><i class="fa fa-info-circle"></i> Situação</label>
-                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="sara-input">
+            <div class="field col-12 md:col-2">
+                <label class="font-bold block mb-2"><i class="pi pi-info-circle mr-1 gold-text"></i> Situação</label>
+                <select class="p-inputtext" [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()">
                     <option value="">Todas</option>
                     <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
                 </select>
             </div>
-            <div class="filter-actions-group">
-                <button class="btn-clear-filters" (click)="limparFiltros()" title="Limpar Filtros">
-                    <i class="fa fa-eraser"></i>
-                    <span>Limpar</span>
-                </button>
+            <div class="flex align-items-end mb-3 ml-auto px-2">
+                <button pButton pRipple icon="pi pi-eraser" label="Limpar" class="p-button-secondary p-button-outlined" (click)="limparFiltros()"></button>
             </div>
         </div>
-        <div class="checkbox-container">
-            <label class="modern-checkbox" for="exibirCancelados">
-                <input type="checkbox" id="exibirCancelados" [(ngModel)]="exibirCancelados" (change)="filtrarPedidos()">
-                <span>Exibir Pedidos Cancelados</span>
-            </label>
+        <div class="flex align-items-center gap-2 mt-2">
+            <p-checkbox [(ngModel)]="exibirCancelados" (onChange)="filtrarPedidos()" [binary]="true" inputId="exibirCancelados"></p-checkbox>
+            <label for="exibirCancelados" class="font-bold cursor-pointer">Exibir Pedidos Cancelados</label>
         </div>
     </div>
 
-    <!-- Drawer de Filtros Mobile (80% largura) -->
-    <div class="mobile-filters-drawer show-mobile" [class.open]="exibirFiltrosMobile">
-        <div class="drawer-handle"></div>
-        <div class="drawer-header">
-            <h3><i class="fa fa-filter"></i> Filtros</h3>
-            <button class="close-drawer" (click)="fecharFiltrosMobile()">&times;</button>
-        </div>
-        <div class="drawer-content">
-            <div class="filter-group" *ngIf="isAdmin">
-                <label><i class="fa fa-user"></i> Cliente</label>
-                <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome" class="modern-input">
+    <!-- Sidebar de Filtros Mobile (Natividade PrimeNG) -->
+    <p-sidebar [(visible)]="exibirFiltrosMobile" position="right" styleClass="w-full md:w-25rem">
+        <ng-template pTemplate="header">
+            <h3 class="cinzel-font m-0 gold-text"><i class="pi pi-filter mr-2"></i> Filtros</h3>
+        </ng-template>
+        <div class="p-fluid">
+            <div class="field" *ngIf="isAdmin">
+                <label class="font-bold block mb-2">Cliente</label>
+                <input pInputText type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome">
             </div>
-            <div class="filter-group">
-                <label><i class="fa fa-hashtag"></i> Número</label>
-                <input type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="Ex: 123" class="modern-input" style="max-width: 70% !important;">
+            <div class="field">
+                <label class="font-bold block mb-2">Número</label>
+                <input pInputText type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="Ex: 123">
             </div>
-            <div class="filter-group">
-                <label><i class="fa fa-calendar"></i> Início</label>
-                <input type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()" class="modern-input" style="max-width: 60% !important;">
+            <div class="field">
+                <label class="font-bold block mb-2">Início</label>
+                <input pInputText type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()">
             </div>
-            <div class="filter-group">
-                <label><i class="fa fa-calendar"></i> Fim</label>
-                <input type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()" class="modern-input" style="max-width: 60% !important;">
+            <div class="field">
+                <label class="font-bold block mb-2">Fim</label>
+                <input pInputText type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()">
             </div>
-            <div class="filter-group">
-                <label><i class="fa fa-info-circle"></i> Situação</label>
-                <select [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()" class="modern-select">
+            <div class="field">
+                <label class="font-bold block mb-2">Situação</label>
+                <select class="p-inputtext" [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()">
                     <option value="">Todas</option>
                     <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
                 </select>
             </div>
-            <div class="filter-group">
-                <div class="form-check" style="display: flex; align-items: center; gap: 10px; padding: 5px 0;">
-                    <input class="form-check-input" type="checkbox" id="exibirCanceladosMob" [(ngModel)]="exibirCancelados" (change)="filtrarPedidos()" style="width: 22px; height: 22px;">
-                    <label class="form-check-label" for="exibirCanceladosMob" style="margin-bottom: 0;">Exibir Cancelados</label>
-                </div>
+            <div class="flex align-items-center gap-2 mt-4">
+                <p-checkbox [(ngModel)]="exibirCancelados" (onChange)="filtrarPedidos()" [binary]="true" inputId="exibirCanceladosMob"></p-checkbox>
+                <label for="exibirCanceladosMob" class="font-bold cursor-pointer m-0">Exibir Cancelados</label>
             </div>
         </div>
-        <div class="drawer-footer">
-            <button class="btn-clear-modern" (click)="limparFiltros()">Limpar Filtros</button>
-            <button class="btn-apply-modern" (click)="fecharFiltrosMobile()">Aplicar Filtros</button>
+        <div class="flex gap-2 mt-6">
+            <button pButton pRipple label="Limpar" class="p-button-outlined p-button-secondary flex-1" (click)="limparFiltros()"></button>
+            <button pButton pRipple label="Aplicar" class="btn-gold flex-1" (click)="fecharFiltrosMobile()"></button>
         </div>
-    </div>
+    </p-sidebar>
 
     <div class="table-section card">
         <table class="table">
             <thead>
                 <tr>
                     <th (click)="alternarOrdenacao('id')" class="sortable">
-                        Número <i class="fa" [ngClass]="getSortIcon('id')"></i>
+                        Número <i class="pi" [ngClass]="getSortIcon('id')"></i>
                     </th>
                     <th (click)="alternarOrdenacao('usuario.nome')" class="sortable hide-mobile" *ngIf="isAdmin">
-                        Cliente <i class="fa" [ngClass]="getSortIcon('usuario.nome')"></i>
+                        Cliente <i class="pi" [ngClass]="getSortIcon('usuario.nome')"></i>
                     </th>
                     <th (click)="alternarOrdenacao('dataPedido')" class="sortable">
-                        Data <i class="fa" [ngClass]="getSortIcon('dataPedido')"></i>
+                        Data <i class="pi" [ngClass]="getSortIcon('dataPedido')"></i>
                     </th>
                     <th>Valor Total</th>
                     <th class="hide-mobile">Situação</th>
@@ -139,10 +125,11 @@
                         </select>
                     </td>
                     <td class="text-center">
-                        <i class="fa fa-lg" [ngClass]="pedido.pago ? 'fa-check-circle' : 'fa-times-circle'"
+                        <i class="pi pi-fw" [ngClass]="pedido.pago ? 'pi-check-circle' : 'pi-times-circle'"
                             [style.color]="pedido.pago ? '#28a745' : '#dc3545'"
                             [title]="pedido.pago ? 'Pago' : 'Pendente de Pagamento'"
                             [style.cursor]="isAdmin ? 'pointer' : 'default'"
+                            [style.fontSize]="'1.2rem'"
                             (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)">
                         </i>
                     </td>

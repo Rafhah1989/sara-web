@@ -1,74 +1,63 @@
-<div class="login-page-wrapper">
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <div class="logo-icon">
-          <i class="fas fa-shield-halved"></i>
-        </div>
-        <h2>Acesse o Sistema</h2>
-        <p>Por favor, identifique-se para entrar no sistema Sara</p>
-      </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <div class="form-group">
-          <label for="cpfCnpj">CPF / CNPJ</label>
-          <div class="input-with-icon">
-            <i class="fas fa-id-card"></i>
-            <input 
-              type="text" 
-              id="cpfCnpj" 
-              formControlName="cpfCnpj" 
-              class="form-control" 
-              (input)="applyMask($event)"
-              [ngClass]="{ 'is-invalid': submitted && f['cpfCnpj'].errors }" 
-              maxlength="18"
-              placeholder="000.000.000-00"
-            />
-          </div>
-          <div *ngIf="submitted && f['cpfCnpj'].errors" class="invalid-feedback">
-            <div *ngIf="f['cpfCnpj'].errors['required']">CPF/CNPJ é obrigatório</div>
-          </div>
+<div class="login-wrapper">
+    <div class="login-panel surface-card shadow-4 border-round-xl p-fluid">
+        <div class="flex flex-column align-items-center mb-5">
+            <div class="logo-container mb-4 shadow-1 border-round-xl p-2 bg-black-alpha-90">
+                <img src="assets/sara_logo.PNG" alt="SARA Logo" style="width: 120px; height: auto; display: block;">
+            </div>
+            <div class="text-3xl font-bold cinzel-font gold-text mb-2">Acesse o Sistema</div>
+            <span class="text-600 montserrat-font text-sm text-center">Por favor, identifique-se para entrar no sistema Sara</span>
         </div>
 
-        <div class="form-group">
-          <label for="senha">Senha</label>
-          <div class="input-with-icon">
-            <i class="fas fa-lock"></i>
-            <input 
-              [type]="showSenha ? 'text' : 'password'" 
-              id="senha" 
-              formControlName="senha" 
-              class="form-control" 
-              [ngClass]="{ 'is-invalid': submitted && f['senha'].errors }" 
-              placeholder="Digite sua senha"
-            />
-            <button type="button" class="eye-icon-login" (click)="showSenha = !showSenha">
-              <i class="fas" [ngClass]="showSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
-            </button>
-          </div>
-          <div *ngIf="submitted && f['senha'].errors" class="invalid-feedback">
-            <div *ngIf="f['senha'].errors['required']">Senha é obrigatória</div>
-          </div>
-        </div>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="field mb-4">
+                <label for="cpfCnpj" class="block text-900 font-medium mb-2 montserrat-font">CPF / CNPJ</label>
+                <span class="p-input-icon-left">
+                    <i class="pi pi-user gold-text"></i>
+                    <input id="cpfCnpj" type="text" pInputText formControlName="cpfCnpj" 
+                           placeholder="000.000.000-00" (input)="applyMask($event)" maxlength="18"
+                           [ngClass]="{'ng-invalid ng-dirty': submitted && f['cpfCnpj'].errors}">
+                </span>
+                <small *ngIf="submitted && f['cpfCnpj'].errors?.['required']" class="p-error block mt-1">
+                    CPF/CNPJ é obrigatório.
+                </small>
+            </div>
 
-        <div *ngIf="error" class="alert-error-container">
-          <i class="fas fa-circle-exclamation"></i>
-          <span>{{ error }}</span>
-        </div>
+            <div class="field mb-5">
+                <label for="senha" class="block text-900 font-medium mb-2 montserrat-font">Senha</label>
+                <div class="relative w-full">
+                    <!-- Ícone Lock (ESQUERDA) -->
+                    <i class="pi pi-lock gold-text absolute top-50 transform-translate-y-50 ml-3 z-2" style="left: 0;"></i>
+                    
+                    <input id="senha" [type]="showSenha ? 'text' : 'password'" pInputText formControlName="senha" 
+                           placeholder="Digite sua senha" class="w-full pl-5 pr-5"
+                           [ngClass]="{'ng-invalid ng-dirty': submitted && f['senha'].errors}">
 
-        <button [disabled]="loading" class="btn-login-gold">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2"></span>
-          <span *ngIf="!loading">Entrar <i class="fas fa-arrow-right-to-bracket ml-2"></i></span>
-        </button>
+                    <!-- Ícone Olho (DIREITA) -->
+                    <i class="pi gold-text absolute top-50 transform-translate-y-50 mr-3 cursor-pointer z-2" 
+                       [ngClass]="showSenha ? 'pi-eye-slash' : 'pi-eye'"
+                       (click)="showSenha = !showSenha" style="right: 0;"></i>
+                </div>
+                <small *ngIf="submitted && f['senha'].errors?.['required']" class="p-error block mt-1">
+                    Senha é obrigatória.
+                </small>
+            </div>
 
-        <div class="forgot-password-link">
-          <a routerLink="/forgot-password">Esqueci/Alterar Senha</a>
-        </div>
-      </form>
-      
-      <div class="login-footer">
-        <p>© 2026 Sara App - Hadas Tecnologia</p>
-      </div>
+            <div *ngIf="error" class="p-message p-message-error mb-4 border-round" style="padding: 1rem;">
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-exclamation-circle"></i>
+                    <span class="text-sm">{{ error }}</span>
+                </div>
+            </div>
+
+            <button pButton pRipple label="ENTRAR" icon="pi pi-sign-in" 
+                    class="p-button-lg btn-gold shadow-2 mb-4" [loading]="loading"></button>
+
+            <div class="flex align-items-center justify-content-center">
+                <a routerLink="/forgot-password" class="forgot-password-link-custom no-underline cursor-pointer hover:underline montserrat-font">
+                    Esqueci/Alterar Senha
+                </a>
+            </div>
+        </form>
+
     </div>
-  </div>
 </div>
