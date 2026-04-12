@@ -1,284 +1,253 @@
-<!-- Modal de Visualização de Imagem (Zoom) - NO TOPO PARA EVITAR ANINHAMENTO -->
+<!-- Modal de Visualização de Imagem (Zoom) - Estilo Premium -->
 <div class="zoom-overlay-exclusive" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
     <div class="zoom-modal-container-exclusive" (click)="$event.stopPropagation()">
         <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Visualização" class="zoom-img-exclusive" (error)="imagemUrlVisualizacao=''">
         <button (click)="fecharVisualizacaoImagem()" class="zoom-close-btn-exclusive">
-            <i class="fa fa-times"></i>
+            <i class="pi pi-times"></i>
         </button>
     </div>
 </div>
 
-<div class="page-title-banner">
-    <h1>Carrinho de Compras</h1>
-</div>
-
-<section class="carrinho-page container">
-    <div *ngIf="itensCarrinho.length === 0" class="carrinho-vazio">
-        <i class="fa fa-shopping-basket fa-4x empty-icon"></i>
-        <h2>Seu carrinho está vazio!</h2>
-        <p>Volte à loja para adicionar produtos incríveis.</p>
-        <button class="btn-gold" routerLink="/loja">Ir para a Loja</button>
+<div class="carrinho-container p-4">
+    <div *ngIf="itensCarrinho.length === 0" class="carrinho-vazio flex flex-column align-items-center justify-content-center py-8">
+        <i class="pi pi-shopping-cart text-6xl gold-text mb-4"></i>
+        <h2 class="cinzel-font text-900 mb-2">Seu carrinho está vazio!</h2>
+        <p class="text-600 mb-4">Explore nossa loja e encontre peças exclusivas.</p>
+        <button pButton label="Ir para a Loja" icon="pi pi-arrow-left" class="p-button-gold border-round-pill px-6" routerLink="/loja"></button>
     </div>
 
-    <div *ngIf="itensCarrinho.length > 0" class="carrinho-conteudo">
-        <div class="carrinho-header-actions">
-            <h3>Meus Itens</h3>
-            <button class="btn-esvaziar" (click)="abrirModalLimpar()">
-                <i class="fa fa-trash"></i> Esvaziar Carrinho
-            </button>
+    <div *ngIf="itensCarrinho.length > 0" class="grid">
+        <div class="col-12">
+            <div class="flex flex-column md:flex-row justify-content-between align-items-center mb-5 gap-3">
+                <h1 class="cinzel-font text-3xl text-900 m-0 border-left-3 border-gold pl-3">Carrinho de Compras</h1>
+                <button pButton label="Esvaziar Carrinho" icon="pi pi-trash" class="p-button-text p-button-danger border-round-lg" (click)="abrirModalLimpar()"></button>
+            </div>
         </div>
 
-        <div class="grupos-container">
-            <!-- Quadros de Tamanho -->
-            <div class="tamanho-card" *ngFor="let grupo of gruposPorTamanho">
-                <div class="tamanho-card-header">
-                    <h4>Tamanho: {{ grupo.tamanho }} cm</h4>
-                </div>
+        <!-- Lista de Itens -->
+        <div class="col-12 lg:col-8">
+            <div class="flex flex-column gap-4">
+                <div *ngFor="let grupo of gruposPorTamanho" class="tamanho-group mb-2">
+                    <div class="flex align-items-center gap-2 mb-3">
+                        <span class="bg-gold text-white px-3 py-1 border-round-pill text-sm font-bold">Tamanho: {{ grupo.tamanho }} cm</span>
+                        <div class="flex-grow-1 border-bottom-1 border-200"></div>
+                    </div>
 
-                <div class="tamanho-card-body">
-                    <div class="carrinho-item" *ngFor="let item of grupo.itens">
-                        <div class="item-main-info">
-                            <div class="item-imagem" (click)="abrirVisualizacaoImagem(item.produtoImagem)" style="cursor: zoom-in" title="Clique para ampliar">
-                                <img *ngIf="item.produtoImagem" [src]="item.produtoImagem | ociImage" [alt]="item.produtoNome" (error)="item.produtoImagem = ''">
-                                <div *ngIf="!item.produtoImagem" class="placeholder-img">Sem Img</div>
-                            </div>
+                    <div class="grid">
+                        <div *ngFor="let item of grupo.itens" class="col-12">
+                            <div class="product-item-card flex flex-column md:flex-row align-items-center p-3 gap-3 bg-white border-round-xl shadow-1 hover:shadow-2 transition-duration-200">
+                                <!-- Imagem -->
+                                <div class="item-img-container flex-shrink-0" (click)="abrirVisualizacaoImagem(item.produtoImagem)">
+                                    <img *ngIf="item.produtoImagem" [src]="item.produtoImagem | ociImage" [alt]="item.produtoNome" class="border-round">
+                                    <div *ngIf="!item.produtoImagem" class="placeholder-img border-round">Sem Imagem</div>
+                                </div>
 
-                            <div class="item-details">
-                                <h5 class="item-nome">{{ item.produtoNome }} (#{{ item.produtoCodigo }})</h5>
-                                <span class="item-preco">{{ item.produtoPreco | currency:'BRL':'symbol':'1.2-2' }}</span>
-                                
-                                <!-- Mobile specific: Actions integrated in details -->
-                                <div class="mobile-item-actions show-mobile">
-                                    <div class="qtd-control">
-                                        <button class="btn-qty" (click)="atualizarQuantidade(item, item.quantidade! - 1)" [disabled]="item.quantidade! <= 1">-</button>
-                                        <input type="number" min="1" [ngModel]="item.quantidade"
-                                            (change)="atualizarQuantidade(item, $any($event.target).value)" readonly>
-                                        <button class="btn-qty" (click)="atualizarQuantidade(item, item.quantidade! + 1)">+</button>
+                                <!-- Detalhes -->
+                                <div class="flex-grow-1 text-center md:text-left">
+                                    <h5 class="text-900 font-bold text-lg m-0 mb-1">{{ item.produtoNome }}</h5>
+                                    <span class="text-500 text-sm block mb-2">Código: #{{ item.produtoCodigo }}</span>
+                                    <div class="text-xl font-bold gold-text">{{ item.produtoPreco | currency:'BRL' }}</div>
+                                </div>
+
+                                <!-- Controles -->
+                                <div class="flex align-items-center gap-4 mt-3 md:mt-0">
+                                    <div class="flex flex-column align-items-center gap-1">
+                                        <label class="text-xs text-500">Quantidade</label>
+                                        <p-inputNumber [(ngModel)]="item.quantidade" [showButtons]="true" 
+                                                       buttonLayout="horizontal" spinnerMode="horizontal" 
+                                                       inputStyleClass="text-center w-3rem border-none font-bold"
+                                                       incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                       [min]="1" (onInput)="atualizarQuantidade(item, $event.value)"
+                                                       styleClass="p-inputnumber-sm compact-qty-cart">
+                                        </p-inputNumber>
                                     </div>
-                                    <button class="btn-remover-mobile" (click)="removerItem(item.produtoId)">
-                                        <i class="fa fa-trash"></i> Remover
-                                    </button>
+
+                                    <div class="flex flex-column align-items-end gap-1">
+                                        <label class="text-xs text-500">Total do Item</label>
+                                        <div class="text-lg font-bold text-900">{{ (item.produtoPreco || 0) * (item.quantidade || 0) | currency:'BRL' }}</div>
+                                    </div>
+
+                                    <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                                            (click)="removerItem(item.produtoId)" pTooltip="Remover"></button>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Desktop specific: Actions on the right -->
-                        <div class="item-actions hide-mobile">
-                            <div class="qtd-control">
-                                <label>Qtd:</label>
-                                <input type="number" min="1" [ngModel]="item.quantidade"
-                                    (change)="atualizarQuantidade(item, $any($event.target).value)">
-                            </div>
-
-                            <button class="btn-remover" (click)="removerItem(item.produtoId)" title="Remover Produto">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Barra Lateral de Pagamento e Finalização -->
-        <aside class="carrinho-checkout shadow-card">
-            <h3>Resumo do Pedido</h3>
+        <!-- Resumo Lateral -->
+        <aside class="col-12 lg:col-4">
+            <div class="p-card shadow-3 border-round-xl overflow-hidden sticky top-8 p-0 checkout-sidebar">
+                <div class="bg-black p-4 text-white">
+                    <h3 class="cinzel-font text-xl m-0 gold-text">Resumo do Pedido</h3>
+                </div>
+                
+                <div class="p-4 flex flex-column gap-3">
+                    <div class="flex justify-content-between text-600">
+                        <span>Subtotal:</span>
+                        <span class="font-bold text-900">{{ valorSubtotal | currency:'BRL' }}</span>
+                    </div>
 
-            <div class="resumo-linha">
-                <span>Subtotal:</span>
-                <span class="resumo-valor">{{ valorSubtotal | currency:'BRL':'symbol':'1.2-2' }}</span>
-            </div>
+                    <div class="flex justify-content-between text-pink-500" *ngIf="valorDescontoCalculado > 0">
+                        <span>Descontos ({{ getDescontoTotalExibicao() }}%):</span>
+                        <span class="font-bold">- {{ valorDescontoCalculado | currency:'BRL' }}</span>
+                    </div>
 
-            <div class="resumo-linha text-danger" *ngIf="valorDescontoCalculado > 0">
-                <span>Descontos ({{ getDescontoTotalExibicao() }}%):</span>
-                <span class="resumo-valor">- {{ valorDescontoCalculado | currency:'BRL':'symbol':'1.2-2' }}</span>
-            </div>
+                    <div class="flex justify-content-between text-600">
+                        <span>Frete (Estimado):</span>
+                        <span class="font-bold text-900" [class.text-green-500]="!freteSugerido">{{ freteSugerido ? (freteSugerido | currency:'BRL') : 'Grátis' }}</span>
+                    </div>
 
-            <div class="resumo-linha">
-                <span>Frete (Sugestão):</span>
-                <span class="resumo-valor" *ngIf="freteSugerido">{{ freteSugerido | currency:'BRL':'symbol':'1.2-2'
-                    }}</span>
-                <span class="resumo-valor" *ngIf="!freteSugerido">Grátis</span>
-            </div>
+                    <p-divider></p-divider>
 
-            <hr>
+                    <div class="flex justify-content-between align-items-center">
+                        <span class="text-xl text-900 font-bold">Total Geral:</span>
+                        <span class="text-2xl gold-text font-bold">{{ valorTotalGeral | currency:'BRL' }}</span>
+                    </div>
 
-            <div class="resumo-linha">
-                <strong>Total Final:</strong>
-                <strong class="resumo-valor destaque-gold">{{ valorTotalGeral | currency:'BRL':'symbol':'1.2-2'
-                    }}</strong>
-            </div>
-
-            <div class="forma-pagamento-section mt-15">
-                <h4>Forma de Pagamento</h4>
-                <div class="radio-cards">
-                    <label class="payment-radio" *ngFor="let forma of formasPagamento" [class.disabled]="!isFormaHabilitada(forma)">
-                        <input type="radio" name="formaPagamento" [value]="forma.id"
-                            [(ngModel)]="formaPagamentoSelecionada" (change)="aoSelecionarFormaPagamento()"
-                            [disabled]="!isFormaHabilitada(forma)">
-                        <div class="payment-card">
-                            <i [ngClass]="forma.iconeFontAwesome"></i>
-                            <span>{{ forma.descricao || forma.nome }}</span>
-                            <small *ngIf="ativarDescontoAVista && forma.desconto > 0 && isFormaHabilitada(forma)">(-{{ forma.desconto }}% à vista)</small>
-                            <span class="badget-minimo-alert" *ngIf="!isFormaHabilitada(forma)">
-                                {{ getMensagemMinimo(forma) }}
-                            </span>
+                    <div class="mt-4 pb-2 border-bottom-1 border-200">
+                        <h4 class="text-900 font-bold mb-3 flex align-items-center gap-2">
+                            <i class="pi pi-credit-card gold-text"></i> Forma de Pagamento
+                        </h4>
+                        
+                        <div class="flex flex-column gap-2">
+                            <div *ngFor="let forma of formasPagamento" 
+                                 class="payment-option-card p-3 border-1 border-round-lg cursor-pointer transition-duration-200"
+                                 [class.selected]="formaPagamentoSelecionada === forma.id"
+                                 [class.disabled]="!isFormaHabilitada(forma)"
+                                 (click)="isFormaHabilitada(forma) ? selecionarForma(forma.id) : null">
+                                
+                                <div class="flex align-items-center gap-3">
+                                    <p-radioButton [name]="'payment'" [value]="forma.id" [(ngModel)]="formaPagamentoSelecionada" 
+                                                  [disabled]="!isFormaHabilitada(forma)" (onClick)="aoSelecionarFormaPagamento()"></p-radioButton>
+                                    <div class="flex flex-column flex-grow-1">
+                                        <span class="font-bold text-900 text-sm">{{ forma.descricao || forma.nome }}</span>
+                                        <small *ngIf="ativarDescontoAVista && forma.desconto > 0 && isFormaHabilitada(forma)" class="text-green-600 font-medium">
+                                            -{{ forma.desconto }}% de desconto à vista
+                                        </small>
+                                        <small *ngIf="!isFormaHabilitada(forma)" class="text-pink-500 font-bold">
+                                            {{ getMensagemMinimo(forma) }}
+                                        </small>
+                                    </div>
+                                    <i [ngClass]="forma.iconeFontAwesome" class="text-lg text-500"></i>
+                                </div>
+                            </div>
                         </div>
-                    </label>
-                </div>
-
-                <!-- Pagamento Online (Opcional para ENTREGA_E_ONLINE com PIX) -->
-                <div class="online-payment-option mt-15" *ngIf="deveMostrarCampoPagamentoOnline()">
-                    <div class="online-payment-card" style="background: #fdf8e6; padding: 12px; border-radius: 8px; border: 1px solid #d4af37;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
-                            <input type="checkbox" [(ngModel)]="pagamentoOnline" (change)="gerarParcelasPreview()" 
-                                   style="width: 18px; height: 18px; margin: 0;">
-                            <span style="font-weight: bold; color: #333; font-size: 0.95rem;">Pagamento Online ({{ getLabelMeioPagamentoOnline() }})</span>
-                        </label>
-                        <p style="margin: 5px 0 0 28px; font-size: 0.8rem; color: #666; line-height: 1.2;">
-                            {{ getDescricaoPagamentoOnline() }} imediatamente após clicar em "Confirmar Pedido".
-                        </p>
                     </div>
-                </div>
 
-                <!-- Parcelamento -->
-                <div class="installment-selection mt-15" *ngIf="permitirParcelamento && opcaoParcelamentoSelecionada">
-                    <h4>Condições de Parcelamento</h4>
-                    <div class="installment-selector-wrapper">
-                        <select class="form-select-gold" [(ngModel)]="quantidadeParcelas" (change)="gerarParcelasPreview()">
-                            <option *ngFor="let n of opcoesParcelasDisponiveis" [value]="n">
-                                {{ getLabelParcela(n) }}
-                            </option>
-                        </select>
+                    <!-- Opção Pagamento Online -->
+                    <div *ngIf="deveMostrarCampoPagamentoOnline()" class="bg-gray-50 p-3 border-round-lg border-1 border-200 mt-2">
+                        <p-checkbox [(ngModel)]="pagamentoOnline" [binary]="true" [label]="'Pagamento Online (' + getLabelMeioPagamentoOnline() + ')'" 
+                                    (onChange)="gerarParcelasPreview()" labelStyleClass="font-bold text-sm text-900"></p-checkbox>
+                        <p class="text-xs text-600 m-0 mt-2 ml-4">{{ getDescricaoPagamentoOnline() }} imediatamente após confirmar.</p>
                     </div>
+
+                    <!-- Parcelamento -->
+                    <div *ngIf="permitirParcelamento && opcaoParcelamentoSelecionada" class="mt-2">
+                        <label class="block text-900 font-bold mb-2 text-sm">Parcelamento:</label>
+                        <p-dropdown [options]="opcoesParcelasDisponiveis" [(ngModel)]="quantidadeParcelas" 
+                                   (onChange)="gerarParcelasPreview()" styleClass="w-full p-inputtext-sm" dropdownIcon="pi pi-chevron-down">
+                            <ng-template let-n pTemplate="item">
+                                <span class="text-sm">{{ getLabelParcela(n) }}</span>
+                            </ng-template>
+                            <ng-template let-n pTemplate="selectedItem">
+                                <span class="text-sm">{{ getLabelParcela(n) }}</span>
+                            </ng-template>
+                        </p-dropdown>
+                        
+                        <div *ngIf="quantidadeParcelas > 1" class="mt-2 bg-gray-50 p-2 border-round border-1 border-200">
+                            <div *ngFor="let p of parcelasGeradas; let i = index" class="flex justify-content-between text-xs py-1 border-bottom-1 border-100 last:border-none">
+                                <span class="text-700">{{ i + 1 }}ª Parcela:</span>
+                                <span class="font-bold text-900">{{ p.valor | currency:'BRL' }}</span>
+                                <span class="text-500">{{ p.dataVencimento | date:'dd/MM/yy' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button pButton label="Gerar Pedido" icon="pi pi-check-circle" class="p-button-success p-button-lg w-full border-round-lg mt-4 shadow-2"
+                            (click)="abrirModalGerarPedido()" [disabled]="!formaPagamentoSelecionada"></button>
                     
-                    <div class="installment-preview mt-10" *ngIf="quantidadeParcelas > 1">
-                        <ul class="preview-list">
-                            <li *ngFor="let p of parcelasGeradas; let i = index">
-                                <span class="parcela-label">{{ i + 1 }}ª:</span>
-                                <span class="parcela-valor">{{ p.valor | currency:'BRL' }}</span>
-                                <span class="parcela-data">Venc: {{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
-                            </li>
-                        </ul>
-                    </div>
+                    <button pButton label="Continuar Comprando" icon="pi pi-cart-plus" class="p-button-text p-button-secondary w-full"
+                            routerLink="/loja"></button>
                 </div>
             </div>
-
-            <button class="btn-gerar-pedido mt-15" (click)="abrirModalGerarPedido()"
-                [disabled]="!formaPagamentoSelecionada">
-                Gerar Pedido
-            </button>
         </aside>
     </div>
-</section>
+</div>
 
 <!-- Modal de Confirmação: Limpar Carrinho -->
-<div class="modal-overlay" *ngIf="exibirModalLimpar">
-    <div class="modal-container">
-        <h3 class="modal-title alert-title">Atenção!</h3>
-        <div class="modal-body text-center">
-            <p>Tem certeza de que deseja excluir <strong>todos</strong> os produtos do seu carrinho?</p>
-            <p class="text-muted">Esta ação não poderá ser desfeita.</p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancelar" (click)="fecharModalLimpar()">Não, cancelar</button>
-            <button class="btn-confirmar btn-danger" (click)="limparCarrinhoConfirmado()">Sim, excluir tudo</button>
-        </div>
+<p-dialog [(visible)]="exibirModalLimpar" [modal]="true" [header]="'Atenção!'" [style]="{width: '90vw', maxWidth: '450px'}" 
+          styleClass="danger-dialog border-round-2xl" [draggable]="false" [resizable]="false">
+    <div class="flex flex-column align-items-center py-4 text-center">
+        <i class="pi pi-exclamation-triangle text-6xl text-pink-500 mb-4"></i>
+        <p class="text-900 text-xl font-medium mb-2">Deseja excluir todos os itens?</p>
+        <p class="text-600 m-0 px-3">Esta ação não poderá ser desfeita e seu carrinho será esvaziado completamente.</p>
     </div>
-</div>
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-center gap-3 pb-3">
+            <button pButton label="Não, Cancelar" class="p-button-text p-button-secondary border-round-lg" (click)="fecharModalLimpar()"></button>
+            <button pButton label="Sim, Excluir Tudo" class="p-button-danger border-round-lg shadow-2 px-4" (click)="limparCarrinhoConfirmado()"></button>
+        </div>
+    </ng-template>
+</p-dialog>
 
 <!-- Modal Confirmar Geração de Pedido -->
-<div class="modal-overlay" *ngIf="exibirModalGerarPedido">
-    <div class="modal-container" style="max-width: 600px;">
-        <h3 class="modal-title alert-title" style="color: #333;"><i class="fa fa-shopping-bag"></i> Resumo do Pedido
-        </h3>
-        <div class="modal-body text-left">
-            <div class="table-responsive mb-3"
-                style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px;">
-                <table class="table table-sm mb-0"
-                    style="background: #fff; font-size: 0.9rem; border-collapse: collapse; width: 100%;">
-                    <thead style="background: #f4f4f4; position: sticky; top: 0; z-index: 1;">
-                        <tr>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Produto</th>
-                            <th class="text-center" style="width: 60px; border: 1px solid #ddd; padding: 8px;">Tam.</th>
-                            <th class="text-center" style="width: 60px; border: 1px solid #ddd; padding: 8px;">Qtd</th>
-                            <th class="text-right" style="width: 100px; border: 1px solid #ddd; padding: 8px;">Total
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let item of itensCarrinhoOrdenadosModal">
-                            <td class="align-middle" style="border: 1px solid #ddd; padding: 8px;">
-                                <span style="font-weight: 500; color: #444;">{{ item.produtoNome }} (#{{ item.produtoCodigo }})</span>
-                            </td>
-                            <td class="text-center align-middle" style="border: 1px solid #ddd; padding: 8px;">{{
-                                item.produtoTamanho }}cm</td>
-                            <td class="text-center align-middle" style="border: 1px solid #ddd; padding: 8px;">{{
-                                item.quantidade }}x</td>
-                            <td class="text-right align-middle"
-                                style="font-weight: 500; border: 1px solid #ddd; padding: 8px;">{{ (item.produtoPreco ||
-                                0) * (item.quantidade || 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Resumo Financeiro -->
-            <div
-                style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px; margin-top: 20px;">
-                <div class="d-flex justify-content-between mb-2">
-                    <span style="font-size: 1.1rem; color: #666;">Subtotal:</span>
-                    <span style="font-size: 1.1rem; font-weight: bold;">{{ valorSubtotal |
-                        currency:'BRL':'symbol':'1.2-2' }}</span>
+<p-dialog [(visible)]="exibirModalGerarPedido" [modal]="true" [header]="'Revisão do Pedido'" 
+          [style]="{width: '95vw', maxWidth: '700px'}" [maximizable]="true" styleClass="confirmation-dialog border-round-2xl">
+    
+    <div class="p-fluid">
+        <!-- Lista de Revisão Compacta -->
+        <div class="review-list mb-4 max-h-15rem overflow-y-auto pr-2">
+            <div *ngFor="let item of itensCarrinhoOrdenadosModal" 
+                 class="flex align-items-center py-3 border-bottom-1 border-100 gap-3">
+                <div class="w-4rem h-4rem flex align-items-center justify-content-center bg-gray-50 border-round shadow-1 p-1 overflow-hidden">
+                    <img *ngIf="item.produtoImagem" [src]="item.produtoImagem | ociImage" class="max-w-full max-h-full w-auto h-auto object-contain">
                 </div>
-                <div class="d-flex justify-content-between mb-2 text-danger" *ngIf="valorDescontoCalculado > 0">
-                    <span style="font-size: 1.1rem;">Descontos ({{ getDescontoTotalExibicao() }}%):</span>
-                    <span style="font-size: 1.1rem; font-weight: bold;">- {{ valorDescontoCalculado |
-                        currency:'BRL':'symbol':'1.2-2' }}</span>
+                <div class="flex-grow-1">
+                    <div class="text-900 font-bold text-base">{{ item.produtoNome }}</div>
+                    <div class="text-500 text-sm">#{{ item.produtoCodigo }} | {{ item.produtoTamanho }}cm | {{ item.quantidade }}x {{ item.produtoPreco | currency:'BRL' }}</div>
                 </div>
-                <div class="d-flex justify-content-between mb-2 text-info">
-                    <span style="font-size: 1.1rem;">Frete Sugerido:</span>
-                    <span style="font-size: 1.1rem; font-weight: bold;" *ngIf="freteSugerido">{{ freteSugerido |
-                        currency:'BRL':'symbol':'1.2-2' }}</span>
-                    <span style="font-size: 1.1rem; font-weight: bold;" *ngIf="!freteSugerido">Grátis</span>
-                </div>
-
-                <!-- Plano de Parcelamento na Modal -->
-                <div *ngIf="quantidadeParcelas > 1" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
-                    <label style="font-weight: bold; color: #555; display: block; margin-bottom: 8px;">Plano de Parcelamento:</label>
-                    <div style="background: #fff; border-radius: 6px; border: 1px solid #eee; padding: 10px;">
-                        <div *ngFor="let p of parcelasGeradas; let i = index" 
-                             style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid #f9f9f9;">
-                            <span><strong>{{ i + 1 }}ª Parcela</strong></span>
-                            <span>{{ p.valor | currency:'BRL' }}</span>
-                            <span style="color: #888;">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr style="margin: 10px 0; border-top: 1px dashed #ccc;">
-                <div class="d-flex justify-content-between">
-                    <span style="font-size: 1.3rem; color: #333; font-weight: bold;">Total Geral:</span>
-                    <span style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">{{ valorTotalGeral |
-                        currency:'BRL':'symbol':'1.2-2' }}</span>
-                </div>
-            </div>
-
-            <div class="form-group mb-4">
-                <label style="font-weight: 600; color: #555;">Observações Adicionais:</label>
-                <textarea class="form-control" rows="2" [(ngModel)]="observacaoPedido"
-                    placeholder="Digite aqui alguma observação sobre o pedido (opcional)..."
-                    style="width: 90%;"></textarea>
+                <div class="text-900 font-bold text-lg text-right">{{ (item.produtoPreco || 0) * (item.quantidade || 0) | currency:'BRL' }}</div>
             </div>
         </div>
-        <div class="modal-footer d-flex justify-content-end" style="gap: 15px;">
-            <button class="btn-cancelar" (click)="fecharModalGerarPedido()">Cancelar</button>
-            <button class="btn-gerar-pedido" style="width: auto; margin-top: 0; padding: 10px 20px; border-radius: 6px;"
-                (click)="confirmarGerarPedido()"><i class="fa fa-check"></i> Confirmar Pedido</button>
+
+        <!-- Resumo Financeiro na Modal -->
+        <div class="bg-gray-50 p-4 border-round-xl border-1 border-100 mb-4">
+            <div class="flex justify-content-between mb-2">
+                <span class="text-700">Subtotal:</span>
+                <span class="font-bold text-900">{{ valorSubtotal | currency:'BRL' }}</span>
+            </div>
+            <div class="flex justify-content-between mb-2 text-pink-500" *ngIf="valorDescontoCalculado > 0">
+                <span>Descontos ({{ getDescontoTotalExibicao() }}%):</span>
+                <span class="font-bold">- {{ valorDescontoCalculado | currency:'BRL' }}</span>
+            </div>
+            <div class="flex justify-content-between mb-2 text-green-600">
+                <span>Frete (Estimado):</span>
+                <span class="font-bold">{{ freteSugerido ? (freteSugerido | currency:'BRL') : 'Grátis' }}</span>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <div class="flex justify-content-between align-items-center">
+                <span class="text-xl text-900 font-bold">Total Final:</span>
+                <span class="text-2xl gold-text font-bold">{{ valorTotalGeral | currency:'BRL' }}</span>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="font-bold text-900 mb-2 block">Observações Adicionais:</label>
+            <textarea pInputTextarea [rows]="3" [(ngModel)]="observacaoPedido" 
+                      placeholder="Alguma instrução especial para este pedido?" class="w-full border-round-lg"></textarea>
         </div>
     </div>
-</div>
 
-<!-- Toast Notification -->
-<div class="toast-notification" *ngIf="exibirToast">
-    {{ mensagemToast }}
-</div>
+    <ng-template pTemplate="footer">
+        <div class="flex flex-column sm:flex-row justify-content-center sm:justify-content-end gap-3 pb-3 px-3">
+            <button pButton label="Voltar" class="p-button-text p-button-secondary border-round-lg w-full sm:w-auto mt-2 sm:mt-0" (click)="fecharModalGerarPedido()"></button>
+            <button pButton label="Confirmar Pedido" icon="pi pi-check" class="p-button-success border-round-lg shadow-2 px-6 py-3 w-full sm:w-auto" 
+                    (click)="confirmarGerarPedido()"></button>
+        </div>
+    </ng-template>
+</p-dialog>

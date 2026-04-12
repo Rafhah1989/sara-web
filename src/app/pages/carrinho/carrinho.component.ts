@@ -6,6 +6,7 @@ import { UsuarioService } from '../../services/usuario.service';
 import { Router } from '@angular/router';
 import { MetodoPagamentoAutorizado } from '../../models/metodo-pagamento-autorizado.enum';
 import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-carrinho',
@@ -44,18 +45,15 @@ export class CarrinhoComponent implements OnInit {
   // Zoom de Imagem
   exibirVisualizacaoImagem: boolean = false;
   imagemUrlVisualizacao: string = '';
-
-  // Toast Notification
-  exibirToast: boolean = false;
-  mensagemToast: string = '';
-  toastTimeout: any;
+  
 
   constructor(
     private carrinhoService: CarrinhoService,
     private pedidoService: PedidoService,
     private authService: AuthService,
     private usuarioService: UsuarioService,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {}
 
   getLabelMeioPagamentoOnline(): string {
@@ -207,6 +205,11 @@ export class CarrinhoComponent implements OnInit {
         return `Faltam ${faltaFmt} para o mínimo`;
     }
     return '';
+  }
+
+  selecionarForma(id: number): void {
+      this.formaPagamentoSelecionada = id;
+      this.aoSelecionarFormaPagamento();
   }
 
   aoSelecionarFormaPagamento(): void {
@@ -431,7 +434,10 @@ export class CarrinhoComponent implements OnInit {
               this.fecharModalLimpar();
               this.carregarCarrinho(usuarioId);
           },
-          error: (err) => console.error('Erro ao limpar carrinho', err)
+          error: (err) => {
+              console.error('Erro ao limpar carrinho', err);
+              this.mostrarToast('Não foi possível esvaziar o carrinho. Tente novamente.', 'error');
+          }
       });
   }
 
@@ -511,17 +517,13 @@ export class CarrinhoComponent implements OnInit {
       });
   }
 
-  mostrarToast(mensagem: string): void {
-      this.mensagemToast = mensagem;
-      this.exibirToast = true;
-      
-      if (this.toastTimeout) {
-          clearTimeout(this.toastTimeout);
-      }
-      
-      this.toastTimeout = setTimeout(() => {
-          this.exibirToast = false;
-      }, 3000);
+  mostrarToast(mensagem: string, severity: 'success' | 'info' | 'warn' | 'error' = 'success'): void {
+      this.messageService.add({
+          severity: severity,
+          summary: severity === 'error' ? 'Erro' : 'Sucesso',
+          detail: mensagem,
+          life: 3000
+      });
   }
 
   get itensCarrinhoOrdenadosModal(): CarrinhoResponseDTO[] {

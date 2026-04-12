@@ -1,184 +1,122 @@
-.pix-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 200px);
-    padding: 20px;
+/* Sara Pix & Boleto Payment Premium Style */
+
+.pix-payment-wrapper {
+    background-color: var(--surface-ground);
+    color: var(--text-color);
 }
 
-.shadow-card {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+:host ::ng-deep .payment-card {
+    border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
-.color-primary-gold-dark {
-    color: #aa8c2c;
+:host ::ng-deep .payment-card .p-card-body {
+    padding: 0 !important;
+}
+
+:host ::ng-deep .payment-card .p-card-content {
+    padding: 1.5rem !important;
+}
+
+.bg-black-900 {
+    background-color: #1a1a1a;
+}
+
+.gold-text {
+    color: #d4af37;
+}
+
+.border-gold {
+    border-color: #d4af37;
+}
+
+.border-gold-light {
+    border-color: #f1e5ac;
+}
+
+/* Custom Gold Button - Premium Metallic Look */
+.p-button-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #b8932c 100%) !important;
+    border-color: #b8932c !important;
+    color: #000 !important; /* Texto preto no ouro para melhor contraste e visual luxuoso */
+    font-weight: 700 !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3) !important;
+}
+
+.p-button-gold:hover {
+    background: linear-gradient(135deg, #e5be48 0%, #caa43a 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4) !important;
+}
+
+.p-button-gold:active {
+    transform: translateY(0);
+}
+
+/* Input Group Enhancements */
+:host ::ng-deep .p-inputgroup input {
+    border-right: none;
+    font-family: 'Montserrat', sans-serif;
+    color: #444;
+}
+
+.custom-info-msg {
+    border-radius: 12px;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Timer Progress Bar */
+.timer-progress ::ng-deep .p-progressbar {
+    background-color: #ececec;
+    border-radius: 10px;
+}
+
+.timer-progress ::ng-deep .p-progressbar-value {
+    background: linear-gradient(90deg, #d4af37, #f1e5ac);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    transition: width 1s linear;
+}
+
+.expiring-bar ::ng-deep .p-progressbar-value {
+    background: linear-gradient(90deg, #ef4444, #fca5a5);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+/* Utility */
+.tracking-wider {
+    letter-spacing: 0.05em;
 }
 
 .cinzel-font {
     font-family: 'Cinzel', serif;
 }
 
-.pix-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 500px;
-    width: 100%;
-    text-align: center;
-    border: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.pix-header h2 {
-    margin-bottom: 10px;
-}
-
-.pix-content {
-    margin: 30px 0;
-}
-
-.section-title {
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 15px;
-}
-
-.qr-code-wrapper {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    display: inline-block;
-    border: 1px solid #ddd;
-    margin-bottom: 25px;
-}
-
-.qr-code-wrapper img {
-    max-width: 250px;
-    display: block;
-}
-
-.copy-input-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.actions {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.error-card {
-    border-top: 4px solid #f44336;
-}
-
-.error-content {
-    text-align: center;
-    padding: 20px 0;
-}
-
-.error-icon {
-    font-size: 4rem;
-    color: #f44336;
-    margin-bottom: 20px;
-}
-
-.btn-gold {
-    background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
-    color: white;
-    padding: 14px 28px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.95rem;
-}
-
-.btn-gold:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 12px 25px rgba(212, 175, 55, 0.4);
-    filter: brightness(1.1);
-}
-
-.btn-outline {
-    background: white;
-    border: 2px solid #d4af37;
-    color: #d4af37;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.95rem;
-}
-
-.btn-outline:hover {
-    background: rgba(212, 175, 55, 0.08);
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
-}
-
-.copy-input-group input {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #000;
-    border-radius: 4px;
-    background: #f5f5f5;
-    font-size: 0.9rem;
-}
-
-.btn-copy {
-    background: #d4af37;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 45px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.btn-copy:hover {
-    background: #aa8c2c;
-}
-
-.pix-footer {
-    margin-top: 30px;
-    border-top: 1px dashed #ccc;
-    padding-top: 20px;
-}
-
-.pix-instructions {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.loading-container {
-    text-align: center;
-    margin-top: 100px;
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Responsive adjustments */
+@media screen and (max-width: 576px) {
+    .payment-card {
+        maxWidth: 100% !important;
+    }
+    
+    .text-6xl {
+        font-size: 3.5rem !important;
+    }
+    
+    .p-inputgroup input {
+        font-size: 0.8rem;
+    }
 }

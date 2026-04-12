@@ -53,6 +53,12 @@ import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { RippleModule } from 'primeng/ripple';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { CheckboxModule } from 'primeng/checkbox';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { CardModule } from 'primeng/card';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 registerLocaleData(localePt);
 
@@ -130,6 +136,12 @@ const routes: Routes = [
     ButtonModule,
     InputTextModule,
     RippleModule,
+    RadioButtonModule,
+    CheckboxModule,
+    InputTextareaModule,
+    CardModule,
+    ProgressBarModule,
+    ProgressSpinnerModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
   ],
   providers: [

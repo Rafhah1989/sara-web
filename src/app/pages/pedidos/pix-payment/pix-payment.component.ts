@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PedidoService } from '../../../services/pedido.service';
 import { AuthService } from '../../../services/auth.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-pix-payment',
@@ -35,7 +36,8 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private pedidoService: PedidoService,
-    private authService: AuthService
+    private authService: AuthService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -222,7 +224,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   copiarBoleto(): void {
     if (!this.boletoLinhaDigitavel) return;
     navigator.clipboard.writeText(this.boletoLinhaDigitavel).then(() => {
-      alert('Linha digitável do boleto copiada para a área de transferência!');
+      this.messageService.add({ severity: 'success', summary: 'Copiado', detail: 'Linha digitável do boleto copiada!' });
     });
   }
 
@@ -234,7 +236,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
 
   copiarPix(): void {
     navigator.clipboard.writeText(this.pixCopiaECola).then(() => {
-      alert('Código PIX copiado para a área de transferência!');
+      this.messageService.add({ severity: 'success', summary: 'Copiado', detail: 'Código PIX copiado!' });
     });
   }
 

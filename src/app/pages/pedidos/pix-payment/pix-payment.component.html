@@ -1,170 +1,124 @@
-<div class="pix-container" *ngIf="!loading; else spinner">
-  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && !erroGeracao && !pagamentoConfirmado">
-    <div class="pix-header" style="text-align: center;">
-      <h2 class="cinzel-font color-primary-gold-dark">Pagamento via {{ isBoleto ? 'Boleto' : 'PIX' }}</h2>
-      <p>Pedido <strong>#{{ pedidoId }}</strong> - Valor da Parcela: <strong>{{ totalParcela | currency:'BRL' }}</strong></p>
-      <p *ngIf="totalPedido !== totalParcela" style="font-size: 0.9rem; color: #777;">Valor Total do Pedido: {{ totalPedido | currency:'BRL' }}</p>
+<div class="pix-payment-wrapper p-4 flex justify-content-center align-items-center min-h-screen bg-gray-50">
+  
+  <p-card styleClass="payment-card shadow-card border-round-2xl overflow-hidden" [style]="{width: '100%', maxWidth: '550px'}">
+    
+    <!-- Header Premium -->
+    <ng-template pTemplate="header">
+      <div class="flex flex-column align-items-center justify-content-center bg-black-900 py-5 px-4 text-center border-bottom-1 border-gold">
+        <div class="header-icon mb-3">
+          <i [class]="isBoleto ? 'pi pi-file-pdf gold-text text-6xl' : 'pi pi-qrcode gold-text text-6xl'"></i>
+        </div>
+        <h2 class="cinzel-font gold-text m-0 text-3xl">Finalizar Pagamento</h2>
+        <p class="text-gray-400 mt-2 mb-0">Pedido #{{ pedidoId }}</p>
+      </div>
+    </ng-template>
+
+    <!-- Conteúdo Principal -->
+    <div *ngIf="!loading && !erroGeracao && !pagamentoConfirmado && !erroSituacaoPendente">
       
-      <div class="pix-timer" *ngIf="tempoRestante && !isBoleto" [class.expiring]="tempoRestante.startsWith('00:0') || tempoRestante.startsWith('00:1')">
-        <div class="pix-expiration-box" *ngIf="tempoRestante && !pagamentoConfirmado">
-          <span class="expiration-label" *ngIf="!isRenovando">
-            <i class="fa fa-clock-o"></i> Expira em: <strong>{{ tempoRestante }}</strong>
-          </span>
-          <span class="expiration-label text-primary" *ngIf="isRenovando">
-            <i class="fa fa-sync fa-spin"></i> Regerando novo código PIX...
-          </span>
+      <!-- Resumo Financeiro -->
+      <div class="bg-white p-3 border-round-lg mb-4 shadow-1 flex justify-content-between align-items-center">
+        <div>
+          <span class="text-500 block text-sm uppercase font-bold tracking-wider">Valor da Parcela</span>
+          <span class="text-2xl font-bold text-900">{{ totalParcela | currency:'BRL' }}</span>
+        </div>
+        <div class="text-right" *ngIf="totalPedido !== totalParcela">
+          <span class="text-500 block text-xs">Total do Pedido</span>
+          <span class="text-base font-semibold">{{ totalPedido | currency:'BRL' }}</span>
         </div>
       </div>
-    </div>
 
-    <div class="pix-content">
       <!-- Seção PIX -->
-      <ng-container *ngIf="!isBoleto">
-        <div class="qr-code-section" *ngIf="pixQrCodeBase64">
-          <p class="section-title">Escaneie o QR Code abaixo:</p>
-          <div class="qr-code-wrapper">
-            <img [src]="'data:image/png;base64,' + pixQrCodeBase64" alt="QR Code PIX">
+      <div *ngIf="!isBoleto" class="flex flex-column align-items-center py-2 animate-fade-in">
+        
+        <!-- Timer -->
+        <div class="w-full mb-4 px-2">
+          <div class="flex justify-content-between align-items-center mb-2">
+            <span class="text-sm font-semibold text-700">O código PIX expira em:</span>
+            <span class="font-bold text-xl" [class.text-red-500]="tempoRestante.startsWith('00:0')">{{ tempoRestante }}</span>
           </div>
+          <p-progressBar [value]="100" [showValue]="false" styleClass="timer-progress" 
+                         [style]="{'height': '6px', 'background': '#eee'}"
+                         [ngClass]="{'expiring-bar': tempoRestante.startsWith('00:0')}"></p-progressBar>
         </div>
 
-        <div class="copy-paste-section" *ngIf="pixCopiaECola">
-          <p class="section-title">Ou use o código Copia e Cola:</p>
-          <div class="copy-input-group">
-            <input type="text" [value]="pixCopiaECola" readonly>
-            <button class="btn-copy" (click)="copiarPix()" title="Copiar código">
-              <i class="fa fa-copy"></i>
-            </button>
-          </div>
+        <div class="qr-code-box p-3 border-2 border-gold-light border-round-xl mb-4 bg-white shadow-3" *ngIf="pixQrCodeBase64">
+           <img [src]="'data:image/png;base64,' + pixQrCodeBase64" alt="QR Code PIX" class="w-full h-auto block border-round">
         </div>
-      </ng-container>
+
+        <span class="text-600 mb-3 text-center">Escaneie o QR Code acima ou copie o código abaixo:</span>
+
+        <div class="p-inputgroup w-full mb-3 shadow-1">
+          <input type="text" pInputText [value]="pixCopiaECola" readonly class="text-sm border-round-left-lg">
+          <button type="button" pButton icon="pi pi-copy" class="p-button-gold border-round-right-lg" (click)="copiarPix()"></button>
+        </div>
+
+        <div class="flex align-items-center p-3 border-round-lg bg-blue-50 border-1 border-blue-100 text-blue-700 w-full mb-4">
+           <i class="pi pi-info-circle mr-2 text-xl"></i>
+           <span class="text-sm">O status do pagamento será atualizado automaticamente em instantes.</span>
+        </div>
+      </div>
 
       <!-- Seção Boleto -->
-      <ng-container *ngIf="isBoleto">
-        <div class="qr-code-section" style="padding-top: 10px;">
-          <i class="fa fa-file-pdf fa-5x" style="color: #c00; margin-bottom: 15px;"></i>
-          <p class="section-title">Seu boleto foi gerado com sucesso!</p>
-          <button class="btn-gold" (click)="abrirPdfBoleto()" style="margin-top: 10px; width: 100%; max-width: 300px;">
-            <i class="fa fa-external-link"></i> Abrir PDF do Boleto
-          </button>
+      <div *ngIf="isBoleto" class="flex flex-column align-items-center py-4 animate-fade-in">
+        <div class="p-4 bg-red-50 border-round-circle mb-4">
+           <i class="pi pi-file-pdf text-6xl text-red-600"></i>
         </div>
+        <h3 class="text-900 font-bold m-0 mb-2">Boleto gerado com sucesso!</h3>
+        <p class="text-600 text-center mb-4">Abaixo você pode abrir o documento ou copiar a linha digitável para pagamento.</p>
 
-        <div class="copy-paste-section" *ngIf="boletoLinhaDigitavel" style="margin-top: 25px;">
-          <p class="section-title">Copie a Linha Digitável:</p>
-          <div class="copy-input-group">
-            <input type="text" [value]="boletoLinhaDigitavel" readonly style="font-size: 0.85rem;">
-            <button class="btn-copy" (click)="copiarBoleto()" title="Copiar linha digitável">
-              <i class="fa fa-copy"></i>
-            </button>
-          </div>
+        <button pButton label="Visualizar Boleto (PDF)" icon="pi pi-external-link" class="p-button-lg w-full mb-4 p-button-raised shadow-3 border-round-xl p-button-gold" (click)="abrirPdfBoleto()"></button>
+
+        <div class="w-full">
+           <span class="text-sm font-bold block mb-2 text-700">Linha Digitável:</span>
+           <div class="p-inputgroup shadow-1">
+             <input type="text" pInputText [value]="boletoLinhaDigitavel" readonly class="text-xs border-round-left-lg">
+             <button type="button" pButton icon="pi pi-copy" class="p-button-gold border-round-right-lg" (click)="copiarBoleto()"></button>
+           </div>
         </div>
-      </ng-container>
-    </div>
-
-    <div class="pix-footer">
-      <p class="pix-instructions">
-        Após realizar o pagamento, você pode verificar o status do seu pedido na listagem.
-      </p>
-      <button class="btn-gold" (click)="irParaListagem()">Ir para Meus Pedidos</button>
-    </div>
-  </div>
-
-  <!-- Estado de Pagamento Confirmado (Sucesso) -->
-  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && pagamentoConfirmado">
-    <div class="success-content" style="text-align: center; padding: 40px 20px;">
-      <i class="fa fa-check-circle fa-5x" style="color: #28a745; margin-bottom: 20px;"></i>
-      <h2 class="cinzel-font" style="color: #28a745;">Pagamento Confirmado!</h2>
-      <p style="font-size: 1.2rem; margin-top: 15px; color: #555;">
-        Recebemos a confirmação do seu pagamento para o pedido <strong>#{{ pedidoId }}</strong>.
-      </p>
-      <p style="color: #666; margin-top: 10px;">
-        Sua parcela foi baixada com sucesso. Você já pode acompanhar o andamento na sua área de pedidos.
-      </p>
-      <div style="margin-top: 30px;">
-        <button class="btn-gold" (click)="irParaListagem()">Ver Meus Pedidos</button>
       </div>
     </div>
-  </div>
 
-  <!-- Estado de Aguardando Confirmação -->
-  <div class="pix-card shadow-card animate-fade-in" *ngIf="!loading && erroSituacaoPendente">
-    <div class="pix-header" style="text-align: center;">
-      <i class="fa fa-hourglass-half fa-4x" style="color: #d4af37; margin-bottom: 20px;"></i>
-      <h2 class="cinzel-font color-primary-gold-dark">Pedido Aguardando Confirmação</h2>
-      <p style="margin-top: 15px; font-size: 1.1rem; color: #555;">
-        O pedido <strong>#{{ pedidoId }}</strong> foi recebido em nossa base.
-      </p>
-    </div>
-    <div class="pix-content" style="text-align: center; padding: 20px;">
-      <p style="margin-bottom: 20px; color: #666; line-height: 1.6;">
-        Para sua segurança, pedidos com pagamento via PIX ou Depósito passam por uma breve análise administrativa.<br>
-        Assim que seu pedido for <strong>confirmado</strong> por nossa equipe, os dados para pagamento serão liberados aqui mesmo.
-      </p>
-      <div style="background: #fdf8e6; border: 1px solid #d4af37; padding: 15px; border-radius: 8px; color: #856404; font-size: 0.9rem;">
-        <i class="fa fa-info-circle"></i> Você receberá uma notificação por e-mail assim que o pagamento for liberado.
+    <!-- Feedback States -->
+    <div class="py-6 px-4 flex flex-column align-items-center text-center animate-fade-in" *ngIf="!loading && pagamentoConfirmado">
+      <div class="flex align-items-center justify-content-center bg-green-100 p-4 border-round-circle mb-4">
+         <i class="pi pi-check-circle text-6xl text-green-600"></i>
       </div>
+      <h2 class="text-2xl font-bold text-green-700 m-0">Pagamento Confirmado!</h2>
+      <p class="text-600 mt-3 text-lg">Recebemos o seu pagamento para o pedido <strong>#{{ pedidoId }}</strong>.</p>
+      <p class="text-500">Sua parcela foi baixada com sucesso em nosso sistema.</p>
     </div>
-    <div class="pix-footer" style="margin-top: 10px;">
-      <button class="btn-gold" (click)="irParaListagem()">Voltar para Meus Pedidos</button>
-    </div>
-  </div>
 
-  <!-- Estado de Erro -->
-  <div class="pix-card shadow-card error-card animate-fade-in" *ngIf="!loading && erroGeracao">
-    <div class="error-content">
-      <i class="fa fa-exclamation-triangle error-icon"></i>
-      <h2 class="cinzel-font color-primary-gold-dark">Erro ao Gerar Pagamento</h2>
-      <p>{{ mensagemErro || 'Ocorreu um problema ao gerar os dados para o seu pagamento no momento.' }}</p>
-      <p class="instruction" *ngIf="!mensagemErro">Por favor, tente visualizar novamente em alguns minutos ou finalize o pagamento na entrega.</p>
-      
-      <div class="actions">
-        <button class="btn-gold" (click)="irParaListagem()">
-          <i class="fa fa-list"></i> Voltar para Pedidos
-        </button>
-        <button class="btn-outline" (click)="carregarDadosPix()">
-          <i class="fa fa-sync"></i> Tentar Novamente
-        </button>
+    <div class="py-6 px-4 flex flex-column align-items-center text-center animate-fade-in" *ngIf="!loading && erroSituacaoPendente">
+      <div class="flex align-items-center justify-content-center bg-blue-50 p-4 border-round-circle mb-4">
+         <i class="pi pi-hourglass text-6xl text-blue-600"></i>
       </div>
+      <h2 class="text-2xl font-bold text-blue-800 m-0">Pedido em Análise</h2>
+      <p class="text-600 mt-3">O pedido #{{ pedidoId }} foi processado, mas requer confirmação administrativa.</p>
+      <p class="text-500 text-sm">Assim que confirmado pela nossa equipe, as instruções de pagamento serão liberadas.</p>
     </div>
-  </div>
+
+    <div class="py-6 px-4 flex flex-column align-items-center text-center animate-fade-in" *ngIf="!loading && erroGeracao">
+      <div class="flex align-items-center justify-content-center bg-red-50 p-4 border-round-circle mb-4">
+         <i class="pi pi-exclamation-triangle text-6xl text-red-600"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-red-700 m-0">Ops! Algo deu errado</h2>
+      <p class="text-600 mt-3">{{ mensagemErro || 'Não conseguimos carregar os dados do seu pagamento.' }}</p>
+        <button pButton label="Tentar Novamente" icon="pi pi-refresh" class="p-button-gold w-full p-button-raised shadow-2" (click)="carregarDadosPix()"></button>
+        <button pButton label="Meus Pedidos" icon="pi pi-list" class="p-button-text w-full" (click)="irParaListagem()"></button>
+      </div>
+
+    <!-- Footer Geral -->
+    <ng-template pTemplate="footer">
+      <div class="flex flex-column gap-2 pt-2 px-3 pb-3" *ngIf="!loading && !erroGeracao">
+        <button pButton label="Ir para Meus Pedidos" icon="pi pi-list" class="w-full p-button-secondary p-button-text" (click)="irParaListagem()"></button>
+      </div>
+    </ng-template>
+
+    <div *ngIf="loading" class="py-8 flex flex-column align-items-center justify-content-center">
+      <p-progressSpinner strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+      <p class="text-600 mt-4 font-bold">Carregando dados financeiros...</p>
+    </div>
+
+  </p-card>
 </div>
-
-<ng-template #spinner>
-  <div class="loading-container">
-    <div class="spinner"></div>
-    <p>Carregando dados de pagamento...</p>
-  </div>
-</ng-template>
-
-<style>
-.pix-timer {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  color: #555;
-  border: 1px solid #ddd;
-  min-width: 180px;
-}
-
-.pix-timer.expiring {
-  color: #dc3545;
-  background-color: #fff5f5;
-  border-color: #ffc9c9;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-.pix-timer i {
-  margin-right: 8px;
-}
-</style>
-
