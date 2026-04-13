@@ -4,6 +4,7 @@ import { UsuarioService } from '../../../services/usuario.service';
 import { Usuario } from '../../../models/usuario.model';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { MenuItem } from 'primeng/api';
 
 @Component({
     selector: 'app-pedido-list',
@@ -59,6 +60,17 @@ export class PedidoListComponent implements OnInit {
     novaSituacaoParaConfirmar: string = '';
     enviarEmailConfirmacao: boolean = true;
 
+    isMobile: boolean = window.innerWidth < 960;
+
+    @HostListener('window:resize', ['$event'])
+    onResize(event: any) {
+        this.isMobile = event.target.innerWidth < 960;
+    }
+
+    toggleFiltrosMobile(): void {
+        this.exibirFiltrosMobile = !this.exibirFiltrosMobile;
+    }
+
     constructor(
         private pedidoService: PedidoService,
         private usuarioService: UsuarioService,
@@ -93,10 +105,12 @@ export class PedidoListComponent implements OnInit {
         let dataFimISO = undefined;
 
         if (this.filtroDataInicio) {
-            dataInicioISO = `${this.filtroDataInicio}T00:00:00`;
+            const dt = new Date(this.filtroDataInicio);
+            dataInicioISO = `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}T00:00:00`;
         }
         if (this.filtroDataFim) {
-            dataFimISO = `${this.filtroDataFim}T23:59:59`;
+            const dt = new Date(this.filtroDataFim);
+            dataFimISO = `${dt.getFullYear()}-${(dt.getMonth() + 1).toString().padStart(2, '0')}-${dt.getDate().toString().padStart(2, '0')}T23:59:59`;
         }
 
         this.pedidoService.listar(
@@ -135,9 +149,22 @@ export class PedidoListComponent implements OnInit {
     }
 
     onPageChange(event: any): void {
-        this.currentPage = event.pageIndex;
-        this.pageSize = event.pageSize;
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.sortField = event.sortField || 'dataPedido';
+        this.sortDir = event.sortOrder === 1 ? 'asc' : 'desc';
         this.carregarPedidos();
+    }
+
+    getSeverity(status: string): string {
+        switch (status) {
+            case 'CONFIRMADO': return 'success';
+            case 'EM_PRODUCAO': return 'warning';
+            case 'ENTREGUE': return 'info';
+            case 'CANCELADO': return 'danger';
+            case 'PENDENTE': return 'info';
+            default: return 'info';
+        }
     }
 
     filtrarPedidos(): void {
@@ -193,15 +220,120 @@ export class PedidoListComponent implements OnInit {
     }
 
     getProximoPagamentoOnline(pedido: Pedido): any {
-        if (!pedido.pagamentos) return null;
-        return pedido.pagamentos
-            .filter(p => !p.pago && p.pagamentoOnline && (p.boletoPdfUrl || p.pixCopiaECola || p.mercadopagoPagamentoId))
-            .sort((a, b) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
+        if (!pedido || !pedido.pagamentos || pedido.pago) return null;
+        
+        const validos = pedido.pagamentos.filter(p => {
+            if (p.pago || !p.pagamentoOnline) return false;
+            
+            const temBoletoValido = typeof p.boletoPdfUrl === 'string' && 
+                                   p.boletoPdfUrl.trim().toLowerCase().startsWith('http');
+                                   
+            const temPixValido = typeof p.pixCopiaECola === 'string' && 
+                                p.pixCopiaECola.trim().length > 30;
+                                
+            return temBoletoValido || temPixValido;
+        });
+
+        if (validos.length === 0) return null;
+        
+        const proximo = validos.sort((a, b) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
+        return (proximo && proximo.id) ? proximo : null;
     }
 
     temPagamentoOnlinePendente(pedido: Pedido): boolean {
-        if (!pedido.pagamentos) return false;
+        if (!pedido.pagamentos || pedido.pago) return false;
         return pedido.pagamentos.some(p => !p.pago && p.pagamentoOnline && (p.boletoPdfUrl || p.pixCopiaECola || p.mercadopagoPagamentoId));
+    }
+
+    getBotoesAcao(pedido: Pedido): any[] {
+        const botoes = [];
+
+        // 1. Gerar PDF
+        botoes.push({
+            id: 'pdf',
+            icon: 'pi pi-file-pdf',
+            className: 'p-button-secondary',
+            tooltip: 'Gerar PDF',
+            action: () => this.gerarPdf(pedido.id)
+        });
+
+        // 2. Pagamento Online (Boleto ou PIX)
+        const pgto = this.getProximoPagamentoOnline(pedido);
+        if (pgto && pgto.id) {
+            botoes.push({
+                id: 'pagamento',
+                icon: pgto.boletoPdfUrl ? 'pi pi-ticket' : 'pi pi-qrcode', // Alterado pi-barcode para pi-ticket
+                className: pgto.boletoPdfUrl ? 'p-button-info' : 'p-button-warning',
+                tooltip: pgto.boletoPdfUrl ? 'Ver Boleto' : 'Ver PIX',
+                action: () => this.visualizarPagamentoOnline(pedido)
+            });
+        }
+
+        // 3. Sincronizar (Admin + Pendência)
+        if (this.isAdmin && this.temPagamentoOnlinePendente(pedido)) {
+            botoes.push({
+                id: 'sync',
+                icon: 'pi pi-sync',
+                className: 'p-button-success',
+                tooltip: 'Sincronizar Mercado Pago',
+                action: () => this.verificarPagamentoManual(pedido)
+            });
+        }
+
+        // 4. Editar
+        botoes.push({
+            id: 'edit',
+            icon: 'pi pi-pencil',
+            className: 'p-button-gold-subtle',
+            tooltip: 'Visualizar/Editar',
+            disabled: pedido.cancelado,
+            action: () => this.editarPedido(pedido.id)
+        });
+
+        // 5. Cancelar
+        const podeCancelar = !pedido.cancelado && (this.isAdmin || (!this.isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')));
+        if (podeCancelar) {
+            botoes.push({
+                id: 'cancel',
+                icon: 'pi pi-trash',
+                className: 'p-button-danger',
+                tooltip: 'Cancelar Pedido',
+                action: () => this.cancelarPedido(pedido)
+            });
+        }
+
+        // 6. NF-e (Upload)
+        if (this.isAdmin && !pedido.cancelado) {
+            botoes.push({
+                id: 'upload',
+                icon: 'pi pi-upload',
+                className: 'p-button-help',
+                tooltip: 'Anexar NF-e',
+                action: () => this.abrirModalNotaFiscal(pedido)
+            });
+        }
+
+        // 7. NF-e (View)
+        if (pedido.notaFiscalPath) {
+            botoes.push({
+                id: 'excel',
+                icon: 'pi pi-file-excel',
+                className: 'p-button-success',
+                tooltip: 'Ver NF-e',
+                action: () => this.visualizarNotaFiscal(pedido)
+            });
+        }
+
+        return botoes;
+    }
+
+    getMenuItems(pedido: Pedido): MenuItem[] {
+        return this.getBotoesAcao(pedido).map(bt => ({
+            label: bt.tooltip,
+            icon: bt.icon,
+            disabled: bt.disabled,
+            command: () => bt.action()
+        }));
     }
 
     cancelarPedido(pedido: Pedido): void {

@@ -62,6 +62,132 @@
     display: none !important;
 }
 
+.actions-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    min-height: 32px;
+}
+
+.actions-container button {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+/* --- Estilos de Botões e Identidade Gold --- */
+
+.btn-gold {
+    background: var(--primary-gold) !important;
+    border-color: var(--primary-gold) !important;
+    color: #1a1a1a !important; /* Texto escuro para contraste no dourado */
+    font-weight: 700 !important;
+}
+
+.btn-gold:hover {
+    background: #d4af37 !important;
+    border-color: #d4af37 !important;
+}
+
+.btn-gold-outline {
+    background: transparent !important;
+    border-color: var(--primary-gold) !important;
+    color: var(--primary-gold) !important;
+    font-weight: 600 !important;
+}
+
+.btn-gold-outline:hover {
+    background: rgba(212, 175, 55, 0.1) !important;
+    color: #d4af37 !important;
+}
+
+/* --- Overrides de Componentes PrimeNG --- */
+
+/* Calendário (p-calendar) */
+:host ::ng-deep .p-calendar .p-datepicker-trigger {
+    background: var(--primary-gold) !important;
+    border-color: var(--primary-gold) !important;
+    color: #1a1a1a !important;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker-trigger:hover {
+    background: #d4af37 !important;
+    border-color: #d4af37 !important;
+}
+
+/* Foco em Inputs e Dropdowns */
+:host ::ng-deep .p-inputtext:enabled:focus,
+:host ::ng-deep .p-dropdown:not(.p-disabled).p-focus {
+    border-color: var(--primary-gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+}
+
+/* Checkbox */
+:host ::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+    background: var(--primary-gold) !important;
+    border-color: var(--primary-gold) !important;
+}
+
+/* Tags de Situação no Cabeçalho da Tabela */
+:host ::ng-deep .p-datatable .p-sortable-column.p-highlight {
+    color: var(--primary-gold) !important;
+}
+
+:host ::ng-deep .p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon {
+    color: var(--primary-gold) !important;
+}
+
+/* --- Compactação do Paginador (Mobile) --- */
+:host ::ng-deep .p-paginator {
+    padding: 0.5rem !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    flex-wrap: nowrap !important; /* Força uma única linha no container principal */
+    overflow-x: auto !important; 
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages {
+    display: flex !important;
+    flex-direction: row !important; /* Força números na horizontal */
+    align-items: center !important;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page,
+:host ::ng-deep .p-paginator .p-link {
+    min-width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.9rem !important;
+}
+
+:host ::ng-deep .p-paginator .p-dropdown {
+    height: 2rem !important;
+    margin-left: 0.5rem !important;
+}
+
+:host ::ng-deep .p-paginator .p-dropdown .p-dropdown-label {
+    padding: 0 0.5rem !important;
+    line-height: normal !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+@media screen and (max-width: 960px) {
+    /* Ajustes para Tabela em Colunas no Mobile */
+    :host ::ng-deep .p-datatable.p-datatable-sm .p-datatable-thead > tr > th,
+    :host ::ng-deep .p-datatable.p-datatable-sm .p-datatable-tbody > tr > td {
+        padding: 0.5rem 0.25rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .p-column-title {
+        display: none !important; /* Garante que não apareça em modo não-stack */
+    }
+}
+
 @media screen and (max-width: 991px) {
     .hide-mobile {
         display: none !important;

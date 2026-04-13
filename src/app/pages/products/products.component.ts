@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Produto } from '../../models/produto.model';
 import { ProdutoService } from '../../services/produto.service';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-products',
@@ -14,17 +15,20 @@ export class ProductsComponent implements OnInit {
   produtoAtual: Produto = this.getNovoProduto();
   filtroNome: string = '';
   modoEdicao: boolean = false;
-  precoFMT: string = '';
   viewMode: 'grid' | 'list' = 'grid';
+  exibirDialog: boolean = false;
 
-  constructor(private produtoService: ProdutoService) { }
+  constructor(
+    private produtoService: ProdutoService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
+  ) { }
 
   ngOnInit(): void {
     this.carregarProdutos();
   }
 
   getNovoProduto(): Produto {
-    this.precoFMT = '';
     return {
       nome: '',
       codigo: '',
@@ -41,15 +45,16 @@ export class ProductsComponent implements OnInit {
       next: (data) => {
         this.produtos = data.sort((a, b) => a.nome.localeCompare(b.nome));
       },
-      error: (err) => console.error('Erro ao listar produtos', err)
+      error: (err) => {
+        console.error('Erro ao listar produtos', err);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar os produtos.' });
+      }
     });
   }
 
   pesquisar(): void {
     if (this.filtroNome.trim()) {
       const termo = this.filtroNome.trim();
-      
-      // Busca híbrida: tenta por código exato primeiro, se não achar, busca por nome (que agora inclui código parcial no backend)
       this.produtoService.buscarPorCodigo(termo).subscribe({
         next: (prod) => {
           if (prod) {
@@ -65,6 +70,13 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  onSearchChange(): void {
+    const termo = this.filtroNome.trim();
+    if (termo.length >= 3 || termo.length === 0) {
+      this.pesquisar();
+    }
+  }
+
   private buscarPorNome(nome: string): void {
     this.produtoService.buscarPorNome(nome).subscribe({
       next: (data) => this.produtos = data,
@@ -72,38 +84,36 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  applyCurrencyMask(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value === '') {
-      this.precoFMT = '';
-      this.produtoAtual.preco = undefined;
-      return;
-    }
-    let numeric = (Number(value) / 100).toFixed(2);
-    const formatted = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(Number(numeric));
-    this.precoFMT = formatted;
-    this.produtoAtual.preco = Number(numeric);
+  adicionarNovo(): void {
+    this.produtoAtual = this.getNovoProduto();
+    this.modoEdicao = false;
+    this.exibirDialog = true;
   }
 
   salvar(): void {
     if (this.modoEdicao && this.produtoAtual.id) {
       this.produtoService.alterar(this.produtoAtual.id, this.produtoAtual).subscribe({
         next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto atualizado com sucesso!' });
           this.finalizarAcao();
           this.carregarProdutos();
         },
-        error: (err) => console.error('Erro ao alterar produto', err)
+        error: (err) => {
+          console.error('Erro ao alterar produto', err);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar alterações.' });
+        }
       });
     } else {
       this.produtoService.adicionar(this.produtoAtual).subscribe({
         next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto cadastrado com sucesso!' });
           this.finalizarAcao();
           this.carregarProdutos();
         },
-        error: (err) => console.error('Erro ao adicionar produto', err)
+        error: (err) => {
+          console.error('Erro ao adicionar produto', err);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao cadastrar produto.' });
+        }
       });
     }
   }
@@ -111,29 +121,38 @@ export class ProductsComponent implements OnInit {
   editar(produto: Produto): void {
     this.produtoAtual = { ...produto };
     this.modoEdicao = true;
-    if (this.produtoAtual.preco != null) {
-      this.precoFMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(this.produtoAtual.preco);
-    } else {
-      this.precoFMT = '';
-    }
-    window.scrollTo(0, 0);
+    this.exibirDialog = true;
   }
 
   alternarAtivo(produto: Produto): void {
     const novoStatus = !produto.ativo;
     const acao = novoStatus ? 'ativar' : 'inativar';
-    if (confirm(`Deseja realmente ${acao} este produto?`)) {
-      produto.ativo = novoStatus;
-      if (produto.id) {
-        this.produtoService.alterar(produto.id, produto).subscribe({
-          next: () => this.carregarProdutos(),
-          error: (err) => {
-            console.error(`Erro ao ${acao} produto`, err);
-            produto.ativo = !novoStatus; // Reverte em caso de erro
-          }
-        });
+    
+    this.confirmationService.confirm({
+      message: `Deseja realmente ${acao} o produto <strong>${produto.nome}</strong>?`,
+      header: 'Confirmação',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sim',
+      rejectLabel: 'Não',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectButtonStyleClass: 'p-button-text p-button-secondary',
+      accept: () => {
+        produto.ativo = novoStatus;
+        if (produto.id) {
+          this.produtoService.alterar(produto.id, produto).subscribe({
+            next: () => {
+              this.messageService.add({ severity: 'info', summary: 'Atualizado', detail: `Produto ${novoStatus ? 'ativado' : 'inativado'} com sucesso.` });
+              this.carregarProdutos();
+            },
+            error: (err) => {
+              console.error(`Erro ao ${acao} produto`, err);
+              produto.ativo = !novoStatus; // Reverte em caso de erro
+              this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível alterar o status.' });
+            }
+          });
+        }
       }
-    }
+    });
   }
 
   alternarVisualizacao(modo: 'grid' | 'list'): void {
@@ -147,6 +166,7 @@ export class ProductsComponent implements OnInit {
   finalizarAcao(): void {
     this.produtoAtual = this.getNovoProduto();
     this.modoEdicao = false;
+    this.exibirDialog = false;
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
@@ -158,17 +178,24 @@ export class ProductsComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.produtoAtual.imagem = e.target.result;
-        // Limpa o valor para permitir selecionar o mesmo arquivo novamente
-        if (this.fileInput) {
-          this.fileInput.nativeElement.value = '';
-        }
+        this.limparInputArquivo();
       };
       reader.readAsDataURL(file);
     }
   }
 
+  triggerFileInput(): void {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }
+  }
+
   removerImagem(): void {
     this.produtoAtual.imagem = '';
+    this.limparInputArquivo();
+  }
+
+  private limparInputArquivo(): void {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }

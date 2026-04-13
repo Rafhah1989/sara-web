@@ -1,383 +1,246 @@
-<div class="page-container p-4">
-    <!-- Header Section -->
+<div class="card">
+    <!-- Header Section Premium -->
     <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4 gap-3">
         <div class="flex align-items-center gap-2">
-            <h1 class="cinzel-font text-900 m-0 text-4xl gold-text">Pedidos</h1>
+            <h1 class="cinzel-font text-900 m-0 text-3xl gold-text">Gestão de Pedidos</h1>
         </div>
-        <div class="flex align-items-center gap-2">
-            <button pButton pRipple label="Filtros" icon="pi pi-filter" class="p-button-outlined btn-gold-outline show-mobile" (click)="abrirFiltrosMobile()"></button>
-            <button pButton pRipple label="Sincronizar PIX" icon="pi pi-refresh" class="p-button-raised btn-gold" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()"></button>
-            <button pButton pRipple label="Novo Pedido" icon="pi pi-plus" class="p-button-raised btn-gold hidden md:inline-flex" (click)="novoPedido()"></button>
-        </div>
-        <!-- Botão Novo Pedido Mobile Centralizado opcional -->
-        <div class="w-full flex justify-content-center show-mobile md:hidden">
-            <button pButton pRipple label="Novo Pedido" icon="pi pi-plus" class="p-button-raised btn-gold w-8" (click)="novoPedido()"></button>
+        <div class="flex flex-wrap gap-2">
+            <button pButton pRipple label="Filtros" icon="pi pi-filter" class="p-button-outlined btn-gold-outline md:hidden" (click)="toggleFiltrosMobile()"></button>
+            <button pButton pRipple label="Sincronizar PIX" icon="pi pi-refresh" class="p-button-outlined btn-gold-outline hide-mobile" *ngIf="isAdmin" (click)="verificarTodosPagamentosPendentes()"></button>
+            <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-raised btn-gold" (click)="novoPedido()"></button>
         </div>
     </div>
 
-    <!-- Filtros Desktop (PrimeNG Design) -->
-    <div class="surface-card p-4 shadow-2 border-round mb-4 hidden md:block border-top-3 border-gold">
+    <!-- Filtros Avançados (Design Sakai) -->
+    <div class="surface-card p-4 shadow-1 border-round mb-4 border-top-3 border-gold" [ngClass]="{'hidden md:block': !exibirFiltrosMobile, 'block': exibirFiltrosMobile}">
         <div class="grid formgrid p-fluid">
             <div class="field col-12 md:col-3" *ngIf="isAdmin">
-                <label class="font-bold block mb-2"><i class="pi pi-user mr-1 gold-text"></i> Por Cliente</label>
+                <label class="font-bold block mb-2"><i class="pi pi-user mr-1 gold-text"></i> Cliente</label>
                 <input pInputText type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente">
             </div>
-            <div class="field col-12 md:col-2">
-                <label class="font-bold block mb-2"><i class="pi pi-hashtag mr-1 gold-text"></i> Número</label>
+            <div class="field col-12 md:col-1">
+                <label class="font-bold block mb-2">#ID</label>
                 <input pInputText type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="ID">
             </div>
             <div class="field col-12 md:col-2">
                 <label class="font-bold block mb-2"><i class="pi pi-calendar mr-1 gold-text"></i> Início</label>
-                <input pInputText type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()">
+                <p-calendar [(ngModel)]="filtroDataInicio" (onSelect)="filtrarPedidos()" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="Data Inicial"></p-calendar>
             </div>
             <div class="field col-12 md:col-2">
                 <label class="font-bold block mb-2"><i class="pi pi-calendar mr-1 gold-text"></i> Fim</label>
-                <input pInputText type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()">
+                <p-calendar [(ngModel)]="filtroDataFim" (onSelect)="filtrarPedidos()" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="Data Final"></p-calendar>
             </div>
             <div class="field col-12 md:col-2">
                 <label class="font-bold block mb-2"><i class="pi pi-info-circle mr-1 gold-text"></i> Situação</label>
-                <select class="p-inputtext" [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()">
-                    <option value="">Todas</option>
-                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
-                </select>
+                <p-dropdown [options]="situacoesPedido" [(ngModel)]="filtroSituacao" (onChange)="filtrarPedidos()" 
+                            optionLabel="descricao" optionValue="codigo" placeholder="Todas as Situações" [showClear]="true"></p-dropdown>
             </div>
-            <div class="flex align-items-end mb-3 ml-auto px-2">
-                <button pButton pRipple icon="pi pi-eraser" label="Limpar" class="p-button-secondary p-button-outlined" (click)="limparFiltros()"></button>
+            <div class="field col-12 md:col-2 flex align-items-end">
+                <button pButton pRipple icon="pi pi-eraser" label="Limpar" class="p-button-secondary p-button-outlined w-full" (click)="limparFiltros()"></button>
             </div>
         </div>
         <div class="flex align-items-center gap-2 mt-2">
             <p-checkbox [(ngModel)]="exibirCancelados" (onChange)="filtrarPedidos()" [binary]="true" inputId="exibirCancelados"></p-checkbox>
-            <label for="exibirCancelados" class="font-bold cursor-pointer">Exibir Pedidos Cancelados</label>
+            <label for="exibirCancelados" class="font-bold cursor-pointer m-0">Exibir Cancelados</label>
         </div>
     </div>
 
-    <!-- Sidebar de Filtros Mobile (Natividade PrimeNG) -->
-    <p-sidebar [(visible)]="exibirFiltrosMobile" position="right" styleClass="w-full md:w-25rem">
-        <ng-template pTemplate="header">
-            <h3 class="cinzel-font m-0 gold-text"><i class="pi pi-filter mr-2"></i> Filtros</h3>
-        </ng-template>
-        <div class="p-fluid">
-            <div class="field" *ngIf="isAdmin">
-                <label class="font-bold block mb-2">Cliente</label>
-                <input pInputText type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome">
-            </div>
-            <div class="field">
-                <label class="font-bold block mb-2">Número</label>
-                <input pInputText type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="Ex: 123">
-            </div>
-            <div class="field">
-                <label class="font-bold block mb-2">Início</label>
-                <input pInputText type="date" [(ngModel)]="filtroDataInicio" (change)="filtrarPedidos()">
-            </div>
-            <div class="field">
-                <label class="font-bold block mb-2">Fim</label>
-                <input pInputText type="date" [(ngModel)]="filtroDataFim" (change)="filtrarPedidos()">
-            </div>
-            <div class="field">
-                <label class="font-bold block mb-2">Situação</label>
-                <select class="p-inputtext" [(ngModel)]="filtroSituacao" (change)="filtrarPedidos()">
-                    <option value="">Todas</option>
-                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
-                </select>
-            </div>
-            <div class="flex align-items-center gap-2 mt-4">
-                <p-checkbox [(ngModel)]="exibirCancelados" (onChange)="filtrarPedidos()" [binary]="true" inputId="exibirCanceladosMob"></p-checkbox>
-                <label for="exibirCanceladosMob" class="font-bold cursor-pointer m-0">Exibir Cancelados</label>
-            </div>
-        </div>
-        <div class="flex gap-2 mt-6">
-            <button pButton pRipple label="Limpar" class="p-button-outlined p-button-secondary flex-1" (click)="limparFiltros()"></button>
-            <button pButton pRipple label="Aplicar" class="btn-gold flex-1" (click)="fecharFiltrosMobile()"></button>
-        </div>
-    </p-sidebar>
-
-    <div class="table-section card">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th (click)="alternarOrdenacao('id')" class="sortable">
-                        Número <i class="pi" [ngClass]="getSortIcon('id')"></i>
-                    </th>
-                    <th (click)="alternarOrdenacao('usuario.nome')" class="sortable hide-mobile" *ngIf="isAdmin">
-                        Cliente <i class="pi" [ngClass]="getSortIcon('usuario.nome')"></i>
-                    </th>
-                    <th (click)="alternarOrdenacao('dataPedido')" class="sortable">
-                        Data <i class="pi" [ngClass]="getSortIcon('dataPedido')"></i>
-                    </th>
-                    <th>Valor Total</th>
-                    <th class="hide-mobile">Situação</th>
-                    <th class="text-center">Pago</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let pedido of pedidos" [class.pedido-cancelado]="pedido.cancelado">
-                    <td>{{ pedido.id }}</td>
-                    <td class="hide-mobile" *ngIf="isAdmin">{{ pedido.usuarioNome }}</td>
-                    <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
-                    <td class="hide-mobile">
-                        <span *ngIf="!isAdmin || pedido.cancelado">{{ pedido.situacaoDescricao }}</span>
-                        <select *ngIf="isAdmin && !pedido.cancelado" class="form-control select-situacao-tabela"
-                            [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)">
-                            <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}
-                            </option>
-                        </select>
-                    </td>
-                    <td class="text-center">
-                        <i class="pi pi-fw" [ngClass]="pedido.pago ? 'pi-check-circle' : 'pi-times-circle'"
-                            [style.color]="pedido.pago ? '#28a745' : '#dc3545'"
-                            [title]="pedido.pago ? 'Pago' : 'Pendente de Pagamento'"
-                            [style.cursor]="isAdmin ? 'pointer' : 'default'"
-                            [style.fontSize]="'1.2rem'"
-                            (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)">
-                        </i>
-                    </td>
-                    <td>
-                        <!-- Ações Desktop -->
-                        <div class="actions hide-mobile">
-                            <button class="btn-action btn-pdf" title="Gerar PDF" (click)="gerarPdf(pedido.id)">
-                                <i class="fa fa-file-pdf"></i>
-                            </button>
-                            <button class="btn-action" 
-                                [class.btn-pix]="getProximoPagamentoOnline(pedido)?.pixCopiaECola"
-                                [class.btn-pdf]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl"
-                                [title]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'Ver Boleto' : 'Visualizar PIX'"
-                                *ngIf="!pedido.pago && getProximoPagamentoOnline(pedido)" 
-                                (click)="visualizarPagamentoOnline(pedido)">
-                                <i class="fa" [ngClass]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'fa-barcode' : 'fa-qrcode'"></i>
-                            </button>
-                            <button class="btn-action btn-sync" title="Sincronizar Mercado Pago"
-                                *ngIf="isAdmin && !pedido.pago && temPagamentoOnlinePendente(pedido)"
-                                (click)="verificarPagamentoManual(pedido)">
-                                <i class="fa fa-sync"></i>
-                            </button>
-                            <button class="btn-action btn-edit" title="Editar/Visualizar"
-                                (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn-action btn-cancel" title="Cancelar"
-                                *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))"
-                                (click)="cancelarPedido(pedido)">
-                                <i class="fa fa-trash-alt"></i>
-                            </button>
-                            <button class="btn-action btn-upload-invoice" title="Anexar Nota Fiscal"
-                                *ngIf="isAdmin && !pedido.cancelado" (click)="abrirModalNotaFiscal(pedido)">
-                                <i class="fa fa-file-upload"></i>
-                            </button>
-                            <button class="btn-action btn-invoice" title="Ver Nota Fiscal" *ngIf="pedido.notaFiscalPath"
-                                (click)="visualizarNotaFiscal(pedido)">
-                                <i class="fa fa-file-invoice"></i>
-                            </button>
-                        </div>
-
-                        <!-- Ações Mobile (Menu Sanduíche) -->
-                        <div class="mobile-actions show-mobile">
-                            <button class="btn-sandwich" (click)="alternarMenuAcoes(pedido.id, $event)">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </button>
-                            <div class="actions-menu" *ngIf="itemMenuAberto === pedido.id">
-                                <button (click)="gerarPdf(pedido.id)"><i class="fa fa-file-pdf"></i> PDF Resumo</button>
-                                <button *ngIf="!pedido.pago && getProximoPagamentoOnline(pedido)" (click)="visualizarPagamentoOnline(pedido)">
-                                    <i class="fa" [ngClass]="getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'fa-barcode' : 'fa-qrcode'"></i> 
-                                    {{ getProximoPagamentoOnline(pedido)?.boletoPdfUrl ? 'Ver Boleto' : 'Ver PIX' }}
-                                </button>
-                                <button *ngIf="isAdmin && !pedido.pago && temPagamentoOnlinePendente(pedido)" (click)="verificarPagamentoManual(pedido)"><i class="fa fa-sync"></i> Sync MP</button>
-                                <button (click)="editarPedido(pedido.id)" [disabled]="pedido.cancelado"><i class="fa fa-pencil-alt"></i> Detalhes</button>
-                                <button *ngIf="!pedido.cancelado && (isAdmin || (!isAdmin && (pedido.situacao === 'PENDENTE' || pedido.situacao === 'EM_PRODUCAO')))" 
-                                    (click)="cancelarPedido(pedido)" class="text-danger"><i class="fa fa-trash-alt"></i> Cancelar</button>
-                                <button *ngIf="isAdmin && !pedido.cancelado" (click)="abrirModalNotaFiscal(pedido)"><i class="fa fa-file-upload"></i> Nota Fiscal</button>
-                                <button *ngIf="pedido.notaFiscalPath" (click)="visualizarNotaFiscal(pedido)"><i class="fa fa-file-invoice"></i> Ver Nota</button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr *ngIf="pedidos.length === 0 && !loading">
-                    <td [attr.colspan]="isAdmin ? 7 : 6" class="text-center">Nenhum pedido encontrado.</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="pagination-footer">
-            <select [(ngModel)]="pageSize" (change)="carregarPedidos()">
-                <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }} por página</option>
-            </select>
-            <div class="pagination-controls">
-                <button [disabled]="currentPage === 0"
-                    (click)="currentPage = currentPage - 1; carregarPedidos()">Anterior</button>
-                <span>Página {{ currentPage + 1 }} de {{ totalPages }}</span>
-                <button [disabled]="(currentPage + 1) * pageSize >= totalElements"
-                    (click)="currentPage = currentPage + 1; carregarPedidos()">Próxima</button>
-            </div>
-            <span>Total: {{ totalElements }}</span>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Cancelamento de Pedido -->
-<div class="modal-overlay" *ngIf="exibirModalCancelamento">
-    <div class="modal-container" style="max-width: 500px;">
-        <h2 class="cinzel-font" style="margin-bottom: 20px; color: #d32f2f;">Cancelar Pedido #{{ pedidoParaCancelar?.id
-            }}</h2>
-        <p style="margin-bottom: 20px; font-weight: 500;">Deseja realmente cancelar este pedido?</p>
-        <p style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">Você pode informar um motivo abaixo (opcional):
-        </p>
-
-        <div class="form-group" style="margin-bottom: 25px;">
-            <textarea [(ngModel)]="motivoCancelamento" class="form-control" rows="4"
-                placeholder="Ex: Desistência da compra, Erro no endereço..." style="resize: vertical;"></textarea>
-        </div>
-
-        <div class="d-flex justify-content-end" style="gap: 15px;">
-            <button class="btn-modal btn-modal-back" (click)="fecharModalCancelamento()">Voltar</button>
-            <button class="btn-modal btn-modal-cancel" (click)="confirmarCancelamento()">
-                <i class="fa fa-trash-alt"></i> Confirmar Cancelamento
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Frame de Aviso PDF -->
-<div class="modal-overlay" *ngIf="avisoPdf">
-    <div class="modal-content">
-        <h2 class="cinzel-font">Gerando PDF</h2>
-        <p>O PDF do pedido está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize a
-            abertura de janelas (pop-ups) no seu navegador.</p>
-        <button class="btn btn-primary" (click)="fecharAvisoPdf()">OK</button>
-    </div>
-</div>
-
-<!-- Modal de Sucesso Geração de Pedido -->
-<div class="modal-overlay" *ngIf="exibirModalSucessoNovoPedido">
-    <div class="modal-container"
-        style="max-width: 450px; text-align: center; padding: 40px 30px; background: #fff; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <i class="fa fa-check-circle" style="font-size: 5rem; margin-bottom: 20px; color: #28a745;"></i>
-        <h2 class="cinzel-font" style="font-weight: bold; color: #333; margin-bottom: 10px;">Pedido Criado!</h2>
-        <p style="font-size: 1.1rem; color: #555; margin-bottom: 25px;">
-            O pedido <strong>#{{ pedidoRecemCriadoId }}</strong> foi gerado com sucesso.
-        </p>
-        <p style="font-size: 1rem; color: #666; margin-bottom: 30px;">
-            Deseja gerar o PDF com o resumo do novo pedido neste momento?
-        </p>
-
-        <div class="d-flex justify-content-center" style="gap: 15px;">
-            <button class="btn btn-secondary" style="padding: 10px 25px; border-radius: 6px;"
-                (click)="fecharModalSucesso(false)">Não, obrigado</button>
-            <button class="btn btn-success"
-                style="padding: 10px 25px; margin-left: 10px; font-weight: bold; border-radius: 6px;"
-                (click)="fecharModalSucesso(true)">
-                <i class="fa fa-file-pdf"></i> Sim, baixar PDF
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Anexo de Nota Fiscal (ADMIN) -->
-<div class="modal-overlay" *ngIf="exibirModalNotaFiscal">
-    <div class="modal-container" style="max-width: 500px;">
-        <h2 class="cinzel-font" style="margin-bottom: 20px; color: #6f42c1;">Nota Fiscal - Pedido #{{
-            pedidoParaNotaFiscal?.id }}</h2>
-
-        <div *ngIf="!pedidoParaNotaFiscal?.notaFiscalPath">
-            <p style="margin-bottom: 20px;">Anexe o arquivo PDF da nota fiscal para este pedido e informe o número.</p>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="numeroNota" style="display: block; margin-bottom: 8px; font-weight: bold; color: #444;">Número da Nota Fiscal <span style="color: #dc3545;">*</span></label>
-                <input type="text" id="numeroNota" [(ngModel)]="numeroNotaFiscal" class="form-control input-nota-small" placeholder="Informe o número da nota" required>
-            </div>
-
-            <div class="file-input-wrapper" (click)="fileInput.click()" (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.drag-over]="isDragging">
-                <i class="fa fa-cloud-upload-alt fa-3x" style="color: #6f42c1; margin-bottom: 10px;"></i>
-                <p style="margin-bottom: 0;">{{ isDragging ? 'Solte para anexar' : 'Clique para selecionar o PDF ou
-                    arraste aqui' }}</p>
-                <p style="font-size: 0.8rem; color: #666;">(Máximo 10 MB)</p>
-                <input #fileInput type="file" (change)="onFileSelected($event)" accept="application/pdf"
-                    style="display: none;">
-            </div>
-
-            <div class="file-info" *ngIf="arquivoSelecionado">
-                Arquivo selecionado: {{ arquivoSelecionado.name }} ({{ (arquivoSelecionado.size / 1024 / 1024) |
-                number:'1.1-2' }} MB)
-            </div>
-
-            <div style="margin-top: 15px; display: flex; align-items: center; gap: 8px;" *ngIf="arquivoSelecionado">
-                <input type="checkbox" id="chkNotificar" [(ngModel)]="notificarCliente"
-                    style="width: 18px; height: 18px; cursor: pointer;">
-                <label for="chkNotificar" style="cursor: pointer; font-size: 0.95rem; color: #444;">Enviar e-mail de
-                    notificação ao cliente</label>
-            </div>
-
-            <div class="d-flex justify-content-end" style="gap: 15px; margin-top: 25px;">
-                <button class="btn-modal btn-modal-back" (click)="fecharModalNotaFiscal()"
-                    [disabled]="uploadingNotaFiscal">Voltar</button>
-                <button class="btn-modal btn-save-invoice" style="margin-left: 10px;"
-                    (click)="salvarNotaFiscal()" [disabled]="!numeroNotaFiscal || !arquivoSelecionado || uploadingNotaFiscal">
-                    <i class="fa fa-save"></i> {{ uploadingNotaFiscal ? 'Enviando...' : 'Salvar Nota' }}
-                </button>
-            </div>
-        </div>
-
-        <div *ngIf="pedidoParaNotaFiscal?.notaFiscalPath">
-            <p style="margin-bottom: 20px; color: #28a745; font-weight: bold;">Este pedido já possui uma Nota Fiscal
-                vinculada.</p>
-            
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="numeroNotaEdit" style="display: block; margin-bottom: 8px; font-weight: bold; color: #444;">Número da Nota Fiscal</label>
-                <input type="text" id="numeroNotaEdit" [(ngModel)]="numeroNotaFiscal" class="form-control input-nota-small" placeholder="Informe o número da nota">
-            </div>
-
-            <p style="margin-bottom: 20px;">Você pode visualizar o arquivo atual, alterar o número ou removê-lo para anexar um novo.</p>
-
-            <div class="d-flex flex-column" style="gap: 12px;">
-                <button class="btn-outline btn-outline-purple" (click)="salvarNotaFiscal()" 
-                    [disabled]="uploadingNotaFiscal || !numeroNotaFiscal || (numeroNotaFiscal === pedidoParaNotaFiscal?.numeroNotaFiscal && !arquivoSelecionado)">
-                    <i class="fa fa-save"></i> Salvar Alterações (Número/Arquivo)
-                </button>
-                <button class="btn btn-outline" (click)="visualizarNotaFiscal(pedidoParaNotaFiscal!)"
-                    style="width: 100%; border: 2px solid #007bff; color: #007bff;">
-                    <i class="fa fa-eye"></i> Visualizar Nota Atual
-                </button>
-                <button class="btn-outline btn-outline-green" (click)="reenviarEmailNotaFiscal()" [disabled]="uploadingNotaFiscal">
-                    <i class="fa fa-paper-plane"></i> Reenviar E-mail de Notificação
-                </button>
-                <button class="btn-danger btn-full-width" (click)="excluirNotaFiscal()" [disabled]="uploadingNotaFiscal">
-                    <i class="fa fa-trash-alt"></i> Excluir e Desvincular Nota
-                </button>
-            </div>
-
-            <div class="d-flex justify-content-end" style="gap: 15px; margin-top: 30px;">
-                <button class="btn-modal btn-modal-back" style="width: 100%;" (click)="fecharModalNotaFiscal()"
-                    [disabled]="uploadingNotaFiscal">Fechar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Confirmação de Pedido (ADMIN) -->
-<div class="modal-overlay" *ngIf="exibirModalConfirmacao">
-    <div class="modal-container" style="max-width: 500px;">
-        <h2 class="cinzel-font" style="margin-bottom: 20px; color: #d4af37;">Confirmar Pedido #{{ pedidoParaConfirmar?.id }}</h2>
-        <p style="margin-bottom: 20px; font-weight: 500;">Você está alterando a situação deste pedido para <strong>CONFIRMADO</strong>.</p>
+    <!-- Tabela de Pedidos (PrimeNG Table) -->
+    <p-table [value]="pedidos" [loading]="loading" [rowHover]="true" styleClass="p-datatable-sm p-datatable-gridlines"
+             [paginator]="true" [rows]="pageSize" [totalRecords]="totalElements" 
+             [lazy]="true" (onLazyLoad)="onPageChange($event)" [rowsPerPageOptions]="pageSizeOptions"
+             [pageLinks]="isMobile ? 3 : 5"
+             sortField="dataPedido" [sortOrder]="-1">
         
-        <div style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37; margin-bottom: 25px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="chkEnviarEmail" [(ngModel)]="enviarEmailConfirmacao"
-                    style="width: 20px; height: 20px; cursor: pointer;">
-                <label for="chkEnviarEmail" style="cursor: pointer; font-weight: bold; color: #333; margin: 0;">
-                    Enviar e-mail de confirmação ao cliente
-                </label>
-            </div>
-            <p style="margin: 8px 0 0 30px; font-size: 0.85rem; color: #666;">
-                O cliente receberá um e-mail com os detalhes do pedido e as instruções de pagamento.
-            </p>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="id" style="width: 80px;">Nº <p-sortIcon field="id"></p-sortIcon></th>
+                <th pSortableColumn="usuario.nome" *ngIf="isAdmin" [class.hidden]="isMobile">Cliente <p-sortIcon field="usuario.nome"></p-sortIcon></th>
+                <th pSortableColumn="dataPedido" [style.width]="isMobile ? '120px' : (isAdmin ? '140px' : '220px')">Data <p-sortIcon field="dataPedido"></p-sortIcon></th>
+                <th pSortableColumn="valorTotal" style="width: 130px;">{{ isMobile ? 'Valor' : 'Valor Total' }} <p-sortIcon field="valorTotal"></p-sortIcon></th>
+                <th style="width: 150px;" [class.hidden]="isMobile" class="text-center">Situação</th>
+                <th style="width: 60px;" class="text-center">Pago</th>
+                <th [style.width]="isMobile ? '50px' : (isAdmin ? '280px' : '180px')" class="text-center">Ações</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-pedido>
+            <tr [class.pedido-cancelado]="pedido.cancelado">
+                <td>
+                    {{ pedido.id }}
+                </td>
+                <td [class.hidden]="isMobile" *ngIf="isAdmin">
+                    {{ pedido.usuarioNome }}
+                </td>
+                <td>
+                    {{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td>
+                    <span class="font-bold text-900">{{ pedido.valorTotal | currency:'BRL' }}</span>
+                </td>
+                <td [class.hidden]="isMobile" class="text-center">
+                    <div *ngIf="!isAdmin || pedido.cancelado">
+                        <p-tag [severity]="getSeverity(pedido.situacao)" [value]="pedido.situacaoDescricao"></p-tag>
+                    </div>
+                    <div *ngIf="isAdmin && !pedido.cancelado">
+                        <p-dropdown [options]="situacoesPedido" [ngModel]="pedido.situacao" (ngModelChange)="alterarSituacao(pedido, $event)"
+                                    optionLabel="descricao" optionValue="codigo" appendTo="body" styleClass="p-inputtext-sm"></p-dropdown>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <i class="pi" [ngClass]="pedido.pago ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'"
+                       [title]="pedido.pago ? 'Pago' : 'Pendente'" [style.fontSize]="'1.4rem'"
+                       (click)="isAdmin && alterarStatusPago(pedido, !pedido.pago)" [style.cursor]="isAdmin ? 'pointer' : 'default'"></i>
+                </td>
+                <td class="text-center">
+                    <!-- Desktop: Barra de Ícones -->
+                    <div *ngIf="!isMobile" class="actions-container">
+                        <button *ngFor="let bt of getBotoesAcao(pedido)" 
+                                pButton pRipple 
+                                [icon]="bt.icon" 
+                                [class]="'p-button-rounded p-button-text ' + bt.className" 
+                                [disabled]="bt.disabled"
+                                (click)="bt.action()" 
+                                [pTooltip]="bt.tooltip" 
+                                tooltipPosition="top" 
+                                style="flex: 0 0 auto !important; margin: 0 !important; width: 32px !important; height: 32px !important;">
+                        </button>
+                    </div>
+
+                    <!-- Mobile: Menu Compacto -->
+                    <div *ngIf="isMobile">
+                        <button pButton pRipple icon="pi pi-ellipsis-v" 
+                                class="p-button-rounded p-button-text p-button-secondary" 
+                                (click)="menu.toggle($event)">
+                        </button>
+                        <p-menu #menu [model]="getMenuItems(pedido)" [popup]="true" appendTo="body"></p-menu>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td [attr.colspan]="isAdmin ? 7 : 6" class="text-center py-5">Nenhum pedido encontrado.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- Modal: Cancelamento de Pedido -->
+<p-dialog [(visible)]="exibirModalCancelamento" [header]="'Cancelar Pedido #' + pedidoParaCancelar?.id" [modal]="true" 
+          [style]="{width: '450px'}" styleClass="p-fluid">
+    <div class="flex align-items-center justify-content-center mb-4">
+        <i class="pi pi-exclamation-triangle text-red-500 text-6xl"></i>
+    </div>
+    <p class="text-center font-bold text-xl mb-3">Deseja realmente cancelar este pedido?</p>
+    <p class="text-center text-600 mb-4">Você pode informar um motivo abaixo (opcional):</p>
+    
+    <div class="field">
+        <textarea pInputTextarea [(ngModel)]="motivoCancelamento" rows="4" placeholder="Ex: Desistência da compra..."></textarea>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Voltar" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="fecharModalCancelamento()"></button>
+        <button pButton label="Confirmar Cancelamento" icon="pi pi-trash" class="p-button-danger" (click)="confirmarCancelamento()"></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Modal: Sucesso Novo Pedido -->
+<p-dialog [(visible)]="exibirModalSucessoNovoPedido" header="Pedido Criado!" [modal]="true" [style]="{width: '400px'}" [closable]="false">
+    <div class="text-center">
+        <i class="pi pi-check-circle text-green-500 text-7xl mb-4"></i>
+        <h3 class="font-bold text-2xl mb-2 text-900">Pedido Sucesso!</h3>
+        <p class="text-700 mb-4">O pedido <strong>#{{ pedidoRecemCriadoId }}</strong> foi gerado corretamente.</p>
+        <p class="text-600 mb-5">Deseja gerar o PDF com o resumo agora?</p>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-content-center">
+            <button pButton label="Não, obrigado" class="p-button-text p-button-secondary" (click)="fecharModalSucesso(false)"></button>
+            <button pButton label="Sim, baixar PDF" icon="pi pi-file-pdf" class="btn-gold" (click)="fecharModalSucesso(true)"></button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Modal: Nota Fiscal (ADMIN) -->
+<p-dialog [(visible)]="exibirModalNotaFiscal" [header]="'Nota Fiscal - Pedido #' + pedidoParaNotaFiscal?.id" [modal]="true" 
+          [style]="{width: '500px'}" styleClass="p-fluid">
+    
+    <div *ngIf="!pedidoParaNotaFiscal?.notaFiscalPath" class="animate-fade-in">
+        <p class="text-600 mb-4">Anexe o arquivo PDF da nota fiscal e informe o número.</p>
+
+        <div class="field">
+            <label class="font-bold">Número da Nota Fiscal <span class="text-red-500">*</span></label>
+            <input pInputText [(ngModel)]="numeroNotaFiscal" placeholder="Número da nota">
         </div>
 
-        <div class="d-flex justify-content-end" style="gap: 15px;">
-            <button class="btn-modal btn-modal-back" (click)="fecharModalConfirmacao()">Voltar</button>
-            <button class="btn-modal" style="background: var(--primary-gold); color: white;" (click)="confirmarPedido()">
-                <i class="fa fa-check"></i> Confirmar Pedido
-            </button>
+        <div class="field mt-4">
+            <div class="upload-drop-zone p-5 border-2 border-dashed border-gold border-round-lg text-center cursor-pointer"
+                 (click)="fileInput.click()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.bg-gold-subtle]="isDragging">
+                <i class="pi pi-cloud-upload text-gold text-4xl mb-3"></i>
+                <p class="m-0 font-bold text-900">{{ arquivoSelecionado ? arquivoSelecionado.name : 'Clique para selecionar PDF ou arraste aqui' }}</p>
+                <p class="text-sm text-600" *ngIf="arquivoSelecionado">({{ (arquivoSelecionado.size / 1024 / 1024) | number:'1.1-2' }} MB)</p>
+                <input #fileInput type="file" (change)="onFileSelected($event)" accept="application/pdf" class="hidden">
+            </div>
+        </div>
+
+        <div class="field-checkbox mt-4">
+            <p-checkbox [(ngModel)]="notificarCliente" [binary]="true" inputId="notif"></p-checkbox>
+            <label for="notif" class="ml-2 font-semibold">Notificar cliente por e-mail</label>
         </div>
     </div>
-</div>
+
+    <div *ngIf="pedidoParaNotaFiscal?.notaFiscalPath" class="animate-fade-in text-center">
+        <div class="p-3 bg-green-50 border-round mb-4 border-1 border-green-200">
+            <i class="pi pi-check text-green-600 mr-2"></i>
+            <span class="text-green-700 font-bold">Nota Fiscal já vinculada</span>
+        </div>
+
+        <div class="field text-left">
+            <label class="font-bold">Número da Nota Fiscal</label>
+            <input pInputText [(ngModel)]="numeroNotaFiscal" placeholder="Número da nota">
+        </div>
+
+        <div class="flex flex-column gap-3 mt-4">
+            <button pButton label="Salvar Alterações" icon="pi pi-save" class="btn-gold" (click)="salvarNotaFiscal()" [loading]="uploadingNotaFiscal"></button>
+            <button pButton label="Visualizar Nota" icon="pi pi-eye" class="p-button-outlined p-button-info" (click)="visualizarNotaFiscal(pedidoParaNotaFiscal!)"></button>
+            <button pButton label="Reenviar E-mail" icon="pi pi-send" class="p-button-outlined p-button-success" (click)="reenviarEmailNotaFiscal()"></button>
+            <button pButton label="Excluir Nota" icon="pi pi-trash" class="p-button-outlined p-button-danger" (click)="excluirNotaFiscal()"></button>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer" *ngIf="!pedidoParaNotaFiscal?.notaFiscalPath">
+        <button pButton label="Voltar" class="p-button-text p-button-secondary" (click)="fecharModalNotaFiscal()" [disabled]="uploadingNotaFiscal"></button>
+        <button pButton label="Salvar Nota" icon="pi pi-check" class="btn-gold" (click)="salvarNotaFiscal()" 
+                [disabled]="!numeroNotaFiscal || !arquivoSelecionado || uploadingNotaFiscal" [loading]="uploadingNotaFiscal"></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Modal: Confirmação de Pedido (ADMIN) -->
+<p-dialog [(visible)]="exibirModalConfirmacao" [header]="'Confirmar Pedido #' + pedidoParaConfirmar?.id" [modal]="true" [style]="{width: '450px'}">
+    <div class="p-3 bg-yellow-50 border-round border-1 border-yellow-200 mb-4">
+        <p class="m-0 font-bold text-yellow-800">Você está alterando a situação para CONFIRMADO.</p>
+    </div>
+    <div class="field-checkbox mb-4">
+        <p-checkbox [(ngModel)]="enviarEmailConfirmacao" [binary]="true" inputId="sendEmail"></p-checkbox>
+        <label for="sendEmail" class="ml-2 font-bold text-900">Enviar e-mail de confirmação ao cliente</label>
+    </div>
+    <p class="text-600 text-sm italic">O cliente receberá instruções de pagamento por e-mail.</p>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Voltar" class="p-button-text p-button-secondary" (click)="fecharModalConfirmacao()"></button>
+        <button pButton label="Confirmar Pedido" icon="pi pi-check" class="btn-gold" (click)="confirmarPedido()"></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Aviso PDF -->
+<p-dialog [(visible)]="avisoPdf" header="Gerando PDF" [modal]="true" [style]="{width: '400px'}">
+    <div class="text-center py-4">
+        <i class="pi pi-file-pdf text-gold text-7xl mb-4"></i>
+        <p class="text-700">O PDF está sendo gerado.</p>
+        <p class="text-600 font-semibold mt-2">Caso não abra automaticamente, autorize pop-ups no seu navegador.</p>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton label="OK" class="p-button-text" (click)="fecharAvisoPdf()"></button>
+    </ng-template>
+</p-dialog>

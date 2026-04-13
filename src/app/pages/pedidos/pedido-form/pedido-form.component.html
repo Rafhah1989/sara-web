@@ -1,606 +1,426 @@
-<div class="page-container">
-    <div class="header-section">
-        <a href="javascript:void(0)" (click)="voltar()" class="back-link">
-            <i class="fa fa-arrow-left"></i> Voltar
-        </a>
-        <h1 class="cinzel-font color-primary-gold-dark">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}
-        </h1>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn-action btn-invoice" *ngIf="modoEdicao && notaFiscalPath"
-                (click)="visualizarNotaFiscal()" title="Ver Nota Fiscal">
-                <i class="fa fa-file-invoice"></i>
-                <span style="margin-left: 5px;" class="hide-mobile">Ver Nota Fiscal</span>
-                <span style="margin-left: 5px;" class="show-mobile">Nota</span>
-            </button>
+<div class="card">
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4 gap-3 border-bottom-1 surface-border pb-3">
+        <div class="flex align-items-center gap-3">
+            <button pButton pRipple type="button" icon="pi pi-arrow-left" class="p-button-rounded p-button-text p-button-secondary" (click)="voltar()" pTooltip="Voltar"></button>
+            <h1 class="cinzel-font m-0 text-3xl gold-text">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}</h1>
+        </div>
+        <div class="flex flex-wrap gap-2" *ngIf="modoEdicao && notaFiscalPath">
+            <button pButton pRipple type="button" label="Ver Nota Fiscal" icon="pi pi-file-invoice" class="p-button-outlined btn-gold-outline" (click)="visualizarNotaFiscal()"></button>
         </div>
     </div>
 
-    <!-- Alerta de Pedido Bloqueado -->
-    <div class="alert alert-warning mb-4 shadow-sm" *ngIf="isPedidoBloqueadoParaUsuario"
-        style="border-left: 5px solid #ffc107; background: #fff3cd; border-radius: 8px; margin: 20px 0;">
-        <div style="display: flex; align-items: center; gap: 15px; padding: 15px;">
-            <i class="fa fa-lock fa-2x" style="color: #856404;"></i>
+    <!-- Alerta de Pedido Bloqueado (Visualização) -->
+    <div class="p-4 bg-yellow-50 border-round-lg border-left-3 border-yellow-500 mb-5 shadow-1" *ngIf="isPedidoBloqueadoParaUsuario">
+        <div class="flex align-items-center gap-3">
+            <i class="pi pi-lock text-yellow-700 text-3xl"></i>
             <div>
-                <strong style="font-size: 1.1rem; display: block; margin-bottom: 5px; color: #856404;">Pedido em Modo de
-                    Visualização</strong>
-                <p style="margin: 0; color: #856404;">Este pedido já foi <strong>{{ pedidoForm.get('situacao')?.value
-                        }}</strong> e não pode ser alterado. Se precisar alterar, entre em contato com o atendimento.
-                </p>
+                <span class="block font-bold text-yellow-800 text-lg">Modo de Visualização</span>
+                <p class="m-0 text-yellow-700">Este pedido já está <strong>{{ pedidoForm.get('situacao')?.value }}</strong> e não pode ser editado.</p>
             </div>
         </div>
     </div>
 
-    <form [formGroup]="pedidoForm" (ngSubmit)="salvar()" class="pedido-form">
-
-        <!-- Dados do Pedido -->
-        <fieldset class="form-section" [disabled]="isPedidoBloqueadoParaUsuario">
-            <legend>Dados do Pedido</legend>
-
-            <div class="form-row">
-                <div class="form-group" style="flex: 100%;">
-                    <label>Usuário (Cliente) *</label>
-                    <div style="position: relative;">
-                        <input type="text" formControlName="usuarioNome" placeholder="Digite 3 letras para buscar..."
-                            class="form-control" autocomplete="off">
-                        <div class="autocomplete-dropdown" *ngIf="showUsuariosDropdown">
-                            <div *ngFor="let u of usuariosFiltrados" (click)="selecionarUsuario(u)"
-                                class="dropdown-item">
-                                {{ u.nome }} ({{ u.cidade }}/{{ u.uf }})
+    <form [formGroup]="pedidoForm" (ngSubmit)="salvar()" class="p-fluid">
+        
+        <!-- Dados Básicos -->
+        <p-panel header="Dados do Cliente e Logística" [toggleable]="true" styleClass="mb-4 shadow-1 border-round-xl border-top-3 border-gold">
+            <div class="grid formgrid p-fluid">
+                <div class="field col-12 lg:col-6">
+                    <label class="font-bold text-900 mb-2 block">Cliente (Usuário) *</label>
+                    <p-autoComplete formControlName="usuarioNome" [suggestions]="usuariosFiltrados" (completeMethod)="searchUser($event)"
+                                   field="nome" placeholder="Digite 3 letras para buscar..." [minLength]="3"
+                                   (onSelect)="onUserSelect($event)"
+                                   [forceSelection]="true" styleClass="w-full">
+                        <ng-template let-user pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <i class="pi pi-user text-gold"></i>
+                                <span>{{ user.nome }} <small class="text-600">({{ user.cidade }}/{{ user.uf }})</small></span>
                             </div>
-                        </div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+                <div class="field col-6 lg:col-2">
+                    <label class="font-bold text-900 mb-2 block">Desconto (%)</label>
+                    <p-inputNumber formControlName="desconto" (onInput)="onDescontoManualChange()" [min]="0" [max]="100"
+                                   suffix="%" [showButtons]="true"></p-inputNumber>
+                </div>
+                <div class="field col-6 lg:col-2">
+                    <label class="font-bold text-900 mb-2 block">Frete (R$)</label>
+                    <p-inputNumber formControlName="frete_num" mode="currency" currency="BRL" locale="pt-BR"
+                                   (onInput)="onFreteChange($event)"></p-inputNumber>
+                </div>
+                <div class="field col-12 lg:col-2">
+                    <label class="font-bold text-900 mb-2 block">Situação</label>
+                    <p-dropdown [options]="situacoesPedido" formControlName="situacao" optionLabel="descricao" optionValue="codigo"
+                                ></p-dropdown>
+                </div>
+                <div class="field col-12 lg:col-9">
+                    <label class="font-bold text-900 mb-2 block">Observações</label>
+                    <textarea pInputTextarea formControlName="observacao" rows="2" [autoResize]="true"></textarea>
+                </div>
+                <div class="field col-12 lg:col-3">
+                    <label class="font-bold text-gold-dark block mb-2 uppercase text-xs tracking-wider">Total do Pedido</label>
+                    <div class="p-3 bg-black-900 border-round-xl text-gold font-bold text-3xl text-center shadow-4 border-1 border-gold total-display-box">
+                        {{ pedidoForm.get('valorTotal')?.value | currency:'BRL' }}
                     </div>
                 </div>
             </div>
+        </p-panel>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Desconto (%)</label>
-                    <input type="number" formControlName="desconto" (input)="onDescontoManualChange()"
-                        placeholder="0.00" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label>Frete (R$)</label>
-                    <input type="text" formControlName="frete" (input)="applyFreteMask($event)" placeholder="R$ 0,00">
-                </div>
-
-                <div class="form-group">
-                    <label>Situação</label>
-                    <select formControlName="situacao" class="form-control">
-                        <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Valor Total</label>
-                    <div class="total-display">{{ pedidoForm.get('valorTotal')?.value | currency:'BRL' }}</div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Observação</label>
-                    <textarea formControlName="observacao" rows="2" placeholder="Observações do pedido..."></textarea>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex: 100%;">
-                    <label>Forma de Pagamento</label>
-                    <div class="payment-options">
-                        <ng-container *ngFor="let forma of formasPagamento">
-                            <label class="payment-radio" [class.disabled]="!isFormaPagamentoDisponivel(forma)">
-                                <input type="radio" formControlName="formaPagamentoId" [value]="forma.id"
-                                    (change)="aoSelecionarFormaPagamento(forma.id)"
-                                    [disabled]="!isFormaPagamentoDisponivel(forma)">
-                                <div class="payment-card">
-                                    <i [ngClass]="forma.iconeFontAwesome"></i>
-                                    <span>{{ forma.descricao || forma.nome }}</span>
-                                    <small
-                                        *ngIf="ativarDescontoAVista && forma.desconto > 0 && isFormaPagamentoDisponivel(forma)">(-{{
-                                        forma.desconto }}% à vista)</small>
-                                    <span class="badget-minimo-alert" *ngIf="!isFormaPagamentoDisponivel(forma)">
-                                        {{ getMensagemMinimo(forma) }}
-                                    </span>
+        <!-- Formas de Pagamento -->
+        <p-panel header="Condições de Pagamento" [toggleable]="true" styleClass="mb-4 shadow-1 border-round-xl border-top-3 border-gold">
+            <div class="grid">
+                <div class="col-12">
+                    <div class="flex flex-wrap gap-3" [class.flex-column]="isMobile">
+                        <div *ngFor="let forma of formasPagamento" class="field-radiobutton flex-grow-1 sm:flex-grow-0" 
+                             [class.w-full]="isMobile" style="min-width: 140px;">
+                            <p-radioButton [value]="forma.id" formControlName="formaPagamentoId" 
+                                          [inputId]="'fp' + forma.id" (onClick)="aoSelecionarFormaPagamento(forma.id)"></p-radioButton>
+                            <label [for]="'fp' + forma.id" class="cursor-pointer ml-2 w-full">
+                                <div class="p-3 border-1 border-round-xl surface-border hover:border-gold transition-colors flex flex-column md:flex-row align-items-center md:justify-content-start text-center md:text-left h-full gap-3"
+                                     [class.bg-gold-subtle]="pedidoForm.get('formaPagamentoId')?.value === forma.id"
+                                     [class.opacity-50]="!isFormaPagamentoDisponivel(forma)"
+                                     [class.flex-row]="isMobile"
+                                     [class.p-2]="isMobile">
+                                    <i [class]="forma.iconeFontAwesome + ' text-3xl gold-text'"></i>
+                                    <div class="flex flex-column text-left md:text-center lg:text-left">
+                                        <span class="font-bold text-sm">{{ forma.descricao || forma.nome }}</span>
+                                        <small class="text-green-600 block mt-1" *ngIf="ativarDescontoAVista && forma.desconto > 0">(-{{ forma.desconto }}% à vista)</small>
+                                    </div>
+                                    <p-tag severity="danger" [value]="getMensagemMinimo(forma)" *ngIf="!isFormaPagamentoDisponivel(forma)" [styleClass]="isMobile ? 'ml-auto' : 'mt-2'"></p-tag>
                                 </div>
                             </label>
-                        </ng-container>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row" *ngIf="deveMostrarCampoPagamentoOnline()" style="margin-top: 20px;">
-                <div class="form-group" style="flex: 100%;">
-                    <div class="online-payment-confirm"
-                        style="background: #fdf8e6; padding: 15px; border-radius: 8px; border: 1px solid #d4af37;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="pagamentoOnline" formControlName="pagamentoOnline"
-                                (change)="onPagamentoOnlineChange()"
-                                style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
-                            <label for="pagamentoOnline"
-                                style="margin: 0; font-weight: bold; color: #333; cursor: pointer; display: inline-block;">
-                                Pagamento Online (Gerar {{ getLabelMeioPagamentoOnline() }})
-                            </label>
-                        </div>
-                        <p style="margin: 8px 0 0 30px; font-size: 0.9rem; color: #666;">
-                            Ao marcar esta opção, {{ getDescricaoPagamentoOnline() }} imediatamente após salvar o
-                            pedido.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Parcelamento -->
-            <div class="form-row"
-                *ngIf="(permitirParcelamento && (opcaoParcelamentoSelecionada || parcelasGeradas.length > 0)) || parcelasGeradas.length > 0"
-                style="margin-top: 20px;">
-                <div class="form-group" style="flex: 100%;">
-                    <div class="installment-box"
-                        style="border: 2px solid var(--primary-color); border-radius: 8px; padding: 15px; background: #fff;">
-                        <label
-                            style="font-weight: bold; color: var(--primary-color); font-size: 1.1rem; margin-bottom: 15px; display: block;">
-                            <i class="fa fa-credit-card"></i> Plano de Parcelamento Autorizado
-                        </label>
-
-                        <div class="installment-selector" *ngIf="opcaoParcelamentoSelecionada"
-                            style="margin-bottom: 15px;">
-                            <select class="form-select-gold" [(ngModel)]="quantidadeParcelas"
-                                [ngModelOptions]="{standalone: true}" (change)="onQuantidadeParcelasChange()"
-                                [disabled]="isPedidoBloqueadoParaUsuario">
-                                <option [ngValue]="0" *ngIf="modoEdicao">SELECIONE</option>
-                                <option *ngFor="let n of opcoesParcelasDisponiveis" [value]="n">
-                                    {{ getLabelParcela(n) }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="installment-table-preview" *ngIf="parcelasGeradas.length > 0">
-                            <table class="table table-sm table-borderless mb-0">
-                                <thead style="background: #fdf8e6; color: var(--primary-gold-dark);">
-                                    <tr>
-                                        <th>Parcela</th>
-                                        <th>Valor</th>
-                                        <th>Vencimento</th>
-                                        <th class="hide-mobile">Forma</th>
-                                        <th *ngIf="isAdmin" class="text-center hide-mobile">Online</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let p of parcelasGeradas; let i = index">
-                                        <td><strong>{{ i + 1 }}ª</strong></td>
-                                        <td>
-                                            <input type="text" [(ngModel)]="p.valorFormatado"
-                                                [ngModelOptions]="{standalone: true}"
-                                                (input)="applyParcelaMoedaMask($event, i)" [disabled]="!isAdmin"
-                                                class="form-control form-control-sm"
-                                                style="width: 110px; display: inline-block; font-weight: bold; color: var(--primary-color);">
-                                        </td>
-                                        <td>
-                                            <input type="date" [(ngModel)]="p.dataVencimento"
-                                                [ngModelOptions]="{standalone: true}"
-                                                class="form-control form-control-sm" *ngIf="isAdmin"
-                                                style="width: 135px; display: inline-block;">
-                                            <span *ngIf="!isAdmin">{{ p.dataVencimento | date:'dd/MM/yyyy' }}</span>
-                                        </td>
-                                        <td class="hide-mobile">
-                                            <select [(ngModel)]="p.formaPagamentoId"
-                                                [ngModelOptions]="{standalone: true}" *ngIf="isAdmin"
-                                                [compareWith]="compareFormas"
-                                                (change)="onFormaPagamentoParcelaChange(p)" class="form-select-gold-sm"
-                                                style="width: 130px;">
-                                                <option *ngFor="let forma of formasPagamento" [ngValue]="forma.id">{{
-                                                    forma.descricao }}</option>
-                                            </select>
-                                            <span *ngFor="let f of formasPagamento">
-                                                <span *ngIf="!isAdmin && f.id == p.formaPagamentoId">{{ f.descricao
-                                                    }}</span>
-                                            </span>
-                                        </td>
-                                        <td *ngIf="isAdmin" class="text-center hide-mobile">
-                                            <input type="checkbox" [(ngModel)]="p.pagamentoOnline"
-                                                [ngModelOptions]="{standalone: true}"
-                                                style="width: 18px; height: 18px; cursor: pointer;">
-                                        </td>
-                                        <td>
-                                            <div class="d-flex flex-column gap-1">
-                                                <button type="button" class="badge"
-                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
-                                                    *ngIf="isAdmin"
-                                                    style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; border: none; cursor: pointer; min-width: 80px;"
-                                                    (click)="toggleParcelaPago(p)">
-                                                    {{ p.pago ? 'PAGO' : 'PENDENTE' }}
-                                                </button>
-                                                <span class="badge"
-                                                    [ngClass]="p.pago ? 'badge-success' : 'badge-warning'"
-                                                    *ngIf="!isAdmin"
-                                                    style="font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; display: inline-block; min-width: 80px; text-align: center;">
-                                                    {{ p.pago ? 'PAGO' : 'PENDENTE' }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <!-- Ações Desktop -->
-                                            <div class="installment-actions-desktop hide-mobile">
-                                                <button type="button" class="btn-action btn-sync"
-                                                    *ngIf="podeExibirSincronizacao(p) && isAdmin"
-                                                    (click)="verificarPagamentoManualParcela(p)"
-                                                    title="Validar Mercado Pago">
-                                                    <i class="fa fa-sync"></i>
-                                                </button>
-                                                <button type="button" class="btn-action btn-email"
-                                                    *ngIf="podeExibirNotificacaoPagamento(p)"
-                                                    (click)="notificarCobrancaPagamento(p)"
-                                                    title="Enviar Cobrança por E-mail">
-                                                    <i class="fa fa-envelope"></i>
-                                                </button>
-                                                <button *ngIf="podeExibirBotaoPagamento(p, i)" class="btn-action"
-                                                    [ngClass]="isBoleto(p) ? 'btn-pdf' : 'btn-pix'"
-                                                    (click)="visualizarPagamentoOnlineParcela(p)"
-                                                    [title]="isBoleto(p) ? 'Ver Boleto' : 'Ver QR Code PIX'">
-                                                    <i class="fa"
-                                                        [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
-                                                </button>
-                                                <button type="button" class="btn-action btn-cancel" *ngIf="isAdmin"
-                                                    (click)="removerPagamentoManual(i)" title="Remover Pagamento">
-                                                    <i class="fa fa-times"></i>
-                                                </button>
-                                            </div>
-
-                                            <!-- Ações Mobile (Menu Sanduíche) -->
-                                            <div class="mobile-actions show-mobile">
-                                                <button type="button" class="btn-sandwich"
-                                                    (click)="alternarMenuAcoesParcela(i, $event)">
-                                                    <i class="fa fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="actions-menu" *ngIf="itemMenuAcoesParcelaAberto === i"
-                                                    (click)="$event.stopPropagation()">
-                                                    <button type="button" *ngIf="podeExibirSincronizacao(p) && isAdmin"
-                                                        (click)="verificarPagamentoManualParcela(p); itemMenuAcoesParcelaAberto = null">
-                                                        <i class="fa fa-sync"></i> Validar MP
-                                                    </button>
-                                                    <button type="button" *ngIf="podeExibirNotificacaoPagamento(p)"
-                                                        (click)="notificarCobrancaPagamento(p); itemMenuAcoesParcelaAberto = null">
-                                                        <i class="fa fa-envelope"></i> Notificar E-mail
-                                                    </button>
-                                                    <button type="button" *ngIf="podeExibirBotaoPagamento(p, i)"
-                                                        (click)="visualizarPagamentoOnlineParcela(p); itemMenuAcoesParcelaAberto = null">
-                                                        <i class="fa"
-                                                            [ngClass]="isBoleto(p) ? 'fa-barcode' : 'fa-qrcode'"></i>
-                                                        {{ isBoleto(p) ? 'Ver Boleto' : 'Ver PIX' }}
-                                                    </button>
-                                                    <button type="button" *ngIf="isAdmin"
-                                                        (click)="removerPagamentoManual(i); itemMenuAcoesParcelaAberto = null"
-                                                        class="text-danger">
-                                                        <i class="fa fa-times"></i> Remover
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot *ngIf="isAdmin">
-                                    <tr>
-                                        <td colspan="6" style="padding-top: 15px;">
-                                            <button type="button" class="btn btn-outline-gold btn-sm"
-                                                (click)="adicionarPagamentoManual()">
-                                                <i class="fa fa-plus-circle"></i> Adicionar Pagamento
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </fieldset>
+
+            <div class="p-3 bg-yellow-50 border-round border-1 border-yellow-200 mt-3" *ngIf="deveMostrarCampoPagamentoOnline()">
+                <div class="flex align-items-center gap-3">
+                    <p-checkbox formControlName="pagamentoOnline" [binary]="true" inputId="pgOnline" (onChange)="onPagamentoOnlineChange()"></p-checkbox>
+                    <div>
+                        <label for="pgOnline" class="font-bold text-900 cursor-pointer">Gerar Pagamento Online ({{ getLabelMeioPagamentoOnline() }})</label>
+                        <p class="m-0 text-sm text-600">{{ getDescricaoPagamentoOnline() }} imediatamente após salvar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parcelamento Grid -->
+            <div class="mt-4" *ngIf="(permitirParcelamento && (opcaoParcelamentoSelecionada || parcelasGeradas.length > 0)) || parcelasGeradas.length > 0">
+                <div class="surface-ground p-3 border-round border-1 surface-border border-left-3 border-gold">
+                    <div class="flex flex-column sm:flex-row align-items-start sm:align-items-center justify-content-between mb-3 gap-2">
+                        <span class="font-bold text-gold text-lg"><i class="pi pi-credit-card mr-2"></i>Plano de Parcelamento</span>
+                        <p-dropdown *ngIf="opcaoParcelamentoSelecionada" [options]="opcoesParcelasOptions" [(ngModel)]="quantidadeParcelas" 
+                                     [ngModelOptions]="{standalone: true}" (onChange)="onQuantidadeParcelasChange()"
+                                     placeholder="Selecione Parcelas" styleClass="w-full md:w-20rem installment-dropdown"></p-dropdown>
+                    </div>
+
+                    <p-table [value]="parcelasGeradas" styleClass="p-datatable-sm shadow-1 border-round-xl" 
+                             *ngIf="parcelasGeradas.length > 0">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 40px;" *ngIf="!isMobile">#</th>
+                                <th [style.width]="isMobile ? '95px' : 'auto'">Valor</th>
+                                <th [style.width]="isMobile ? '95px' : 'auto'">Vcto</th>
+                                <th *ngIf="!isMobile">Meio</th>
+                                <th class="text-center" *ngIf="isAdmin && !isMobile">Online</th>
+                                <th class="text-center" [style.width]="isMobile ? '70px' : 'auto'">Status</th>
+                                <th [style.width]="isMobile ? '50px' : '15rem'" *ngIf="isAdmin">Ações</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-p let-i="rowIndex">
+                            <tr>
+                                <td class="font-bold" *ngIf="!isMobile">
+                                    {{ i + 1 }}ª
+                                </td>
+                                <td>
+                                    <span class="p-column-title font-bold">Valor</span>
+                                    <p-inputNumber [(ngModel)]="p.valor" [ngModelOptions]="{standalone: true}" mode="currency" 
+                                                   currency="BRL" locale="pt-BR" [disabled]="!isAdmin" styleClass="w-full"></p-inputNumber>
+                                </td>
+                                <td>
+                                    <p-calendar [(ngModel)]="p.dataVencimentoDate" [ngModelOptions]="{standalone: true}"
+                                                (onSelect)="p.dataVencimento = formatDate($event)" dateFormat="dd/mm/yy"
+                                                [showIcon]="!isMobile" [disabled]="!isAdmin" appendTo="body" styleClass="w-full"></p-calendar>
+                                </td>
+                                <td *ngIf="!isMobile">
+                                    <span class="p-column-title font-bold">Meio de Pagamento</span>
+                                    <p-dropdown [options]="formasPagamento" [(ngModel)]="p.formaPagamentoId" [ngModelOptions]="{standalone: true}"
+                                                optionLabel="descricao" optionValue="id" *ngIf="isAdmin && !isMobile" appendTo="body"
+                                                (onChange)="onFormaPagamentoParcelaChange(p)" styleClass="w-full"></p-dropdown>
+                                    <span *ngIf="!isAdmin || isMobile" class="text-600 text-xs">{{ p.formaPagamentoDescricao || 'Meio' }}</span>
+                                </td>
+                                <td class="text-center" *ngIf="isAdmin && !isMobile">
+                                     <p-checkbox [(ngModel)]="p.pagamentoOnline" [ngModelOptions]="{standalone: true}" [binary]="true"></p-checkbox>
+                                 </td>
+                                <td class="text-center">
+                                    <p-tag [severity]="p.pago ? 'success' : 'warning'" [value]="p.pago ? 'PAGO' : 'PEND'" 
+                                            (click)="isAdmin && toggleParcelaPago(p)" [style.cursor]="isAdmin ? 'pointer' : 'default'"
+                                            [pTooltip]="p.pago ? 'PAGO' : 'PENDENTE'"></p-tag>
+                                </td>
+                                <td class="text-center" *ngIf="isAdmin">
+                                    <div class="flex gap-1 justify-content-center lg:justify-content-start" *ngIf="!isMobile">
+                                        <button pButton type="button" icon="pi pi-sync" class="p-button-rounded p-button-success p-button-text" 
+                                                *ngIf="podeExibirSincronizacao(p) && isAdmin" (click)="verificarPagamentoManualParcela(p)" pTooltip="Verificar Status"></button>
+                                        <button pButton type="button" icon="pi pi-envelope" class="p-button-rounded btn-gold-outline p-button-text gold-text" 
+                                                *ngIf="podeExibirNotificacaoPagamento(p)" (click)="notificarCobrancaPagamento(p)" pTooltip="Notificar Cliente"></button>
+                                        <button pButton type="button" [icon]="isBoleto(p) ? 'pi pi-file-pdf' : 'pi pi-qrcode'" class="p-button-rounded btn-gold-outline p-button-text gold-text" 
+                                                *ngIf="podeExibirBotaoPagamento(p, i)" (click)="visualizarPagamentoOnlineParcela(p)" pTooltip="Ver Pagamento"></button>
+                                        <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                                                *ngIf="isAdmin" (click)="removerPagamentoManual(i)" pTooltip="Remover"></button>
+                                    </div>
+                                    <div *ngIf="isMobile">
+                                        <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-secondary p-0 w-2rem"
+                                                (click)="abrirMenuAcoesParcela($event, menuAcoesParcela, p, i)"></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="footer" *ngIf="isAdmin">
+                            <tr>
+                                <td colspan="7">
+                                    <button pButton type="button" label="Adicionar Parcela Manual" icon="pi pi-plus" class="p-button-text p-button-sm btn-gold-outline" (click)="adicionarPagamentoManual()"></button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </p-panel>
 
         <!-- Itens do Pedido -->
-        <fieldset class="form-section" [disabled]="isPedidoBloqueadoParaUsuario">
-            <legend>Itens do Pedido</legend>
-
-            <div class="mb-5 mt-3 text-right">
-                <button type="button" class="btn btn-loja-add" (click)="abrirModalProdutosAlternativo()"
-                    *ngIf="isAdmin || pedidoForm.get('situacao')?.value === 'PENDENTE' || pedidoForm.get('situacao')?.value === 'EM_PRODUCAO'">
-                    <i class="fa fa-list" style="margin-right: 5px;"></i> Comprar por tabela
-                </button>
-            </div>
-
-            <div class="product-search-box" *ngIf="pedidoForm.get('situacao')?.value === 'PENDENTE'">
-                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Adicionar Produto</label>
-                <div style="position: relative;">
-                    <input type="text" [(ngModel)]="termoBuscaProduto" [ngModelOptions]="{standalone: true}"
-                        (input)="buscarProduto()" placeholder="Buscar produto por nome ou código..."
-                        class="form-control">
-                    <div class="autocomplete-dropdown" *ngIf="showProdutosDropdown">
-                        <div *ngFor="let p of produtosFiltrados" (click)="adicionarProduto(p)" class="dropdown-item">
-                            #{{ p.codigo }} - {{ p.nome }} ({{ p.tamanho }})
-                        </div>
-                    </div>
+        <p-panel header="Produtos do Pedido" [toggleable]="true" styleClass="mb-4 shadow-1 border-round-xl border-top-3 border-gold">
+            <div [formGroup]="pedidoForm" formArrayName="itens">
+            <div class="grid formgrid mb-4 gap-3 md:gap-0 p-fluid">
+                <div class="col-12 md:col-8 lg:col-9" *ngIf="pedidoForm.get('situacao')?.value === 'PENDENTE'">
+                    <p-autoComplete [(ngModel)]="termoBuscaProdutoPlaceholder" [ngModelOptions]="{standalone: true}"
+                                   [suggestions]="produtosFiltrados" (completeMethod)="searchProduct($event)"
+                                   field="nome" placeholder="Adicionar produto por nome ou código..."
+                                   (onSelect)="adicionarProdutoDeSakai($event)" [minLength]="3" styleClass="w-full">
+                        <ng-template let-p pTemplate="item">
+                            <div class="flex align-items-center justify-content-between">
+                                <span>#{{ p.codigo }} - {{ p.nome }}</span>
+                                <span class="text-gold font-bold ml-2">{{ p.preco | currency:'BRL' }}</span>
+                            </div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+                <div class="col-12 md:col-4 lg:col-3 flex justify-content-end">
+                    <button pButton pRipple type="button" label="Catálogo / Tabela" icon="pi pi-th-large" 
+                            class="p-button-raised btn-gold w-full" (click)="abrirModalProdutosAlternativo()"
+                            *ngIf="isAdmin || pedidoForm.get('situacao')?.value === 'PENDENTE' || pedidoForm.get('situacao')?.value === 'EM_PRODUCAO'"></button>
                 </div>
             </div>
 
-            <div class="items-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="hide-mobile">Cód.</th>
-                            <th>Produto</th>
-                            <th class="hide-mobile">Tamanho</th>
-                            <th width="100">Qtd</th>
-                            <th width="100">Valor (R$)</th>
-                            <th class="hide-mobile">Total</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody formArrayName="itens">
-                        <tr *ngFor="let item of itens.controls; let i = index" [formGroupName]="i">
-                            <td class="hide-mobile">{{ item.get('produtoCodigo')?.value }}</td>
-                            <td>
-                                {{ item.get('produtoNome')?.value }}
-                                <span class="show-mobile-inline" style="font-size: 0.8rem; color: #666;">
-                                    ({{ item.get('tamanho')?.value }}cm)
-                                </span>
-                            </td>
-                            <td class="hide-mobile">{{ item.get('tamanho')?.value }}</td>
-                            <td>
-                                <div class="qtd-control">
-                                    <button type="button" class="btn-qty show-mobile" (click)="decrementarQtd(i)"
-                                        [disabled]="(item.get('quantidade')?.value || 1) <= 1">-</button>
-                                    <input type="number" formControlName="quantidade" (input)="onItemChange()"
-                                        class="form-control small input-qtd-mobile">
-                                    <button type="button" class="btn-qty show-mobile"
-                                        (click)="incrementarQtd(i)">+</button>
-                                </div>
-                            </td>
-                            <td>
-                                <input type="text" formControlName="valor" (input)="applyMoedaMask($event, i)"
-                                    class="form-control small valor-input-mobile">
-                            </td>
-                            <td class="hide-mobile">{{ item.get('total')?.value | currency:'BRL' }}</td>
-                            <td class="actions">
-                                <button type="button" class="btn btn-info btn-sm mx-1 text-white"
-                                    (click)="visualizarImagem(item.value)"
-                                    *ngIf="item.get('temImagem')?.value || item.get('imagem')?.value"
-                                    title="Ver Imagem">
-                                    <i class="fa fa-image"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm mx-1" (click)="removerItem(i)"
-                                    title="Remover" *ngIf="pedidoForm.get('situacao')?.value === 'PENDENTE'">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr *ngIf="itens.length === 0">
-                            <td colspan="7" class="text-center" style="padding: 2rem; color: #888;">Nenhum produto
-                                adicionado ao pedido.</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <p-table [value]="itens.controls" styleClass="p-datatable-sm shadow-1 border-round-xl">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 50px;" *ngIf="!isMobile">Cód.</th>
+                        <th>Produto</th>
+                        <th style="width: 60px;" *ngIf="!isMobile">Tam.</th>
+                        <th [style.width]="isMobile ? '70px' : '100px'">Qtd</th>
+                        <th style="width: 100px;" *ngIf="!isMobile">Unitário</th>
+                        <th style="width: 110px;" [style.textAlign]="isMobile ? 'right' : 'left'">Total</th>
+                        <th style="width: 60px;" class="text-center">Ações</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-itemForm let-i="rowIndex">
+                    <tr [formGroupName]="i">
+                        <td *ngIf="!isMobile">
+                            <span class="text-xs">#{{ itemForm.get('produtoCodigo')?.value }}</span>
+                        </td>
+                        <td>
+                            <div class="flex flex-column">
+                                <span class="text-900 font-medium text-sm line-height-2">{{ itemForm.get('produtoNome')?.value }}</span>
+                                <small class="text-gold" *ngIf="isMobile">{{ itemForm.get('tamanho')?.value }}cm</small>
+                                <p-tag [value]="itemForm.get('tamanho')?.value + 'cm'" severity="warning" *ngIf="!isMobile"></p-tag>
+                            </div>
+                        </td>
+                        <td *ngIf="!isMobile">
+                            {{ itemForm.get('tamanho')?.value }}
+                        </td>
+                        <td>
+                            <div class="flex align-items-center gap-1">
+                                <button pButton type="button" icon="pi pi-minus" class="p-button-text p-button-sm p-0 m-0 w-1rem h-1rem flex-shrink-0" (click)="decrementarQtd(i)" [disabled]="itemForm.get('quantidade')?.value <= 1" *ngIf="!isMobile"></button>
+                                <p-inputNumber formControlName="quantidade" (onInput)="onItemChange()" [min]="1" 
+                                              styleClass="flex-grow-1" [inputStyle]="{ 'width': isMobile ? '2.2rem' : '3.5rem', 'text-align': 'center', 'padding': isMobile ? '0.1rem' : '0.2rem' }"></p-inputNumber>
+                                <button pButton type="button" icon="pi pi-plus" class="p-button-text p-button-sm p-0 m-0 w-1rem h-1rem flex-shrink-0" (click)="incrementarQtd(i)" *ngIf="!isMobile"></button>
+                            </div>
+                        </td>
+                        <td *ngIf="!isMobile">
+                            <p-inputNumber formControlName="valor_num" (onInput)="onItemValueChange($event, i)"
+                                          mode="currency" currency="BRL" locale="pt-BR" styleClass="w-full"></p-inputNumber>
+                        </td>
+                        <td class="font-bold text-gold text-sm" [style.textAlign]="isMobile ? 'right' : 'left'">
+                            {{ itemForm.get('total')?.value | currency:'BRL' }}
+                        </td>
+                        <td class="text-center">
+                            <div class="flex gap-1 justify-content-center lg:justify-content-start" *ngIf="!isMobile">
+                                <button pButton type="button" icon="pi pi-image" class="p-button-rounded btn-gold-outline p-button-text" 
+                                         *ngIf="itemForm.get('temImagem')?.value || itemForm.get('imagem')?.value" (click)="visualizarImagem(itemForm.value)" pTooltip="Ver Foto"></button>
+                                <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                                         (click)="removerItem(i)" *ngIf="isAdmin && pedidoForm.get('situacao')?.value === 'PENDENTE'" pTooltip="Remover"></button>
+                            </div>
+                            <div *ngIf="isMobile">
+                                <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text p-button-secondary p-0 w-2rem"
+                                        (click)="abrirMenuAcoes($event, menuAcoes, itemForm.value, i)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-600 italic">Nenhum produto adicionado.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
             </div>
-        </fieldset>
+        </p-panel>
 
-        <div class="form-actions" *ngIf="!isPedidoBloqueadoParaUsuario">
-            <button type="submit" class="btn-gold" [disabled]="pedidoForm.invalid || itens.length === 0">
-                {{ modoEdicao ? 'Salvar Alterações' : 'Salvar Pedido' }}
-            </button>
-            <button type="button" class="btn-notify" (click)="salvar(true)" *ngIf="isAdmin && modoEdicao"
-                [disabled]="pedidoForm.invalid || itens.length === 0">
-                <i class="fa fa-envelope"></i> Salvar e Notificar
-            </button>
-            <button type="button" class="btn-outline" (click)="voltar()">Cancelar</button>
-        </div>
-        <div class="form-actions" *ngIf="isPedidoBloqueadoParaUsuario">
-            <button type="button" class="btn-gold" (click)="voltar()">Voltar</button>
+        <!-- Botões de Ação Final -->
+        <div class="flex flex-column md:flex-row justify-content-end gap-3 mt-5">
+            <button pButton pRipple type="button" label="Cancelar e Voltar" icon="pi pi-times" class="p-button-text p-button-secondary md:w-12rem" (click)="voltar()"></button>
+            <button pButton pRipple [label]="modoEdicao ? 'Salvar Alterações' : 'Salvar Pedido'" icon="pi pi-save" 
+                    class="p-button-raised btn-gold md:w-15rem" [disabled]="pedidoForm.invalid || itens.length === 0" *ngIf="!isPedidoBloqueadoParaUsuario"></button>
+            <button pButton pRipple label="Salvar e Notificar" icon="pi pi-send" 
+                    class="p-button-raised btn-gold md:w-15rem" (click)="salvar(true)" 
+                    *ngIf="isAdmin && modoEdicao" [disabled]="pedidoForm.invalid || itens.length === 0"></button>
         </div>
     </form>
 </div>
 
-<!-- Pop up Sucesso Pedido -->
-<div class="modal-overlay" *ngIf="exibirSucesso">
-    <div class="modal-content">
-        <h2 class="cinzel-font">Pedido Salvo!</h2>
-        <p>Pedido criado com sucesso. Deseja gerar o PDF agora?</p>
-        <div class="modal-actions">
-            <button class="btn btn-primary" (click)="confirmarPdf(true)">Sim</button>
-            <button class="btn btn-secondary" (click)="confirmarPdf(false)">Não</button>
-        </div>
-    </div>
-</div>
+<p-menu #menuAcoes [popup]="true" [model]="menuItensAcao" appendTo="body" [autoZIndex]="true" [baseZIndex]="9999"></p-menu>
+<p-menu #menuAcoesParcela [popup]="true" [model]="menuItensAcaoParcela" appendTo="body" [autoZIndex]="true" [baseZIndex]="9999"></p-menu>
 
-<!-- Modal Imagem -->
-<div class="modal-overlay image-modal-overlay" *ngIf="exibirVisualizacaoImagem" (click)="fecharVisualizacaoImagem()">
-    <div class="modal-content image-modal" (click)="$event.stopPropagation()" style="text-align: center;">
-        <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" alt="Produto" class="img-preview">
-        <div *ngIf="!imagemUrlVisualizacao" style="padding: 40px; background: #f9f9f9; border-radius: 8px;">
-            <i class="fa fa-image-slash" style="font-size: 4rem; color: #ddd; display: block; margin-bottom: 15px;"></i>
-            <span style="color: #999; font-weight: bold; font-family: 'Cinzel', serif;">Produto sem imagem
-                cadastrada</span>
-        </div>
-        <div style="margin-top: 20px;">
-            <button class="btn btn-secondary" (click)="fecharVisualizacaoImagem()">Fechar</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Inclusão Alternativa -->
-<div class="modal-overlay" *ngIf="exibirModalProdutosAlternativo" (click)="fecharModalProdutosAlternativo()">
-    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-        <div class="d-flex justify-content-between align-items-center"
-            style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-            <h2 class="cinzel-font color-primary-gold-dark text-left" style="margin: 0; font-size: 1.5rem;">Adicionar
-                Produtos</h2>
-        </div>
-
-        <div class="mb-2 mt-1">
-            <!-- Linha única de filtros compacta -->
-            <div class="modal-filters-row">
-
-                <div class="filter-item-name">
-                    <label>Nome</label>
-                    <input type="text" class="form-control" [(ngModel)]="filtroModalNome"
-                        [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()"
-                        placeholder="Buscar produto...">
+<!-- Modal: Seleção de Produtos por Tabela (Alternativo) -->
+<p-dialog [(visible)]="exibirModalProdutosAlternativo" [header]="'Comprar por Tabela / Catálogo'" [modal]="true" 
+          [style]="{width: '95vw', maxWidth: '1000px'}" [maximizable]="true" styleClass="bulk-dialog"
+          [contentStyle]="{'padding': '0'}">
+    
+    <div class="flex flex-column h-full">
+        <div class="p-4 bg-gray-50 border-bottom-1 border-gold-faded">
+            <div class="flex flex-column md:flex-row gap-3">
+                <div class="p-input-icon-left flex-grow-1">
+                    <i class="pi pi-search gold-text"></i>
+                    <input type="text" pInputText [(ngModel)]="filtroModalNome" (input)="filtrarProdutosModal()" 
+                           placeholder="Pesquisar por nome ou código..." class="w-full">
                 </div>
-
-                <div class="filter-item-size hide-mobile">
-                    <label>Tam.</label>
-                    <input type="text" class="form-control" [(ngModel)]="filtroModalTamanho"
-                        [ngModelOptions]="{standalone: true}" (input)="filtrarProdutosModal()" placeholder="cm">
-                </div>
-
-                <div class="filter-item-price hide-mobile">
-                    <label>Preço (R$)</label>
-                    <div class="price-inputs">
-                        <input type="text" class="form-control" [value]="filtroModalPrecoMin"
-                            (input)="applyFiltroMoedaMaskMin($event)" placeholder="Mín">
-                        <input type="text" class="form-control" [value]="filtroModalPrecoMax"
-                            (input)="applyFiltroMoedaMaskMax($event)" placeholder="Máx">
-                    </div>
-                </div>
-
-                <div class="modal-filter-actions">
-                    <button type="button" class="btn-catalogo" (click)="gerarCatalogoPdf()">
-                        <i class="fa fa-file-pdf"></i> <span>Catálogo</span>
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm btn-clear-modal" (click)="limparFiltrosModal()">
-                        <i class="fa fa-eraser"></i> <span>Limpar</span>
-                    </button>
+                <div class="flex align-items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    <p-dropdown [options]="tamanhosDisponiveisModal" [(ngModel)]="filtroModalTamanho" 
+                                (onChange)="filtrarProdutosModal()" placeholder="Todos os Tamanhos" 
+                                [showClear]="true" class="flex-grow-1 md:flex-grow-0 md:w-15rem"></p-dropdown>
+                    
+                    <button pButton icon="pi pi-file-pdf" class="p-button-danger border-round-lg flex-shrink-0" 
+                            (click)="gerarCatalogoPdf()" label="Catálogo"></button>
                 </div>
             </div>
         </div>
 
-        <div
-            style="flex: 1; overflow-y: auto; overflow-x: hidden; border: 1px solid #ddd; border-radius: 4px; margin-top: 15px; padding: 15px; background-color: #fcfcfc;">
-            <div style="display: flex; flex-direction: column;">
-                <div *ngFor="let grupo of produtosModalAgrupadosPorTamanho" style="width: 100%; margin-bottom: 20px;">
-                    <div
-                        style="border: 2px solid #333; height: 100%; display: flex; flex-direction: column; background: #fff;">
-                        <!-- Cabeçalho do Quadro (Tamanho) -->
-                        <div
-                            style="padding: 10px; font-weight: bold; border-bottom: 2px solid #333; font-size: 1.1rem; color: #333;">
-                            Imagens {{ grupo.tamanho }}
-                        </div>
-
-                        <!-- Corpo do Quadro com Scroll Interno -->
-                        <div style="flex: 1; overflow-y: auto;">
-                            <table class="table table-bordered mb-0"
-                                style="width: 90%; margin: 0 auto; border-collapse: collapse; text-align: center;">
-                                <thead style="position: sticky; top: 0; background: #f4f4f4; z-index: 10;">
-                                    <tr style="font-size: 0.85rem;">
-                                        <th width="60" class="text-center hide-mobile"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">Cód.</th>
-                                        <th width="150" class="text-left"
-                                            style="padding: 4px 8px; border: 1px solid #ccc; text-align: left !important;">
-                                            Nome</th>
-                                        <th width="45" class="text-center hide-mobile"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">Img</th>
-                                        <th width="80" class="text-center"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">Qtd.</th>
-                                        <th width="100" class="text-right"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">V. Unit.</th>
-                                        <th width="100" class="text-right hide-mobile"
-                                            style="padding: 4px 8px; border: 1px solid #ccc;">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let p of grupo.produtos" style="font-size: 0.85rem;">
-                                        <td class="text-center hide-mobile"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
-                                            p.codigo }}</td>
-                                        <td class="text-left"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; text-align: left !important;">
-                                            {{
-                                            p.nome }}</td>
-                                        <td class="text-center hide-mobile"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">
-                                            <button class="btn btn-info text-white" (click)="visualizarImagem(p)"
-                                                title="Ver Imagem"
-                                                style="padding: 2px 6px; font-size: 0.8rem; line-height: 1;">
-                                                <i class="fa fa-image"></i>
-                                            </button>
-                                        </td>
-                                        <td class="text-center"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">
-                                            <input type="number" class="form-control text-center"
-                                                [(ngModel)]="p.quantidadeSelecionada"
-                                                [ngModelOptions]="{standalone: true}" min="0"
-                                                style="height: 24px; padding: 0 4px; font-size: 0.85rem; width: 60px; margin: 0 auto;">
-                                        </td>
-                                        <td class="text-right"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc;">{{
-                                            p.preco | currency:'BRL' }}</td>
-                                        <td class="text-right hide-mobile"
-                                            style="padding: 4px 8px; vertical-align: middle; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
-                                            {{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr style="background: #f4f4f4; font-size: 0.85rem;">
-                                        <td class="text-right"
-                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold;">
-                                            Total {{ grupo.tamanho }}cm:
-                                        </td>
-                                        <td class="text-left"
-                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; text-align: left !important;">
-                                            {{ calcularQtdGrupo(grupo) }}
-                                        </td>
-                                        <td class="hide-mobile" style="border: 1px solid #ccc;"></td>
-                                        <td class="text-right hide-mobile"
-                                            style="padding: 4px 8px; border: 1px solid #ccc; font-weight: bold; color: #d4af37;">
-                                            {{ calcularTotalGrupo(grupo) | currency:'BRL' }}
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
+        <div class="overflow-y-auto flex-grow-1 p-3" style="max-height: 60vh;">
+            <div *ngFor="let grupo of produtosModalAgrupadosPorTamanho" class="mb-4">
+                <div class="bg-gold-faded p-2 px-3 border-round-top-lg border-1 border-gold-faded gold-text font-bold flex justify-content-between align-items-center">
+                    <span>Tamanho {{ grupo.tamanho }}cm</span>
+                    <span class="text-sm bg-gold-faded gold-text px-2 border-round border-1 border-gold-faded">Subtotal: {{ calcularTotalGrupo(grupo) | currency:'BRL' }}</span>
                 </div>
-                <!-- Mensagem se vazio -->
-                <div class="col-12 text-center py-5 text-muted" *ngIf="produtosModalAgrupadosPorTamanho.length === 0">
-                    Nenhum produto encontrado com os filtros informados.
+                <div class="border-1 border-round-bottom-lg border-gold-faded overflow-hidden">
+                    <table class="w-full compact-table">
+                        <thead class="bg-gray-50 border-bottom-1 border-gold-faded">
+                            <tr class="text-left text-xs text-600 gold-text uppercase font-bold">
+                                <th class="p-2 pl-3" *ngIf="!isMobile">Cód</th>
+                                <th class="p-2">Produto</th>
+                                <th class="p-2 text-center" style="width: 130px;">Qtd</th>
+                                <th class="p-2 text-right">Preço</th>
+                                <th class="p-2 pr-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let p of grupo.produtos" class="hover:bg-gray-50 border-bottom-1 border-gray-100">
+                                <td class="p-2 pl-3 text-sm text-700" *ngIf="!isMobile">#{{ p.codigo }}</td>
+                                <td class="p-2 text-sm font-medium text-900">
+                                    <div class="flex flex-column">
+                                        {{ p.nome }}
+                                        <span class="text-xs text-500 md:hidden">Cód: #{{ p.codigo }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-1 text-center">
+                                    <p-inputNumber [(ngModel)]="p.quantidadeSelecionada" [showButtons]="true" 
+                                                   buttonLayout="horizontal" spinnerMode="horizontal" 
+                                                   inputStyleClass="text-center w-2rem p-inputtext-sm p-1"
+                                                   incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                   [min]="0" class="inline-block p-inputnumber-sm compact-qty">
+                                    </p-inputNumber>
+                                </td>
+                                <td class="p-2 text-right text-sm text-900">{{ p.preco | currency:'BRL' }}</td>
+                                <td class="p-2 pr-3 text-right text-sm font-bold gold-text">
+                                    {{ ((p.quantidadeSelecionada || 0) * (p.preco || 0)) | currency:'BRL' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-
-        <!-- Rodapé Fixo Modernizado -->
-        <div class="modal-footer-fixed">
-            <div class="footer-summary">
-                <div class="summary-item">
-                    <span class="summary-label">ITENS</span>
-                    <div class="summary-value">
-                        <i class="fa fa-shopping-cart"></i>
-                        <span>{{ totalModalAlternativoQtd }}</span>
-                    </div>
-                </div>
-                <div class="summary-divider"></div>
-                <div class="summary-item highlight">
-                    <span class="summary-label">TOTAL GERAL</span>
-                    <div class="summary-value gold">
-                        <i class="fa fa-wallet"></i>
-                        <span>{{ totalModalAlternativo | currency:'BRL' }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-actions">
-                <button type="button" class="btn-loja-cancelar"
-                    (click)="fecharModalProdutosAlternativo()">Cancelar</button>
-                <button type="button" class="btn-loja-add" (click)="adicionarProdutosModal()">
-                    <i class="fa fa-check"></i> Adicionar
-                </button>
+            
+            <div *ngIf="produtosModalAgrupadosPorTamanho.length === 0" class="text-center py-5">
+                <i class="pi pi-search text-4xl text-400 mb-3 gold-text"></i>
+                <p class="text-600">Nenhum produto encontrado.</p>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Frame de Aviso PDF -->
-<div class="modal-overlay" *ngIf="avisoPdf">
-    <div class="modal-content">
-        <h2 class="cinzel-font">Gerando PDF</h2>
-        <p>O PDF do pedido está sendo gerado. Caso não abra automaticamente em uma nova aba, por favor, autorize a
-            abertura de janelas (pop-ups) no seu navegador.</p>
-        <button class="btn btn-primary" (click)="fecharAvisoPdf()">OK</button>
+    <!-- Rodapé Estilo Loja -->
+    <div class="p-4 border-top-1 border-gold-faded flex flex-column md:flex-row md:justify-content-between align-items-center gap-3 bg-gray-50 border-round-bottom-xl">
+        <div class="flex gap-4">
+            <div class="flex flex-column align-items-start">
+                <span class="text-xs text-700 font-bold uppercase gold-text">Itens Selecionados</span>
+                <span class="text-xl font-bold text-900">{{ totalModalAlternativoQtd }}</span>
+            </div>
+            <div class="flex flex-column align-items-start">
+                <span class="text-xs text-700 font-bold uppercase gold-text">Valor Total</span>
+                <span class="text-xl font-bold gold-text">{{ totalModalAlternativo | currency:'BRL' }}</span>
+            </div>
+        </div>
+        <div class="flex gap-2 w-full md:w-auto">
+            <button pButton label="Cancelar" icon="pi pi-times" 
+                    class="p-button-text p-button-secondary border-round-lg flex-grow-1 md:flex-grow-0" 
+                    (click)="fecharModalProdutosAlternativo()"></button>
+            <button pButton label="Adicionar Produtos" icon="pi pi-shopping-cart" 
+                    class="btn-gold shadow-2 border-round-lg flex-grow-1 md:flex-grow-0" 
+                    (click)="adicionarProdutosModal()"></button>
+        </div>
     </div>
-</div>
+</p-dialog>
+
+<!-- Modal: Foto do Produto (Estilo Loja) -->
+<p-dialog [(visible)]="exibirVisualizacaoImagem" [modal]="true" [dismissableMask]="true" 
+          [style]="{width: '90vw', maxWidth: '800px'}" [showHeader]="false"
+          styleClass="zoom-dialog-minimal" maskStyleClass="darker-overlay" (onHide)="fecharVisualizacaoImagem()">
+    <div class="flex flex-column align-items-center justify-content-center p-0">
+        <div class="relative inline-block" style="width: fit-content;">
+            <button pButton icon="pi pi-times" class="close-zoom-btn p-button-rounded p-button-text" 
+                    (click)="fecharVisualizacaoImagem()"></button>
+            <img *ngIf="imagemUrlVisualizacao" [src]="imagemUrlVisualizacao | ociImage" 
+                 class="zoom-img-fixed shadow-4"
+                 (error)="imagemUrlVisualizacao=''">
+            <div *ngIf="!imagemUrlVisualizacao" class="p-8 surface-100 border-round text-center shadow-2">
+                <i class="pi pi-image text-400 text-6xl mb-3"></i>
+                <p class="text-700 font-bold m-0">Produto sem imagem</p>
+            </div>
+        </div>
+    </div>
+</p-dialog>
+
+<!-- Modal: Sucesso ao Salvar -->
+<p-dialog [(visible)]="exibirSucesso" header="Pedido Salvo!" [modal]="true" [style]="{width: '400px'}" [closable]="false">
+    <div class="text-center py-4">
+        <i class="pi pi-check-circle text-green-500 text-7xl mb-4"></i>
+        <h3 class="font-bold text-2xl text-900 mb-2">Concluído!</h3>
+        <p class="text-700">O pedido foi salvo com sucesso.</p>
+        <p class="text-600 mt-3">Deseja gerar o PDF do resumo agora?</p>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-content-center">
+            <button pButton label="Não" (click)="confirmarPdf(false)" class="p-button-text p-button-secondary"></button>
+            <button pButton label="Sim, Gerar PDF" icon="pi pi-file-pdf" (click)="confirmarPdf(true)" class="btn-gold"></button>
+        </div>
+    </ng-template>
+</p-dialog>

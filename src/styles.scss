@@ -95,11 +95,21 @@ p-menubar, .p-menubar {
     z-index: 1000;
 }
 
-.p-menubar .p-menuitem-link:hover {
+.p-menubar .p-menuitem-link:hover,
+.p-menubar .p-menuitem-link.p-menuitem-link-active,
+.p-menubar .p-menuitem.p-menuitem-active > .p-menuitem-link {
     background: rgba(212, 175, 55, 0.15) !important;
 }
 
-.p-menubar .p-menuitem-link:hover .p-menuitem-text {
+.p-menubar .p-menuitem-link:focus,
+.p-menubar .p-menuitem-link:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.p-menubar .p-menuitem-link:hover .p-menuitem-text,
+.p-menubar .p-menuitem-link.p-menuitem-link-active .p-menuitem-text,
+.p-menubar .p-menuitem.p-menuitem-active > .p-menuitem-link .p-menuitem-text {
     color: var(--primary-gold) !important;
 }
 
@@ -181,8 +191,22 @@ p-menubar, .p-menubar {
     z-index: 1001;
 }
 
-.p-tieredmenu .p-menuitem-link:hover {
+.p-tieredmenu .p-menuitem-link:hover,
+.p-tieredmenu .p-menuitem-link.p-menuitem-link-active,
+.p-tieredmenu .p-menuitem.p-menuitem-active > .p-menuitem-link {
     background: rgba(212, 175, 55, 0.15) !important;
+}
+
+.p-tieredmenu .p-menuitem-link:focus,
+.p-tieredmenu .p-menuitem-link:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.p-tieredmenu .p-menuitem-link:hover .p-menuitem-text,
+.p-tieredmenu .p-menuitem-link.p-menuitem-link-active .p-menuitem-text,
+.p-tieredmenu .p-menuitem.p-menuitem-active > .p-menuitem-link .p-menuitem-text {
+    color: var(--primary-gold) !important;
 }
 
 /* Mobile TieredMenu Accordion-like behavior */

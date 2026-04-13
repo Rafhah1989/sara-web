@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { PedidoService, Pedido, PedidoProduto } from '../../../services/pedido.service';
 import { UsuarioService } from '../../../services/usuario.service';
@@ -12,6 +12,7 @@ import { of, Observable } from 'rxjs';
 import { MetodoPagamentoAutorizado } from '../../../models/metodo-pagamento-autorizado.enum';
 import { OpcaoParcelamentoService } from '../../../services/opcao-parcelamento.service';
 import { OpcaoParcelamento } from '../../../models/opcao-parcelamento.model';
+import { MenuItem } from 'primeng/api';
 
 @Component({
     selector: 'app-pedido-form',
@@ -54,6 +55,7 @@ export class PedidoFormComponent implements OnInit {
     parcelasGeradas: { 
         id?: number, 
         dataVencimento: string, 
+        dataVencimentoDate?: Date,
         valor: number, 
         valorFormatado?: string, 
         pago: boolean, 
@@ -62,6 +64,7 @@ export class PedidoFormComponent implements OnInit {
         pagamentoOnline?: boolean,
         pagamentoOnlineSalvo?: boolean,
         pixCopiaECola?: string,
+        pixQrCode?: string,
         boletoPdfUrl?: string,
         boletoLinhaDigitavel?: string,
         boletoCodigoBarras?: string,
@@ -69,8 +72,9 @@ export class PedidoFormComponent implements OnInit {
         dataExpiracao?: string
     }[] = [];
 
-    // Modal Alternativo State
+    // Modal Produtos Alternativo (Bulk Add)
     exibirModalProdutosAlternativo: boolean = false;
+    tamanhosDisponiveisModal: string[] = [];
     produtosModal: any[] = [];
     produtosModalFiltrados: any[] = [];
     filtroModalNome: string = '';
@@ -79,10 +83,24 @@ export class PedidoFormComponent implements OnInit {
     filtroModalPrecoMax: string = '';
     produtosModalAgrupadosPorTamanho: { tamanho: string, produtos: any[] }[] = [];
     itemMenuAcoesParcelaAberto: number | null = null;
+    filtroModalPrecoMin_num: number | null = null;
+    filtroModalPrecoMax_num: number | null = null;
 
     produtoService: ProdutoService;
     route: ActivatedRoute;
     router: Router;
+    isMobile: boolean = window.innerWidth < 960;
+    menuItensAcao: MenuItem[] = [];
+    menuItensAcaoParcela: MenuItem[] = [];
+    itemSelecionadoParaMenu: any = null;
+    indiceSelecionadoParaMenu: number = -1;
+    parcelaSelecionadaParaMenu: any = null;
+    indiceParcelaSelecionadaParaMenu: number = -1;
+
+    @HostListener('window:resize', ['$event'])
+    onResize(event: any) {
+        this.isMobile = event.target.innerWidth < 960;
+    }
 
     private freteConfig: any = null; // Store freight config
 
@@ -110,6 +128,7 @@ export class PedidoFormComponent implements OnInit {
             observacao: [''],
             valorTotal: [{ value: 0, disabled: true }],
             pagamentoOnline: [false],
+            frete_num: [0],
             itens: this.fb.array([])
         });
     }
@@ -138,31 +157,134 @@ export class PedidoFormComponent implements OnInit {
             }
         });
         this.carregarSituacoes();
-        
-        // Disable fields for CLIENTE globally
-        if (!this.isAdmin) {
-            this.pedidoForm.get('desconto')?.disable();
-            this.pedidoForm.get('frete')?.disable();
-            this.pedidoForm.get('situacao')?.disable();
-            this.pedidoForm.get('usuarioNome')?.disable();
+        this.inicializarMenuAcoes();
+        this.applyFormPermissions();
 
-            if (this.modoEdicao) {
-                this.pedidoForm.get('formaPagamentoId')?.disable();
-                this.pedidoForm.get('pagamentoOnline')?.disable();
-            } else {
-                // Se é um NOVO pedido e é CLIENTE, já carrega os dados dele
-                const userId = this.authService.getUsuarioIdDoToken();
-                if (userId) {
-                    this.usuarioService.buscarPorId(userId).subscribe(u => {
-                        this.selecionarUsuario(u);
-                    });
-                }
+        if (!this.isAdmin && !this.modoEdicao) {
+            // Se é um NOVO pedido e é CLIENTE, já carrega os dados dele
+            const userId = this.authService.getUsuarioIdDoToken();
+            if (userId) {
+                this.usuarioService.buscarPorId(userId).subscribe(u => {
+                    this.selecionarUsuario(u);
+                });
             }
         }
 
-        if (this.isAdmin) {
-            this.setupBuscaUsuarios();
+    }
+
+    inicializarMenuAcoes(): void {
+        this.menuItensAcao = [
+            {
+                label: 'Ver Foto',
+                icon: 'pi pi-image',
+                command: () => this.visualizarImagem(this.itemSelecionadoParaMenu)
+            },
+            {
+                label: 'Remover',
+                icon: 'pi pi-trash',
+                command: () => this.removerItem(this.indiceSelecionadoParaMenu)
+            }
+        ];
+
+        this.menuItensAcaoParcela = [
+            {
+                label: 'Sincronizar',
+                icon: 'pi pi-sync',
+                command: () => this.verificarPagamentoManualParcela(this.parcelaSelecionadaParaMenu)
+            },
+            {
+                label: 'Notificar',
+                icon: 'pi pi-envelope',
+                command: () => this.notificarCobrancaPagamento(this.parcelaSelecionadaParaMenu)
+            },
+            {
+                label: 'Ver Pagamento',
+                icon: 'pi pi-qrcode', // Atualizado dinamicamente
+                command: () => this.visualizarPagamentoOnlineParcela(this.parcelaSelecionadaParaMenu)
+            },
+            {
+                label: 'Remover',
+                icon: 'pi pi-trash',
+                command: () => this.removerPagamentoManual(this.indiceParcelaSelecionadaParaMenu)
+            }
+        ];
+    }
+
+    applyFormPermissions(): void {
+        const isBloqueado = this.isPedidoBloqueadoParaUsuario;
+        
+        // Campos principais
+        if (this.isAdmin && !isBloqueado) {
+            this.pedidoForm.enable({ emitEvent: false });
+        } else {
+            this.pedidoForm.disable({ emitEvent: false });
+            // Admins podem MUDAR situação mesmo se estiver bloqueado? 
+            // Geralmente sim, mas se for bloqueado (CANCELADO/ENTREGUE), talvez nem Admin devesse.
+            // Para segurança, permitimos Admin se não estiver bloqueado.
         }
+
+        // Casos específicos para Admin
+        if (this.isAdmin) {
+            this.pedidoForm.get('valorTotal')?.disable({ emitEvent: false });
+            // Se está bloqueado, Admin ainda pode querer mudar Situação ou Observação as vezes?
+            // Vamos seguir a regra de isPedidoBloqueadoParaUsuario.
+        }
+
+        // Casos específicos para Cliente
+        if (!this.isAdmin) {
+            this.pedidoForm.get('desconto')?.disable({ emitEvent: false });
+            this.pedidoForm.get('frete_num')?.disable({ emitEvent: false });
+            this.pedidoForm.get('situacao')?.disable({ emitEvent: false });
+            this.pedidoForm.get('usuarioNome')?.disable({ emitEvent: false });
+            this.pedidoForm.get('valorTotal')?.disable({ emitEvent: false });
+
+            if (isBloqueado || this.modoEdicao) {
+                this.pedidoForm.get('formaPagamentoId')?.disable({ emitEvent: false });
+                this.pedidoForm.get('pagamentoOnline')?.disable({ emitEvent: false });
+            } else {
+                this.pedidoForm.get('formaPagamentoId')?.enable({ emitEvent: false });
+                this.pedidoForm.get('pagamentoOnline')?.enable({ emitEvent: false });
+            }
+        }
+
+        // Itens do Pedido (Produtos)
+        this.itens.controls.forEach(control => {
+            const group = control as FormGroup;
+            if (this.isAdmin && !isBloqueado) {
+                group.get('quantidade')?.enable({ emitEvent: false });
+                group.get('valor')?.enable({ emitEvent: false });
+            } else {
+                group.get('quantidade')?.disable({ emitEvent: false });
+                group.get('valor')?.disable({ emitEvent: false });
+            }
+        });
+    }
+
+    abrirMenuAcoes(event: any, menu: any, item: any, index: number): void {
+        this.itemSelecionadoParaMenu = item;
+        this.indiceSelecionadoParaMenu = index;
+        
+        // Atualiza visibilidade baseado no estado do item/pedido
+        this.menuItensAcao[0].visible = !!(item.temImagem || item.imagem);
+        this.menuItensAcao[1].visible = this.isAdmin && this.pedidoForm.get('situacao')?.value === 'PENDENTE';
+        
+        menu.toggle(event);
+    }
+
+    abrirMenuAcoesParcela(event: any, menu: any, parcela: any, index: number): void {
+        this.parcelaSelecionadaParaMenu = parcela;
+        this.indiceParcelaSelecionadaParaMenu = index;
+
+        const sit = this.pedidoForm.get('situacao')?.value;
+        const isAdmin = this.isAdmin;
+
+        this.menuItensAcaoParcela[0].visible = this.podeExibirSincronizacao(parcela) && isAdmin;
+        this.menuItensAcaoParcela[1].visible = this.podeExibirNotificacaoPagamento(parcela);
+        this.menuItensAcaoParcela[2].visible = this.podeExibirBotaoPagamento(parcela, index);
+        this.menuItensAcaoParcela[2].icon = this.isBoleto(parcela) ? 'pi pi-file-pdf' : 'pi pi-qrcode';
+        this.menuItensAcaoParcela[3].visible = isAdmin && sit === 'PENDENTE';
+
+        menu.toggle(event);
     }
 
     get isPedidoBloqueadoParaUsuario(): boolean {
@@ -194,16 +316,40 @@ export class PedidoFormComponent implements OnInit {
         return this.pedidoForm.get('itens') as FormArray;
     }
 
-    setupBuscaUsuarios(): void {
-        this.pedidoForm.get('usuarioNome')?.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            filter(value => typeof value === 'string' && value.length >= 3),
-            switchMap(value => this.usuarioService.buscarPorNome(value))
-        ).subscribe(usuarios => {
+    searchUser(event: any): void {
+        this.usuarioService.buscarPorNome(event.query).subscribe(usuarios => {
             this.usuariosFiltrados = usuarios;
-            this.showUsuariosDropdown = usuarios.length > 0;
         });
+    }
+
+    onUserSelect(event: any): void {
+        this.selecionarUsuario(event);
+    }
+
+    searchProduct(event: any): void {
+        this.produtoService.buscarPorNome(event.query).subscribe(produtos => {
+            this.produtosFiltrados = produtos.filter(p => p.ativo);
+        });
+    }
+
+    adicionarProdutoDeSakai(event: any): void {
+        this.adicionarProduto(event);
+        this.termoBuscaProdutoPlaceholder = null;
+    }
+
+    termoBuscaProdutoPlaceholder: any = null;
+    
+    get opcoesParcelasOptions(): any[] {
+        return this.opcoesParcelasDisponiveis.map(n => ({
+            label: this.getLabelParcela(n),
+            value: n
+        }));
+    }
+
+    formatDate(date: Date): string {
+        if (!date) return '';
+        const d = new Date(date);
+        return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
     }
 
     selecionarUsuario(usuario: Usuario): void {
@@ -211,7 +357,7 @@ export class PedidoFormComponent implements OnInit {
         
         this.pedidoForm.patchValue({
             usuarioId: usuario.id,
-            usuarioNome: usuario.nome,
+            usuarioNome: usuario,
             desconto: this.calcularDescontoTotal(this.pedidoForm.get('formaPagamentoId')?.value)
         }, { emitEvent: false });
         this.metodoPagamentoAutorizadoCliente = usuario.metodoPagamentoAutorizado;
@@ -231,6 +377,7 @@ export class PedidoFormComponent implements OnInit {
     }
 
     carregarConfiguracaoFrete(usuarioId: number): void {
+        if (!usuarioId) return;
         this.pedidoService.obterSugestaoFrete(usuarioId).subscribe(config => {
             this.freteConfig = config;
             if (!this.modoEdicao) {
@@ -257,8 +404,23 @@ export class PedidoFormComponent implements OnInit {
             this.pedidoForm.get('desconto')?.setValue(descT, { emitEvent: false });
         }
         this.verificarRegrasPagamentoOnline();
-        this.calcularTotais(this.modoEdicao, formaId); // Passa o ID novo explicitamente
-        // Nota: calcularTotais já chama atualizarOpcoesParcelamento
+        this.calcularTotais(this.modoEdicao, formaId);
+    }
+
+    onFreteChange(event: any): void {
+        const val = event.value || 0;
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        this.pedidoForm.get('frete')?.setValue(fmt, { emitEvent: false });
+        this.onItemChange();
+    }
+
+    onItemValueChange(event: any, index: number): void {
+        const val = event.value || 0;
+        const item = this.itens.at(index);
+        const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        item.get('valor')?.setValue(fmt, { emitEvent: false });
+        item.get('valor_num')?.setValue(val, { emitEvent: false });
+        this.onItemChange();
     }
 
     onDescontoManualChange(): void {
@@ -369,11 +531,15 @@ export class PedidoFormComponent implements OnInit {
             const formaId = this.pedidoForm.get('formaPagamentoId')?.value;
             const fp = this.formasPagamento.find(f => Number(f.id) === Number(formaId));
             const descForma = (fp && this.ativarDescontoAVista) ? (fp.desconto || 0) : 0;
-            const suffix = descForma > 0 ? ` (-${descForma}% à vista)` : '';
+            const suffix = (descForma > 0 && !this.isMobile) ? ` (-${descForma}% à vista)` : '';
             return `À vista (1x) de ${valorFmt}${suffix}`;
         }
 
         if (!this.opcaoParcelamentoSelecionada) return `${n}x de ${valorFmt}`;
+
+        if (this.isMobile) {
+            return `${n}x de ${valorFmt}`;
+        }
 
         const interval = this.opcaoParcelamentoSelecionada.diasVencimentoIntervalo;
         const dias: number[] = [];
@@ -434,6 +600,7 @@ export class PedidoFormComponent implements OnInit {
 
             this.parcelasGeradas.push({
                 dataVencimento: data.toISOString().split('T')[0],
+                dataVencimentoDate: data,
                 valor: v,
                 valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v),
                 pago: false,
@@ -553,6 +720,14 @@ export class PedidoFormComponent implements OnInit {
                 ...p,
                 quantidadeSelecionada: 0
             }));
+
+            // Calcula tamanhos disponíveis dinamicamente
+            const uniqueSizes = [...new Set(this.produtosModal
+                .filter(p => p.tamanho != null)
+                .map(p => p.tamanho!.toString()))]
+                .sort((a, b) => Number(a) - Number(b));
+            this.tamanhosDisponiveisModal = uniqueSizes;
+
             this.filtrarProdutosModal();
         });
     }
@@ -584,20 +759,12 @@ export class PedidoFormComponent implements OnInit {
                 matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
             }
 
-            if (this.filtroModalPrecoMin) {
-                let clearMin = this.filtroModalPrecoMin.toString().replace(/[^\d,]/g, '').replace(',', '.');
-                let parsedMin = parseFloat(clearMin);
-                if (!isNaN(parsedMin) && parsedMin > 0) {
-                    matchPreco = p.preco !== undefined && p.preco !== null && p.preco >= parsedMin;
-                }
+            if (this.filtroModalPrecoMin_num) {
+                matchPreco = p.preco !== undefined && p.preco !== null && p.preco >= this.filtroModalPrecoMin_num;
             }
             
-            if (this.filtroModalPrecoMax && matchPreco) {
-                let clearMax = this.filtroModalPrecoMax.toString().replace(/[^\d,]/g, '').replace(',', '.');
-                let parsedMax = parseFloat(clearMax);
-                if (!isNaN(parsedMax) && parsedMax > 0) {
-                    matchPreco = p.preco !== undefined && p.preco !== null && p.preco <= parsedMax;
-                }
+            if (this.filtroModalPrecoMax_num && matchPreco) {
+                matchPreco = p.preco !== undefined && p.preco !== null && p.preco <= this.filtroModalPrecoMax_num;
             }
 
             return matchNome && matchTamanho && matchPreco;
@@ -702,8 +869,9 @@ export class PedidoFormComponent implements OnInit {
                     produtoNome: [p.nome],
                     produtoCodigo: [p.codigo],
                     tamanho: [p.tamanho],
-                    quantidade: [{ value: p.quantidadeSelecionada, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' && !this.isAdmin }, [Validators.required, Validators.min(0.01)]],
+                    quantidade: [{ value: Number(p.quantidadeSelecionada || 1), disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' && !this.isAdmin }, [Validators.required, Validators.min(0.01)]],
                     valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
+                    valor_num: [{ value: Number(p.preco || 0), disabled: !this.isAdmin }],
                     total: [{ value: 0, disabled: true }],
                     imagem: [p.imagem],
                     temImagem: [p.temImagem],
@@ -747,8 +915,10 @@ export class PedidoFormComponent implements OnInit {
                 tamanho: [produto.tamanho],
                 quantidade: [{ value: 1, disabled: this.pedidoForm.get('situacao')?.value !== 'PENDENTE' }, [Validators.required, Validators.min(0.01)]],
                 valor: [{ value: valorInicialFormatado, disabled: !this.isAdmin }, Validators.required],
+                valor_num: [valorInicial],
                 total: [{ value: 0, disabled: true }],
                 imagem: [produto.imagem],
+                temImagem: [produto.temImagem],
                 peso: [produto.peso || 0]
             });
             
@@ -815,6 +985,7 @@ export class PedidoFormComponent implements OnInit {
         }).format(Number(value));
 
         this.itens.at(controlIndex).get('valor')?.setValue(formatted, { emitEvent: false });
+        this.itens.at(controlIndex).get('valor_num')?.setValue(Number(value), { emitEvent: false });
 
         this.calcularTotais();
     }
@@ -824,7 +995,7 @@ export class PedidoFormComponent implements OnInit {
         let value = input.value.replace(/\D/g, '');
         value = (Number(value) / 100).toFixed(2);
         const formatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
-        this.pedidoForm.patchValue({ frete: formatted }, { emitEvent: false });
+        this.pedidoForm.patchValue({ frete: formatted, frete_num: Number(value) }, { emitEvent: false });
         this.calcularTotais();
     }
 
@@ -879,7 +1050,7 @@ export class PedidoFormComponent implements OnInit {
         }
 
         const formatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(freteCalculado);
-        this.pedidoForm.patchValue({ frete: formatted }, { emitEvent: false });
+        this.pedidoForm.patchValue({ frete: formatted, frete_num: freteCalculado }, { emitEvent: false });
 
         this.calcularTotais();
     }
@@ -956,6 +1127,10 @@ export class PedidoFormComponent implements OnInit {
         const minParcelado = op ? (op.valorMinimoParcela * 2) : Infinity;
 
         const menorMinimo = Math.min(minVista, minParcelado);
+        
+        // Se o total é 0 (novo pedido), permite selecionar para que o sistema possa calcular as regras
+        if (valorTotal === 0) return true;
+
         return valorTotal >= menorMinimo;
     }
 
@@ -984,18 +1159,15 @@ export class PedidoFormComponent implements OnInit {
 
                 this.pedidoForm.patchValue({
                     usuarioId: pedido.usuarioId,
-                    usuarioNome: pedido.usuarioNome,
+                    usuarioNome: { nome: pedido.usuarioNome },
                     formaPagamentoId: pedido.formaPagamentoId ? Number(pedido.formaPagamentoId) : null,
                     desconto: pedido.desconto,
                     frete: freteFormatted,
                     situacao: pedido.situacao,
                     observacao: pedido.observacao,
-                    pagamentoOnline: pedido.pagamentoOnline
+                    pagamentoOnline: pedido.pagamentoOnline,
+                    frete_num: pedido.frete || 0
                 }, { emitEvent: false });
-
-                if (!this.isAdmin) {
-                    this.pedidoForm.get('formaPagamentoId')?.disable();
-                }
 
                 this.notaFiscalPath = pedido.notaFiscalPath;
                 this.carregarConfiguracaoFrete(pedido.usuarioId);
@@ -1008,6 +1180,7 @@ export class PedidoFormComponent implements OnInit {
                         return {
                             id: p.id,
                             dataVencimento: p.dataVencimento.toString(),
+                            dataVencimentoDate: new Date(p.dataVencimento + 'T12:00:00'),
                             valor: p.valor,
                             valorFormatado: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor),
                             pago: p.pago,
@@ -1042,14 +1215,18 @@ export class PedidoFormComponent implements OnInit {
                         produtoNome: [p.produtoNome],
                         produtoCodigo: [p.produtoCodigo],
                         tamanho: [p.tamanho],
-                        quantidade: [{ value: p.quantidade, disabled: pedido.situacao !== 'PENDENTE' }, Validators.required],
+                        quantidade: [{ value: Number(p.quantidade || 0), disabled: pedido.situacao !== 'PENDENTE' }, Validators.required],
                         valor: [{ value: valorFormatted, disabled: !this.isAdmin }, Validators.required],
-                        total: [{ value: p.quantidade * p.valor, disabled: true }],
+                        valor_num: [{ value: Number(p.valor || 0), disabled: !this.isAdmin }],
+                        total: [{ value: Number(p.quantidade || 0) * Number(p.valor || 0), disabled: true }],
                         imagem: [p.imagem],
+                        temImagem: [p.temImagem],
                         peso: [p.peso || 0]
                     });
                     this.itens.push(itemForm);
                 });
+                
+                this.pedidoForm.get('frete_num')?.setValue(pedido.frete || 0, { emitEvent: false });
 
                 // 3. Carregar dados do usuário e disparar recálculo final
                 this.usuarioService.buscarPorId(pedido.usuarioId).subscribe({
@@ -1069,6 +1246,7 @@ export class PedidoFormComponent implements OnInit {
 
                         this.filtrarMetodosPagamentoAutorizados();
                         this.calcularTotais(true);
+                        this.applyFormPermissions(); // Novo: aplica permissões após carregar tudo
                         
                         setTimeout(() => this.isCarregandoPedido = false, 500);
                     },
@@ -1431,17 +1609,14 @@ export class PedidoFormComponent implements OnInit {
     }
 
     gerarCatalogoPdf(): void {
-        this.avisoPdf = true;
         this.produtoService.gerarCatalogo().subscribe({
             next: (blob) => {
                 const url = window.URL.createObjectURL(blob);
                 window.open(url, '_blank');
-                // Mantém o aviso aberto conforme solicitado
             },
             error: (err) => {
                 console.error('Erro ao gerar catálogo', err);
                 alert('Ocorreu um erro ao gerar o catálogo.');
-                this.avisoPdf = false;
             }
         });
     }

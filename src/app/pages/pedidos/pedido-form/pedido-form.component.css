@@ -1,859 +1,430 @@
-.page-container {
-    padding: 2rem;
-}
-
-.payment-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.payment-radio {
-    cursor: pointer;
-}
-
-.payment-radio input {
-    display: none;
-}
-
-.payment-card {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #fcfcfc;
-    transition: all 0.2s ease-in-out;
-}
-
-.payment-card i {
-    font-size: 1.2rem;
-    color: #666;
-}
-
-.payment-radio.disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.payment-radio.disabled .payment-card {
-    border-color: #eee;
-    background: #fafafa;
-}
-
-.badget-minimo-alert {
-    display: block;
-    font-size: 0.75rem;
-    color: #cc0000;
-    font-weight: 600;
-    margin-top: 5px;
-}
-
-.payment-radio input:checked+.payment-card {
-    border-color: var(--primary-color);
-    background-color: #f7f1e3;
-}
-
-.payment-radio input:checked+.payment-card i,
-.payment-radio input:checked+.payment-card span {
-    color: var(--primary-color);
-    font-weight: bold;
-}
-
-/* Page title is now handled by .header-section */
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.back-link {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 1.1rem;
-}
-
-.card {
-    background: white;
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
-}
-
-.pedido-form h2 {
-    color: var(--primary-gold-dark);
-    margin-bottom: 1.5rem;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-section {
-    border: 3px solid var(--secondary-dark);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.form-section legend {
-    font-weight: bold;
-    padding: 0 10px;
-    color: var(--secondary-dark);
-    font-size: 20px;
-    background: white;
-}
-
-.form-row {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.2rem;
-}
-
-.form-row:last-child {
-    margin-bottom: 0;
-}
-
-.form-group {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    min-width: 200px;
-}
-
-.form-group.small {
-    flex: 1;
-    min-width: 80px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    font-size: 1rem;
-    transition: border-color 0.3s;
-    font-family: inherit;
-    padding: 8px;
-    border: 2px solid #000;
-    border-radius: 4px;
-}
-
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
-    border-color: #f44336;
-}
-
-.form-control {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.total-display {
-    font-size: 24px;
-    font-weight: bold;
-    color: #d4af37;
-    margin-top: 5px;
-}
-
-.autocomplete-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 2px solid #000;
-    border-top: none;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.product-search-box .autocomplete-dropdown {
-    margin-top: 0;
-}
-
-.dropdown-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-
-.dropdown-item:hover {
-    background-color: #f8f8f8;
-}
-
-.product-search-box {
-    position: relative;
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.form-control.small {
-    padding: 5px;
-}
-
-.items-list table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.items-list th {
-    text-align: left;
-    padding: 1rem;
-    border-bottom: 2px solid #eee;
-    color: var(--secondary-dark);
-    font-weight: bold;
-}
-
-.items-list td {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.items-list tr:last-child td {
-    border-bottom: none;
-}
-
-.btn-icon {
-    background: none;
-    border: 1px solid #000;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    margin-right: 5px;
-}
-
-.btn-icon:hover {
-    background-color: #f0f0f0;
-}
-
-.btn-icon.danger {
-    color: red;
-    border-color: red;
-}
-
-.btn-icon.danger:hover {
-    background-color: #fff0f0;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    text-align: center;
-    border: 5px solid #d4af37;
-    min-width: 400px;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 25px;
-}
-
-.img-preview {
-    max-width: 100%;
-    max-height: 70vh;
-}
-
-.image-modal {
-    max-width: 80%;
-}
-
-.image-modal-overlay {
-    z-index: 10050 !important;
-}
-
-.large-modal {
-    width: 95%;
-    max-width: 1200px;
-    padding: 20px;
-    text-align: left;
-    max-height: 95vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Importante para o rodapé fixo */
-}
-
-.large-modal h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Custom Modal Buttons based on Loja */
-.btn-loja-add {
-    background-color: #3b6b91;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-transform: uppercase;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-bottom: 20px;
-    border-radius: var(--border-radius, 4px);
-}
-
-.btn-loja-add:hover {
-    background-color: #4CAF50;
-}
-
-.btn-loja-cancelar {
-    background-color: #f28b82;
-    /* Light red */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-transform: uppercase;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-radius: var(--border-radius, 4px);
-}
-
-.btn-loja-cancelar:hover {
-    background-color: #e53935;
-    /* Brighter, more vivid red */
-}
-
-/* Catálogo PDF Styles */
-.btn-catalogo {
-    background-color: #d4af37;
-    color: white;
-    border: 2px solid #000000; /* Borda preta solicitada */
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-}
-
-.btn-catalogo:hover {
-    background-color: #b8962d;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.tooltip-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.tooltip-trigger {
-    color: #333; /* Cor mais escura para combinar com a borda */
-    font-size: 1.3rem;
-    cursor: help;
-}
-
-.tooltip-box {
-    visibility: hidden;
-    width: 250px;
-    background-color: #000000; /* Preto sólido */
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 12px;
-    position: absolute;
-    z-index: 1000;
-    top: 50%;
-    left: 40px; /* Posicionar à direita do ícone */
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
-    font-size: 0.85rem;
-    line-height: 1.4;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    white-space: normal; /* Garante que o texto quebre linhas */
-}
-
-.tooltip-box::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 100%; /* Seta para a esquerda */
-    margin-top: -8px;
-    border-width: 8px;
-    border-style: solid;
-    border-color: transparent #000000 transparent transparent;
-}
-
-
-.modal-footer-fixed {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-    padding: 15px 20px;
-    border-top: 1px solid #e0e0e0;
-    background: #ffffff;
-    flex-shrink: 0;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
-
-.footer-summary {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-}
-
-.summary-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.summary-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: #888;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
-}
-
-.summary-value {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #444;
-}
-
-.summary-value i {
-    font-size: 0.9rem;
-    color: #aaa;
-}
-
-.summary-value.gold {
-    color: #c5a059;
-    font-size: 1.4rem;
-}
-
-.summary-value.gold i {
-    color: #c5a059;
-}
-
-.summary-divider {
-    width: 1px;
-    height: 30px;
-    background: #eee;
-}
-
-.footer-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.footer-actions button {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 0 25px;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
-}
-
-/* Modal Filters Layout */
-.modal-filters-row {
-    display: flex;
-    gap: 15px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    background: #f9f9f9;
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #eee;
-}
-
-.modal-filters-row label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-}
-
-.modal-filters-row .form-control {
-    height: 32px;
-    font-size: 0.9rem;
-    padding: 4px 10px;
-}
-
-.filter-item-name { flex: 2; min-width: 200px; }
-.filter-item-size { flex: 0.5; min-width: 80px; }
-.filter-item-price { flex: 1.5; min-width: 180px; }
-
-.price-inputs {
-    display: flex;
-    gap: 5px;
-}
-
-.modal-filter-actions {
-    display: flex;
-    gap: 8px;
-}
-
-
-/* Hide number input arrows (spinners) */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none !important;
-  margin: 0 !important;
-}
-
-input[type=number] {
-  -moz-appearance: textfield !important;
-  appearance: textfield !important;
-}
-
-/* Quantity Control */
-.qtd-control { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 0 !important; width: fit-content !important; margin: 0 auto !important; }
-
-.btn-qty { background-color: #f8f9fa !important; border: 1px solid #ced4da !important; width: 28px !important; height: 32px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; }
-.btn-qty:hover { background-color: #e2e6ea !important; }
-
-.input-qtd-mobile { width: 45px !important; text-align: center !important; border-radius: 0 !important; margin: 0 !important; height: 32px !important; padding: 0 !important; font-size: 0.9rem !important; border: 1px solid #ced4da !important; border-left: none !important; border-right: none !important; box-sizing: border-box !important; }
-
-.valor-input-mobile { width: 95px !important; height: 32px !important; padding: 2px 5px !important; font-size: 0.85rem !important; box-sizing: border-box !important; }
-
-@media (max-width: 768px) {
-  .page-container { padding: 1rem; }
-  .form-section { padding: 1rem; }
-  .items-list table { font-size: 0.8rem !important; }
-  .items-list th, .items-list td { padding: 6px 2px !important; vertical-align: middle !important; }
-  
-  .input-qtd-mobile { width: 32px !important; height: 28px !important; font-size: 0.8rem !important; }
-  .btn-qty { width: 24px !important; height: 28px !important; display: flex !important; }
-  .valor-input-mobile { width: 68px !important; height: 28px !important; font-size: 0.75rem !important; padding: 2px !important; }
-  
-  /* Parcelamento Mobile */
-  .installment-table-preview table { font-size: 0.75rem !important; }
-  .installment-table-preview th, .installment-table-preview td { padding: 6px 4px !important; }
-  .installment-table-preview input.form-control-sm { width: 85px !important; font-size: 0.75rem !important; height: 28px !important; }
-  .installment-table-preview input[type="date"] { width: 110px !important; font-size: 0.7rem !important; height: 28px !important; padding: 2px !important; }
-  .badge { font-size: 0.65rem !important; min-width: 60px !important; padding: 3px 6px !important; }
-
-  .mobile-actions {
-    position: relative;
-    display: flex;
-    justify-content: center;
-  }
-
-  .btn-sandwich {
-    background: none;
-    border: 1px solid #ddd;
-    color: #666;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  .actions-menu {
-    position: absolute;
-    right: 0;
-    top: 35px;
-    background: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    border-radius: 8px;
-    z-index: 1000;
-    min-width: 160px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid #eee;
-  }
-
-  .actions-menu button {
-    background: none;
-    border: none;
-    padding: 12px 15px;
-    text-align: left;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    color: #444;
-    width: 100%;
-    transition: background 0.2s;
-  }
-
-  .actions-menu button:hover {
-    background: #f8f9fa;
-  }
-
-  .actions-menu i {
-    width: 16px;
-    text-align: center;
-    color: var(--primary-gold-dark);
-  }
-
-  .actions-menu .text-danger i {
-    color: #dc3545;
-  }
-
-  .qtd-control { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; }
-  
-  .actions { display: table-cell !important; vertical-align: middle !important; text-align: center !important; white-space: nowrap !important; padding: 4px !important; }
-  .actions button { display: inline-flex !important; flex-direction: row !important; margin: 0 2px !important; padding: 4px 5px !important; height: 28px !important; align-items: center !important; justify-content: center !important; }
-  
-  .large-modal { width: 100% !important; height: 100% !important; border-radius: 0 !important; }
-  .modal-footer-fixed { flex-direction: column; gap: 10px; padding: 10px; }
-  .footer-summary { justify-content: space-around; gap: 5px; }
-  .footer-actions { flex-direction: row; }
-  .footer-actions button { flex: 1; height: 38px; }
-}
-
-/* ================== INSTALLMENTS & LOCKING ================== */
-.installment-box {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.form-select-gold {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--primary-color);
-    border-radius: 8px;
-    background-color: #fff;
-    color: #333;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.form-select-gold:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
-    border-color: var(--primary-gold-dark);
-}
-
-.installment-table-preview {
-    margin-top: 15px;
-    background: #fdfdfd;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.installment-table-preview th {
-    padding: 10px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.installment-table-preview td {
-    padding: 12px 10px;
-    vertical-align: middle;
-}
-
-.badge-warning {
-    background-color: #ffc107;
-    color: #856404;
-}
-
-.badge-success {
-    background-color: #28a745;
-    color: #fff;
-}
-
-.alert-warning {
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-}
-
-fieldset[disabled] {
-    opacity: 0.8;
-    cursor: not-allowed;
-}
-
-fieldset[disabled] .form-control,
-fieldset[disabled] select,
-fieldset[disabled] textarea,
-fieldset[disabled] input {
-    background-color: #f8f9fa;
-    pointer-events: none;
-}
-
-.btn-notify {
-    background-color: #c5a059;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-notify:hover {
-    background-color: #b38f4d;
-}
-
-.btn-notify:disabled {
-    background-color: #ccc !important;
-    cursor: not-allowed !important;
-    opacity: 0.7;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-.btn-remove-parc {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: transform 0.2s;
-}
+/* Estilos para o Formulário de Pedidos - Padrão Sakai/PrimeNG */
 
-.btn-remove-parc:hover {
-    transform: scale(1.1);
+.gold-text {
+    color: var(--primary-gold) !important;
 }
 
-.form-select-gold-sm {
-    padding: 4px 8px;
-    border: 1px solid var(--primary-color);
-    border-radius: 4px;
-    font-size: 0.85rem;
-    background-color: #fff;
-    cursor: pointer;
+.bg-gold-subtle {
+    background-color: rgba(212, 175, 55, 0.1) !important;
 }
 
-.btn-outline-gold {
-    background: none;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-gold-dark);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+.border-gold {
+    border-color: var(--primary-gold) !important;
 }
 
-.btn-outline-gold:hover {
-    background-color: #f7f1e3;
-    border-color: var(--primary-gold-dark);
+.cinzel-font {
+    font-family: 'Cinzel', serif;
 }
 
-/* --- Modern Action Buttons (from PedidoList) --- */
-.btn-action {
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 32px;
-    height: 32px;
+/* Custom Gold Buttons */
+::ng-deep .btn-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #f1d592 50%, #d4af37 100%) !important;
+    border: none !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3) !important;
+    transition: all 0.3s ease !important;
 }
 
-.btn-action:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+::ng-deep .btn-gold:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4) !important;
     filter: brightness(1.1);
 }
 
-.btn-pix {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+::ng-deep .btn-gold-outline {
+    border-color: #d4af37 !important;
+    color: #d4af37 !important;
 }
 
-.btn-pdf {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+::ng-deep .btn-gold-outline:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.1) !important;
+    color: #b8962d !important;
 }
 
-.btn-invoice {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+/* Upload Drop Zone */
+.upload-drop-zone {
+    transition: all 0.3s ease;
+    background-color: var(--surface-card);
 }
 
-
-.btn-sync {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+.upload-drop-zone:hover {
+    border-color: var(--primary-gold-dark) !important;
+    background-color: var(--surface-hover);
 }
 
-.btn-email {
-    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+/* Panel Headers Gold */
+::ng-deep .p-panel .p-panel-header {
+    background: var(--surface-section);
+    border-left: 4px solid var(--primary-gold);
 }
 
-.btn-cancel {
-    background: linear-gradient(135deg, #f06157 0%, #ee2432 100%);
+::ng-deep .p-panel .p-panel-header .p-panel-title {
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+/* Success Modal Gold Badge */
+.bg-gold-dark {
+    background-color: #b8962d;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Adjustments for Table */
+@media screen and (max-width: 960px) {
+    ::ng-deep .p-datatable.p-datatable-stack .p-datatable-tbody > tr > td {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .show-mobile {
+        display: flex !important;
+    }
+}
+
+.show-mobile {
+    display: none;
+}
+
+/* Dialog Adjustments */
+::ng-deep .minimal-dialog .p-dialog-content {
+    padding: 0 !important;
+}
+
+::ng-deep .p-inputnumber-buttons-horizontal .p-inputnumber-input {
+    text-align: center;
+}
+
+/* PrimeNG Blue Overrides - Gold Theme */
+::ng-deep .p-radiobutton .p-radiobutton-box.p-highlight {
+    border-color: #d4af37 !important;
+    background: #d4af37 !important;
+}
+
+::ng-deep .p-radiobutton .p-radiobutton-box.p-highlight:not(.p-disabled):hover {
+    border-color: #b8962d !important;
+    background: #b8962d !important;
+}
+
+.card {
+    padding: 2rem;
+    border-radius: 1rem;
+    background: #ffffff;
+}
+
+@media screen and (max-width: 960px) {
+    .card {
+        padding: 0.75rem;
+    }
+}
+
+/* Forçar visual de 'linha' em tabelas que não são mais stack no mobile */
+@media screen and (max-width: 960px) {
+    ::ng-deep .p-datatable:not(.p-datatable-stacked) .p-datatable-tbody > tr > td {
+        padding: 0.5rem 0.25rem !important;
+        font-size: 0.85rem;
+    }
+
+    ::ng-deep .p-datatable:not(.p-datatable-stacked) .p-datatable-thead > tr > th {
+        padding: 0.5rem 0.25rem !important;
+        font-size: 0.8rem;
+    }
+
+    /* Container de rolagem suave se necessário */
+    .p-datatable-wrapper {
+        overflow-x: auto;
+    }
+}
+
+.cinzel-font {
+    font-family: 'Cinzel', serif;
+}
+
+.gold-text {
+    color: #d4af37 !important;
+}
+
+.gold-text-dark {
+    color: #b8860b !important;
 }
 
 .btn-gold {
-    background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+    background: #d4af37 !important;
+    border: 1px solid #d4af37 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
 }
 
-.d-flex {
-    display: flex !important;
+.btn-gold:hover {
+    background: #b8860b !important;
+    border-color: #b8860b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3) !important;
 }
 
-.gap-2 {
-    gap: 0.5rem !important;
+.total-display-box {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border-left: 4px solid #d4af37 !important;
+    letter-spacing: 1px;
 }
 
-.installment-actions-desktop {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+@media screen and (max-width: 960px) {
+    /* Reduz o tamanho da fonte e padding dos inputs dentro de tabelas */
+    :host ::ng-deep .p-datatable .p-inputtext {
+        font-size: 0.8rem !important;
+        padding: 0.3rem 0.4rem !important;
+    }
+
+    /* Ajuste específico para calendários e inputnumbers em tabelas */
+    :host ::ng-deep .p-datatable .p-inputnumber-input,
+    :host ::ng-deep .p-datatable .p-calendar .p-inputtext {
+        text-align: center;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* Espaçamento das células em tabelas compactas */
+    :host ::ng-deep .p-datatable.p-datatable-sm .p-datatable-tbody > tr > td {
+        padding: 0.4rem 0.2rem !important;
+    }
+
+    /* Redução de fonte para o dropdown de parcelamento no mobile */
+    :host ::ng-deep .installment-dropdown.p-dropdown {
+        font-size: 0.75rem !important;
+        border-color: var(--primary-gold) !important;
+    }
+
+    :host ::ng-deep .installment-dropdown.p-dropdown .p-dropdown-label {
+        padding: 0.3rem 0.4rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    :host ::ng-deep .installment-dropdown.p-dropdown .p-dropdown-trigger {
+        width: 2rem;
+    }
 }
 
+@media screen and (max-width: 768px) {
+    .total-display-box {
+        font-size: 2rem !important;
+        padding: 1rem !important;
+    }
+}
 
-.align-items-center {
-    align-items: center !important;
+::ng-deep .p-datepicker {
+    background: var(--surface-overlay) !important;
+}
+
+::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+    border-color: #d4af37 !important;
+    background: #d4af37 !important;
+}
+
+::ng-deep .p-inputnumber-button {
+    background-color: #d4af37 !important;
+    border-color: #d4af37 !important;
+    color: #000 !important;
+}
+
+::ng-deep .p-inputnumber-button:hover {
+    background-color: #b8962d !important;
+    border-color: #b8962d !important;
+}
+
+::ng-deep .p-datepicker .p-datepicker-header {
+    background: var(--surface-section) !important;
+    border-bottom: 1px solid var(--surface-border) !important;
+}
+
+::ng-deep .p-datepicker table td > span.p-highlight {
+    background: #d4af37 !important;
+    color: #000 !important;
+}
+
+/* Custom icon color and visibility - Force Gold */
+::ng-deep .gold-text i, 
+::ng-deep .gold-text,
+::ng-deep .btn-gold-outline i {
+    color: #d4af37 !important;
+}
+
+/* Modal Estilo Loja - Light Theme (Migração solicitada) */
+.bg-gold-faded {
+    background-color: rgba(212, 175, 55, 0.1) !important;
+}
+
+::ng-deep .bulk-dialog .p-dialog-header {
+    background: #fdfdfd !important;
+    border-bottom: 2px solid #d4af37 !important;
+    color: #495057 !important;
+}
+
+::ng-deep .bulk-dialog .p-dialog-content {
+    background: #ffffff !important;
+    color: #495057 !important;
+}
+
+.compact-table th {
+    padding: 0.8rem 0.5rem;
+    background: #fdfdfd;
+    color: #d4af37;
+}
+
+.compact-table td {
+    padding: 0.5rem 0.5rem !important;
+    border-top: 1px solid #f1f1f1;
+    color: #495057;
+}
+
+.compact-table tbody tr:nth-child(even) {
+    background-color: #fafafa !important;
+}
+
+.compact-table tbody tr:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* Compactar botões do inputNumber na tabela (Estilo Light) */
+::ng-deep .compact-qty .p-inputnumber-button {
+    width: 2.2rem !important;
+    padding: 0 !important;
+    background: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #495057 !important;
+}
+
+::ng-deep .compact-qty .p-inputnumber-input {
+    padding: 0.4rem !important;
+    font-size: 0.9rem !important;
+    background: #ffffff !important;
+    color: #495057 !important;
+    border-color: #dee2e6 !important;
+}
+
+::ng-deep .bulk-dialog .p-dropdown {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+::ng-deep .bulk-dialog .p-dropdown .p-dropdown-label {
+    color: #495057 !important;
+}
+
+::ng-deep .bulk-dialog .p-inputtext {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+    color: #495057 !important;
+}
+
+/* Specific Calendar Trigger Fix - Definitive & Absolute */
+::ng-deep .p-calendar .p-datepicker-trigger.p-button,
+::ng-deep .p-calendar .p-button.p-datepicker-trigger,
+::ng-deep .p-calendar .p-datepicker-trigger:enabled:hover,
+::ng-deep .p-calendar .p-button:enabled:hover {
+    background: #d4af37 !important;
+    border: 1px solid #d4af37 !important;
+    color: #000 !important;
+    box-shadow: none !important;
+}
+
+::ng-deep .p-calendar .p-datepicker-trigger.p-button span,
+::ng-deep .p-calendar .p-button span {
+    color: #000 !important;
+}
+
+/* Force action icons visibility in all states */
+::ng-deep .btn-gold-outline.p-button-text i,
+::ng-deep .btn-gold-outline.p-button-outlined i {
+    color: #d4af37 !important;
+    display: inline-block !important;
+}
+
+/* Stack Table Mobile Refinements */
+::ng-deep .p-datatable.p-datatable-stacked .p-datatable-tbody > tr > td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #f1f1f1 !important;
+}
+
+::ng-deep .p-datatable.p-datatable-stacked .p-datatable-tbody > tr > td .p-column-title {
+    color: #b8860b !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+@media screen and (max-width: 960px) {
+    ::ng-deep .p-panel .p-panel-content {
+        padding: 1rem 0.5rem !important;
+    }
+    
+    .field-radiobutton {
+        margin-bottom: 1rem !important;
+    }
+
+    /* Garantir que o conteúdo do painel permita overflow para menus/dropdowns popups */
+    ::ng-deep .p-panel .p-panel-content {
+        overflow: visible !important;
+    }
+}
+
+/* Minimalist Zoom Dialog (Loja Style) */
+::ng-deep .zoom-dialog-minimal .p-dialog-content {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+
+::ng-deep .zoom-dialog-minimal.p-dialog {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+::ng-deep .darker-overlay {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(3px);
+}
+
+.zoom-img-fixed {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.close-zoom-btn {
+    position: absolute;
+    top: -1.5rem;
+    right: -1.5rem;
+    z-index: 1100;
+    color: white !important;
+    background: rgba(0,0,0,0.6) !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    border: 2px solid rgba(255,255,255,0.4) !important;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.close-zoom-btn:hover {
+    background: #d4af37 !important;
+    transform: scale(1.1);
+}
+
+::ng-deep .close-zoom-btn .pi {
+    font-size: 1.5rem !important;
 }

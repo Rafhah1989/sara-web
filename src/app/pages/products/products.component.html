@@ -1,172 +1,188 @@
 <div class="page-title-banner">
-    <h1>Gestão de Produtos</h1>
+    <h1 class="cinzel-font font-bold">Gestão de Produtos</h1>
 </div>
 
-<section class="products-page container">
-
-    <!-- Formulário de Cadastro/Edição -->
-    <div class="product-form-container card">
-        <h2>{{ modoEdicao ? 'Editar Produto' : 'Novo Produto' }}</h2>
-        <form (ngSubmit)="salvar()" #produtoForm="ngForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nome">Nome do Produto</label>
-                    <input type="text" id="nome" name="nome" [(ngModel)]="produtoAtual.nome" required
-                        placeholder="Ex: Nossa Senhora">
-                </div>
-                <div class="form-group">
-                    <label for="tamanho">Tamanho (cm)</label>
-                    <input type="number" id="tamanho" name="tamanho" [(ngModel)]="produtoAtual.tamanho"
-                        placeholder="Ex: 30">
-                </div>
-                <div class="form-group">
-                    <label for="peso">Peso (g)</label>
-                    <input type="number" id="peso" name="peso" [(ngModel)]="produtoAtual.peso" placeholder="Ex: 500">
-                </div>
+<div class="products-container container pb-6">
+    <div class="card shadow-2 border-round-xl mt-4">
+        <!-- Toolbar Superior -->
+        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center mb-5 gap-3">
+            <div class="search-box p-input-icon-left w-full md:w-30rem">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" [(ngModel)]="filtroNome" (ngModelChange)="onSearchChange()"
+                       (keyup.enter)="pesquisar()" placeholder="Pesquisar por nome ou código..." class="w-full border-round-lg" />
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="codigo">Código</label>
-                    <input type="text" id="codigo" name="codigo" [(ngModel)]="produtoAtual.codigo" required
-                        placeholder="Ex: 08101">
-                </div>
-                <div class="form-group">
-                    <label for="preco">Preço (R$)</label>
-                    <input type="text" id="preco" name="preco" [(ngModel)]="precoFMT"
-                        (input)="applyCurrencyMask($event)" placeholder="Ex: R$ 50,00">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group checkbox-group">
-                    <label for="ativo">Ativo</label>
-                    <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="produtoAtual.ativo">
-                </div>
-                <div class="form-group">
-                    <label for="imagem">Imagem do Produto</label>
-                    <input type="file" id="imagem" #fileInput (change)="onFileSelected($event)" accept="image/*">
-                </div>
-            </div>
-
-            <div class="image-preview" *ngIf="produtoAtual.imagem">
-                <div class="preview-header">
-                    <p>Prévia da Imagem:</p>
-                    <button type="button" class="btn-remove-img" (click)="removerImagem()" title="Remover Imagem">
-                        <i class="fa fa-times-circle"></i> Remover
-                    </button>
-                </div>
-                <img [src]="produtoAtual.imagem | ociImage" alt="Preview" (error)="produtoAtual.imagem = ''">
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn-gold" [disabled]="!produtoForm.form.valid">
-                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Produto' }}
-                </button>
-                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
-            </div>
-        </form>
-    </div>
-
-    <hr class="divider">
-
-    <!-- Busca e Alternância de Visualização -->
-    <div class="search-and-view-controls">
-        <div class="search-container">
-            <input type="text" [(ngModel)]="filtroNome" placeholder="Pesquisar por nome ou código..."
-                (keyup.enter)="pesquisar()">
-            <button class="btn-gold" (click)="pesquisar()">
-                <i class="fa fa-search"></i> Pesquisar
-            </button>
-        </div>
-        <div class="view-toggle">
-            <button class="btn-view" [class.active]="viewMode === 'grid'" (click)="alternarVisualizacao('grid')"
-                title="Grade">
-                <i class="fa fa-th-large"></i>
-            </button>
-            <button class="btn-view" [class.active]="viewMode === 'list'" (click)="alternarVisualizacao('list')"
-                title="Lista">
-                <i class="fa fa-list"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Lista de Produtos (Grid) -->
-    <div class="product-grid" *ngIf="viewMode === 'grid'">
-        <div class="product-card" *ngFor="let product of produtos">
-            <div class="product-image-container">
-                <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" class="product-img" (error)="product.imagem = ''">
-                <div *ngIf="!product.imagem" class="product-image placeholder">Sem Imagem</div>
-            </div>
-            <div class="product-info">
-                <h3>{{ product.nome }} <small style="color:gray;">(#{{ product.codigo }})</small></h3>
-                <p>Tamanho: {{ product.tamanho }} cm</p>
-                <p *ngIf="product.preco">Preço: <strong>{{ product.preco | currency:'BRL':'symbol':'1.2-2' }}</strong>
-                </p>
-                <p class="status" [class.inactive]="!product.ativo">
-                    {{ product.ativo ? 'Disponível' : 'Indisponível' }}
-                </p>
-                <div class="card-actions">
-                    <button class="btn-edit" (click)="editar(product)">
-                        <i class="fa fa-edit"></i> Editar
-                    </button>
-                    <button [class]="product.ativo ? 'btn-deactivate' : 'btn-activate'"
-                        (click)="alternarAtivo(product)">
-                        <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
-                        {{ product.ativo ? 'Inativar' : 'Ativar' }}
-                    </button>
-                </div>
+            <div class="flex align-items-center gap-2">
+                <p-selectButton [options]="[{label: '', value: 'grid', icon: 'pi pi-th-large'}, {label: '', value: 'list', icon: 'pi pi-list'}]" 
+                                [(ngModel)]="viewMode" optionLabel="label" optionValue="value">
+                    <ng-template let-item pTemplate="item">
+                        <i [class]="item.icon"></i>
+                    </ng-template>
+                </p-selectButton>
+                <div class="mx-2 border-left-1 border-300 h-2rem hidden md:block"></div>
+                <button pButton pRipple label="Novo Produto" icon="pi pi-plus" 
+                        class="p-button-gold border-round-lg shadow-2" (click)="adicionarNovo()"></button>
             </div>
         </div>
-    </div>
 
-    <!-- Lista de Produtos (Lista) -->
-    <div class="product-list-view" *ngIf="viewMode === 'list'">
-        <table class="list-table">
-            <thead>
-                <tr>
-                    <th>Foto</th>
-                    <th>Código</th>
-                    <th>Nome</th>
-                    <th>Tam.</th>
-                    <th>Preço</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let product of produtos" [class.row-inactive]="!product.ativo">
-                    <td class="col-thumb">
-                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" class="product-thumb" (error)="product.imagem = ''">
-                        <div *ngIf="!product.imagem" class="thumb-placeholder"><i class="fa fa-image"></i></div>
-                    </td>
-                    <td>#{{ product.codigo }}</td>
-                    <td class="col-nome">{{ product.nome }}</td>
-                    <td>{{ product.tamanho }}cm</td>
-                    <td class="col-preco">{{ product.preco | currency:'BRL' }}</td>
-                    <td>
-                        <span class="badge" [class.badge-active]="product.ativo"
-                            [class.badge-inactive]="!product.ativo">
-                            {{ product.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                    </td>
-                    <td class="list-actions">
-                        <div class="list-actions-container">
-                            <button class="btn-icon-edit" (click)="editar(product)" title="Editar">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                            <button [class]="product.ativo ? 'btn-icon-deactivate' : 'btn-icon-activate'"
-                                (click)="alternarAtivo(product)" [title]="product.ativo ? 'Inativar' : 'Ativar'">
-                                <i [class]="product.ativo ? 'fa fa-ban' : 'fa fa-check-circle'"></i>
-                            </button>
+        <!-- DataView de Produtos -->
+        <p-dataView #dv [value]="produtos" [paginator]="true" [rows]="12" [layout]="viewMode" 
+                   styleClass="custom-dataview" [emptyMessage]="'Nenhum produto encontrado.'">
+            
+            <!-- Template Grade (Grid) -->
+            <ng-template let-product pTemplate="gridItem">
+                <div class="col-12 sm:col-6 lg:col-4 xl:col-3 p-2">
+                    <div class="product-grid-item card h-full flex flex-column border-1 surface-border p-3 transition-all hover:shadow-4 border-round-xl">
+                        <div class="product-grid-item-top flex align-items-center justify-content-between mb-2">
+                            <span class="text-xs font-bold text-500">#{{product.codigo}}</span>
+                            <p-tag [value]="product.ativo ? 'ATIVO' : 'INATIVO'" 
+                                   [severity]="product.ativo ? 'success' : 'danger'" [rounded]="true"></p-tag>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        <div class="product-grid-item-content flex flex-column align-items-center p-3">
+                            <div class="image-container relative mb-3 cursor-pointer" (click)="editar(product)">
+                                <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" 
+                                     class="product-image shadow-2 border-round-lg" (error)="product.imagem = ''" />
+                                <div *ngIf="!product.imagem" class="placeholder-image border-round-lg flex align-items-center justify-content-center bg-gray-100 shadow-1">
+                                    <i class="pi pi-image text-400 text-3xl"></i>
+                                </div>
+                            </div>
+                            <div class="product-name font-bold text-xl text-center mb-1">{{product.nome}}</div>
+                            <div class="product-description text-500 text-sm mb-3">Tamanho: {{product.tamanho}}cm</div>
+                            <div class="product-price text-2xl font-bold text-gold">{{product.preco | currency:'BRL'}}</div>
+                        </div>
+                        <div class="product-grid-item-bottom mt-auto pt-3 flex gap-2">
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-outlined p-button-secondary flex-1" 
+                                    (click)="editar(product)" label="Editar"></button>
+                            <button pButton pRipple [icon]="product.ativo ? 'pi pi-ban' : 'pi pi-check'" 
+                                    [class]="product.ativo ? 'p-button-text p-button-danger' : 'p-button-text p-button-success'"
+                                    (click)="alternarAtivo(product)" [title]="product.ativo ? 'Desativar' : 'Ativar'"></button>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+            <!-- Template Lista (List) -->
+            <ng-template let-product pTemplate="listItem">
+                <div class="col-12">
+                    <div class="product-list-item flex flex-column md:flex-row align-items-center p-3 w-full border-bottom-1 surface-border gap-4 hover:surface-50 transition-all">
+                        <img *ngIf="product.imagem" [src]="product.imagem | ociImage" [alt]="product.nome" 
+                             class="product-image-list shadow-2 border-round-md" (error)="product.imagem = ''" />
+                        <div *ngIf="!product.imagem" class="placeholder-image-list border-round-md flex align-items-center justify-content-center bg-gray-100 shadow-1">
+                            <i class="pi pi-image text-300"></i>
+                        </div>
+                        <div class="product-list-detail flex-1 text-center md:text-left">
+                            <div class="flex align-items-center justify-content-center md:justify-content-start gap-2 mb-1">
+                                <span class="font-bold text-lg pointer" (click)="editar(product)">{{product.nome}}</span>
+                                <span class="text-sm text-500">#{{product.codigo}}</span>
+                            </div>
+                            <div class="text-500 text-sm">Tamanho: {{product.tamanho}}cm | Peso: {{product.peso}}g</div>
+                            <p-tag [value]="product.ativo ? 'ATIVO' : 'INATIVO'" 
+                                   [severity]="product.ativo ? 'success' : 'danger'" class="mt-2" [rounded]="true"></p-tag>
+                        </div>
+                        <div class="product-list-action flex flex-column align-items-center md:align-items-end gap-2 pr-3">
+                            <span class="text-2xl font-bold text-gold">{{product.preco | currency:'BRL'}}</span>
+                            <div class="flex gap-2">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-outlined p-button-secondary" (click)="editar(product)"></button>
+                                <button pButton pRipple [icon]="product.ativo ? 'pi pi-ban' : 'pi pi-check'" 
+                                        [class]="product.ativo ? 'p-button-rounded p-button-text' + (product.ativo ? ' p-button-danger' : ' p-button-success') : ''"
+                                        (click)="alternarAtivo(product)"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+    </div>
+</div>
+
+<!-- Dialog de Produto -->
+<p-dialog [(visible)]="exibirDialog" [style]="{width: '600px', 'max-width': '95vw'}" [header]="modoEdicao ? 'Editar Produto' : 'Novo Produto'" 
+          [modal]="true" [draggable]="false" [resizable]="false" 
+          styleClass="product-dialog shadow-8" appendTo="body" [contentStyle]="{'overflow-x': 'hidden'}">
+    
+    <div class="p-fluid pt-3"> <!-- Wrapper for proper spacing -->
+        <div class="grid formgrid">
+            <!-- Nome e Código -->
+            <div class="field col-12 md:col-10">
+                <label for="nome" class="font-bold block mb-2">Nome do Produto</label>
+                <input pInputText id="nome" [(ngModel)]="produtoAtual.nome" required autofocus 
+                       placeholder="Ex: Nossa Senhora de Fátima" class="w-full" />
+            </div>
+            <div class="field col-12 md:col-2">
+                <label for="codigo" class="font-bold block mb-2">Código</label>
+                <input pInputText id="codigo" [(ngModel)]="produtoAtual.codigo" required 
+                       placeholder="Ex: 08101" class="w-full" />
+            </div>
+
+            <!-- Preço, Tamanho, Peso -->
+            <div class="field col-12 md:col-4">
+                <label for="preco" class="font-bold block mb-2">Preço (R$)</label>
+                <p-inputNumber id="preco" [(ngModel)]="produtoAtual.preco" mode="currency" 
+                              currency="BRL" locale="pt-BR" [min]="0" placeholder="R$ 0,00"></p-inputNumber>
+            </div>
+            <div class="field col-6 md:col-4">
+                <label for="tamanho" class="font-bold block mb-2">Tamanho (cm)</label>
+                <p-inputNumber id="tamanho" [(ngModel)]="produtoAtual.tamanho" [min]="0" 
+                              placeholder="0"></p-inputNumber>
+            </div>
+            <div class="field col-6 md:col-4">
+                <label for="peso" class="font-bold block mb-2">Peso (g)</label>
+                <p-inputNumber id="peso" [(ngModel)]="produtoAtual.peso" [min]="0" 
+                              placeholder="0"></p-inputNumber>
+            </div>
+
+            <!-- Ativo -->
+            <div class="field col-12 mt-2">
+                <div class="flex align-items-center gap-3" style="padding-left: 0.1rem;">
+                    <p-inputSwitch [(ngModel)]="produtoAtual.ativo" id="ativo"></p-inputSwitch>
+                    <label for="ativo" class="font-bold cursor-pointer" 
+                           [class.text-green-600]="produtoAtual.ativo" 
+                           [class.text-red-600]="!produtoAtual.ativo">
+                        {{ produtoAtual.ativo ? 'Ativo' : 'Inativo' }}
+                    </label>
+                </div>
+            </div>
+
+            <!-- Imagem -->
+            <div class="field col-12 mt-2">
+                <label class="font-bold block mb-2">Imagem do Produto</label>
+                <div class="image-upload-area border-2 border-dashed surface-border border-round-xl p-4 text-center transition-all hover:bg-gold-pale cursor-pointer relative"
+                     (click)="triggerFileInput()">
+                    
+                    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
+                    
+                    <div *ngIf="!produtoAtual.imagem" class="flex flex-column align-items-center gap-2 py-3">
+                        <i class="pi pi-image text-5xl text-300"></i>
+                        <span class="text-600 font-medium">Clique para selecionar imagem</span>
+                        <span class="text-400 text-xs">PNG, JPG ou WEBP (Max. 2MB)</span>
+                    </div>
+
+                    <div *ngIf="produtoAtual.imagem" class="preview-container flex flex-column align-items-center">
+                        <div class="relative inline-block border-round-xl overflow-hidden shadow-4 mb-3">
+                            <img [src]="produtoAtual.imagem | ociImage" class="max-h-12rem block" alt="Preview"/>
+                            <div class="absolute inset-0 bg-black-alpha-40 flex align-items-center justify-content-center opacity-0 hover:opacity-100 transition-all">
+                                <i class="pi pi-refresh text-white text-3xl"></i>
+                            </div>
+                        </div>
+                        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text p-button-lg" 
+                                (click)="removerImagem(); $event.stopPropagation()" title="Remover imagem"></button>
+                        <span class="text-xs text-gold font-bold">Clique para alterar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div *ngIf="produtos.length === 0" class="no-products">
-        <p>Nenhum produto encontrado.</p>
-    </div>
-</section>
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2 pt-2">
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text p-button-secondary border-round-lg" (click)="cancelar()"></button>
+            <button pButton pRipple [label]="modoEdicao ? 'Salvar Alterações' : 'Cadastrar Produto'" 
+                    icon="pi pi-check" class="px-4 border-round-lg shadow-2" (click)="salvar()" 
+                    style="background-color: #D4AF37 !important; border-color: #D4AF37 !important; color: #000000 !important;"
+                    [disabled]="!produtoAtual.nome || !produtoAtual.codigo"></button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Confirmação e Toasts -->
+<p-confirmDialog [style]="{width: '450px'}" [baseZIndex]="10000"></p-confirmDialog>
+<p-toast position="bottom-right"></p-toast>
