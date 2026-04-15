@@ -13,6 +13,7 @@ import { MetodoPagamentoAutorizado } from '../../../models/metodo-pagamento-auto
 import { OpcaoParcelamentoService } from '../../../services/opcao-parcelamento.service';
 import { OpcaoParcelamento } from '../../../models/opcao-parcelamento.model';
 import { MenuItem } from 'primeng/api';
+import { removerAcentos } from '../../../utils/string-utils';
 
 @Component({
     selector: 'app-pedido-form',
@@ -745,7 +746,7 @@ export class PedidoFormComponent implements OnInit {
     }
 
     filtrarProdutosModal(): void {
-        const termo = this.filtroModalNome?.toLowerCase() || '';
+        const termo = removerAcentos(this.filtroModalNome?.toLowerCase() || '');
         
         const filtrados = this.produtosModal.filter(p => {
             let matchNome = true;
@@ -753,7 +754,8 @@ export class PedidoFormComponent implements OnInit {
             let matchPreco = true;
 
             if (termo && termo.length >= 3) {
-                matchNome = p.nome.toLowerCase().includes(termo) || (p.codigo?.toLowerCase().includes(termo) || false);
+                matchNome = removerAcentos(p.nome.toLowerCase()).includes(termo) || 
+                            (p.codigo && removerAcentos(p.codigo.toLowerCase()).includes(termo));
             }
             if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
                 matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();

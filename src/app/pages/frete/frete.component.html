@@ -1,100 +1,107 @@
-<div class="page-title-banner">
-    <h1>Gestão de Tabela de Frete</h1>
-</div>
+<div class="grid">
+    <div class="col-12">
+        <div class="card p-fluid">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">
+                {{ modoEdicao ? 'Editar Tabela : ' + freteAtual.descricao : 'Nova Tabela de Frete' }}
+            </h5>
 
-<section class="frete-page container">
+            <div class="grid">
+                <!-- Informações Básicas -->
+                <div class="col-12 md:col-6">
+                    <label for="descricao" class="font-bold">Descrição</label>
+                    <input pInputText id="descricao" [(ngModel)]="freteAtual.descricao" placeholder="Ex: Frete Capital">
+                </div>
+                <div class="col-12 md:col-3">
+                    <label for="valor" class="font-bold">Valor Base</label>
+                    <p-inputNumber id="valor" [(ngModel)]="freteAtual.valor" mode="currency" currency="BRL" locale="pt-BR" placeholder="R$ 0,00"></p-inputNumber>
+                </div>
+                <div class="col-12 md:col-3 flex align-items-end pb-2">
+                    <div class="field-checkbox mb-0">
+                        <p-checkbox id="ativo" [(ngModel)]="freteAtual.ativo" [binary]="true"></p-checkbox>
+                        <label for="ativo" class="ml-2">Tabela Ativa</label>
+                    </div>
+                </div>
 
-    <!-- Formulário de Cadastro/Edição -->
-    <div class="frete-form-container card">
-        <h2>{{ modoEdicao ? 'Editar Tabela de Frete' : 'Nova Tabela de Frete' }}</h2>
-        <form (ngSubmit)="salvar()" #freteForm="ngForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="descricao">Descrição</label>
-                    <input type="text" id="descricao" name="descricao" [(ngModel)]="freteAtual.descricao" required
-                        placeholder="Ex: Frete Capital">
-                </div>
-                <div class="form-group">
-                    <label for="valor">Valor Base (R$)</label>
-                    <input type="text" id="valor" name="valor" [(ngModel)]="valorMascarado"
-                        (input)="applyCurrencyMask($event)" required placeholder="R$ 0,00">
-                </div>
-            </div>
-
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="minimoFaixa">Valor Mínimo da Faixa (g) (Opcional)</label>
-                    <input type="number" class="form-control" id="minimoFaixa" [(ngModel)]="freteAtual.minimoFaixa"
-                        name="minimoFaixa" placeholder="Ex: 500">
-                </div>
-                <div class="form-group">
-                    <label for="quantidadeFaixa">Peso por Faixa (g) (Opcional)</label>
-                    <input type="number" id="quantidadeFaixa" name="quantidadeFaixa"
-                        [(ngModel)]="freteAtual.quantidadeFaixa" placeholder="Ex: 5">
-                </div>
-                <div class="form-group">
-                    <label for="valorFaixa">Valor da Faixa (R$)</label>
-                    <input type="text" id="valorFaixa" name="valorFaixa" [(ngModel)]="valorFaixaMascarado"
-                        (input)="applyValorFaixaMask($event)" placeholder="R$ 0,00">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group checkbox-group">
-                    <label for="ativo">Ativo</label>
-                    <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="freteAtual.ativo">
+                <!-- Configuração de Faixas -->
+                <div class="col-12 mt-3">
+                    <p-panel header="Configuração por Faixa (Opcional)" [toggleable]="true" [collapsed]="!freteAtual.minimoFaixa && !freteAtual.quantidadeFaixa && !freteAtual.valorFaixa">
+                        <div class="grid pt-2">
+                            <div class="col-12 md:col-4">
+                                <label for="minimoFaixa" class="font-bold">Valor Mínimo da Faixa (g)</label>
+                                <p-inputNumber id="minimoFaixa" [(ngModel)]="freteAtual.minimoFaixa" placeholder="Ex: 500" [showButtons]="true" [min]="0"></p-inputNumber>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <label for="quantidadeFaixa" class="font-bold">Taxa de Peso Extra (g)</label>
+                                <p-inputNumber id="quantidadeFaixa" [(ngModel)]="freteAtual.quantidadeFaixa" placeholder="Ex: 5" [showButtons]="true" [min]="0"></p-inputNumber>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <label for="valorFaixa" class="font-bold">Valor Adicional da Faixa</label>
+                                <p-inputNumber id="valorFaixa" [(ngModel)]="freteAtual.valorFaixa" mode="currency" currency="BRL" locale="pt-BR" placeholder="R$ 0,00"></p-inputNumber>
+                            </div>
+                        </div>
+                    </p-panel>
                 </div>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn-gold" [disabled]="!freteForm.form.valid">
-                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Tabela' }}
-                </button>
-                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
+            <div class="flex justify-content-end gap-2 mt-4">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="cancelar()" *ngIf="modoEdicao"></button>
+                <button pButton pRipple [label]="modoEdicao ? 'Salvar Alterações' : 'Cadastrar Tabela'" 
+                        [icon]="modoEdicao ? 'pi pi-save' : 'pi pi-check'" 
+                        class="p-button-primary btn-gold" 
+                        (click)="salvar()"
+                        [disabled]="!freteAtual.descricao"></button>
             </div>
-        </form>
+        </div>
     </div>
 
-    <hr class="divider">
+    <!-- Filtro e Listagem -->
+    <div class="col-12">
+        <div class="card">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center mb-4">
+                <h5 class="cinzel-font m-0">Tabelas de Frete Ativas</h5>
+                <div class="p-inputgroup w-full md:w-25rem mt-3 md:mt-0">
+                    <input pInputText type="text" [(ngModel)]="filtroDescricao" placeholder="Pesquisar por descrição..." (keyup.enter)="pesquisar()">
+                    <button type="button" pButton pRipple icon="pi pi-search" class="btn-gold" (click)="pesquisar()"></button>
+                </div>
+            </div>
 
-    <!-- Busca -->
-    <div class="search-container">
-        <input type="text" [(ngModel)]="filtroDescricao" placeholder="Pesquisar por descrição..."
-            (keyup.enter)="pesquisar()">
-        <button class="btn-gold" (click)="pesquisar()">Pesquisar</button>
+            <p-table [value]="tabelasFrete" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'" 
+                     styleClass="p-datatable-gridlines" [rowHover]="true" dataKey="id">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="descricao">Descrição <p-sortIcon field="descricao"></p-sortIcon></th>
+                        <th pSortableColumn="valor" style="width: 12rem">Valor Base <p-sortIcon field="valor"></p-sortIcon></th>
+                        <th style="width: 10rem">Status</th>
+                        <th style="width: 10rem">Ações</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-frete>
+                    <tr>
+                        <td class="font-bold">{{ frete.descricao }}</td>
+                        <td>{{ frete.valor | currency:'BRL' }}</td>
+                        <td>
+                            <p-tag [severity]="frete.ativo ? 'success' : 'danger'" 
+                                   [value]="frete.ativo ? 'ATIVO' : 'INATIVO'" 
+                                   [rounded]="true"></p-tag>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text" 
+                                        (click)="editar(frete)" pTooltip="Editar"></button>
+                                <button pButton pRipple [icon]="frete.ativo ? 'pi pi-slash' : 'pi pi-check'" 
+                                        [class]="frete.ativo ? 'p-button-rounded p-button-danger p-button-text' : 'p-button-rounded p-button-success p-button-text'" 
+                                        (click)="frete.ativo ? desativar(frete.id) : ativar(frete)" 
+                                        [pTooltip]="frete.ativo ? 'Desativar' : 'Ativar'"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4" class="text-center p-4">Nenhuma tabela de frete encontrada.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
     </div>
-
-    <!-- Lista de Tabelas de Frete -->
-    <div class="frete-list">
-        <table class="card">
-            <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let frete of tabelasFrete">
-                    <td>{{ frete.descricao }}</td>
-                    <td>{{ frete.valor | currency:'BRL' }}</td>
-                    <td>
-                        <span class="status-badge" [class.active]="frete.ativo" [class.inactive]="!frete.ativo">
-                            {{ frete.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn-edit" (click)="editar(frete)">✏️</button>
-                        <button class="btn-delete" (click)="desativar(frete.id)" *ngIf="frete.ativo">🚫</button>
-                        <button class="btn-activate" (click)="ativar(frete)" *ngIf="!frete.ativo">✅</button>
-                    </td>
-                </tr>
-                <tr *ngIf="tabelasFrete.length === 0">
-                    <td colspan="4" class="no-data">Nenhuma tabela de frete encontrada.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+</div>

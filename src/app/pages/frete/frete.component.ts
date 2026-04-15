@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Frete } from '../../models/frete.model';
 import { FreteService } from '../../services/frete.service';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-frete',
@@ -13,10 +14,12 @@ export class FreteComponent implements OnInit {
     freteAtual: Frete = this.getNovoFrete();
     filtroDescricao: string = '';
     modoEdicao: boolean = false;
-    valorMascarado: string = '';
-    valorFaixaMascarado: string = '';
 
-    constructor(private freteService: FreteService) { }
+    constructor(
+        private freteService: FreteService,
+        private confirmationService: ConfirmationService,
+        private messageService: MessageService
+    ) { }
 
     ngOnInit(): void {
         this.carregarTabelas();
@@ -51,37 +54,6 @@ export class FreteComponent implements OnInit {
         }
     }
 
-    applyCurrencyMask(event: any): void {
-        let value = event.target.value.replace(/\D/g, '');
-        if (!value) {
-            this.valorMascarado = '';
-            this.freteAtual.valor = 0;
-            return;
-        }
-
-        const numberValue = (parseFloat(value) / 100);
-        this.freteAtual.valor = numberValue;
-        this.valorMascarado = numberValue.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-    }
-
-    applyValorFaixaMask(event: any): void {
-        let value = event.target.value.replace(/\D/g, '');
-        if (!value) {
-            this.valorFaixaMascarado = '';
-            this.freteAtual.valorFaixa = undefined;
-            return;
-        }
-
-        const numberValue = (parseFloat(value) / 100);
-        this.freteAtual.valorFaixa = numberValue;
-        this.valorFaixaMascarado = numberValue.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-    }
 
     salvar(): void {
         if (this.modoEdicao && this.freteAtual.id) {
@@ -89,60 +61,57 @@ export class FreteComponent implements OnInit {
                 next: () => {
                     this.finalizarAcao();
                     this.carregarTabelas();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Tabela de Frete alterada!' });
                 },
-                error: (err) => {
-                    alert(err.error || 'Erro ao alterar tabela de frete');
-                    console.error('Erro ao alterar tabela de frete', err);
-                }
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error || 'Erro ao alterar tabela de frete' })
             });
         } else {
             this.freteService.cadastrar(this.freteAtual).subscribe({
                 next: () => {
                     this.finalizarAcao();
                     this.carregarTabelas();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Tabela de Frete cadastrada!' });
                 },
-                error: (err) => {
-                    alert(err.error || 'Erro ao cadastrar tabela de frete');
-                    console.error('Erro ao cadastrar tabela de frete', err);
-                }
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error || 'Erro ao cadastrar tabela de frete' })
             });
         }
     }
 
     editar(frete: Frete): void {
         this.freteAtual = { ...frete };
-        this.valorMascarado = frete.valor.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
-
-        if (frete.valorFaixa) {
-            this.valorFaixaMascarado = frete.valorFaixa.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        } else {
-            this.valorFaixaMascarado = '';
-        }
-
         this.modoEdicao = true;
         window.scrollTo(0, 0);
     }
 
     desativar(id?: number): void {
-        if (id && confirm('Tem certeza que deseja desativar esta tabela de frete?')) {
-            this.freteService.desativar(id).subscribe({
-                next: () => this.carregarTabelas(),
-                error: (err) => console.error('Erro ao desativar tabela de frete', err)
-            });
-        }
+        if (!id) return;
+        this.confirmationService.confirm({
+            message: 'Tem certeza que deseja desativar esta tabela de frete?',
+            header: 'Confirmar Desativação',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            acceptButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this.freteService.desativar(id).subscribe({
+                    next: () => {
+                        this.carregarTabelas();
+                        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Tabela desativada!' });
+                    },
+                    error: (err) => console.error('Erro ao desativar tabela de frete', err)
+                });
+            }
+        });
     }
 
     ativar(frete: Frete): void {
         const freteAtivado = { ...frete, ativo: true };
         if (frete.id) {
             this.freteService.alterar(frete.id, freteAtivado).subscribe({
-                next: () => this.carregarTabelas(),
+                next: () => {
+                    this.carregarTabelas();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Tabela ativada!' });
+                },
                 error: (err) => console.error('Erro ao ativar tabela de frete', err)
             });
         }
@@ -154,8 +123,6 @@ export class FreteComponent implements OnInit {
 
     finalizarAcao(): void {
         this.freteAtual = this.getNovoFrete();
-        this.valorMascarado = '';
-        this.valorFaixaMascarado = '';
         this.modoEdicao = false;
     }
 }

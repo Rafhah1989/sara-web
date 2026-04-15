@@ -1,95 +1,82 @@
-<div class="page-title-banner text-center">
-    <h1>Gestão de Usuários</h1>
-</div>
+<div class="grid">
+    <div class="col-12">
+        <div class="card">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">Gestão de Usuários</h5>
+            
+            <p-table #dt [value]="users" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'"
+                     [globalFilterFields]="['nome','cpfCnpj','email']"
+                     styleClass="p-datatable-gridlines" [rowHover]="true" dataKey="id"
+                     currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} usuários" [showCurrentPageReport]="true">
+                
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <button pButton pRipple label="Novo Usuário" icon="pi pi-plus" class="p-button-success mr-2 mb-2 md:mb-0 btn-gold" (click)="cadastrarNovo()"></button>
+                        <span class="p-input-icon-left w-full md:w-auto">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" [(ngModel)]="filtroNome" (input)="onNomeInput()" placeholder="Pesquisar por nome..." class="w-full md:w-auto" />
+                        </span>
+                    </div>
+                </ng-template>
 
-<section class="users-page container">
-    <!-- Topo: Botão de Cadastro -->
-    <div class="top-actions-row">
-        <button class="btn-gold" (click)="cadastrarNovo()">
-            <i class="fa fa-plus"></i> Cadastrar Usuário
-        </button>
-    </div>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="nome">Nome <p-sortIcon field="nome"></p-sortIcon></th>
+                        <th pSortableColumn="cpfCnpj">CPF/CNPJ <p-sortIcon field="cpfCnpj"></p-sortIcon></th>
+                        <th class="hide-mobile" pSortableColumn="telefone">Telefone <p-sortIcon field="telefone"></p-sortIcon></th>
+                        <th class="hide-mobile" pSortableColumn="role">Tipo <p-sortIcon field="role"></p-sortIcon></th>
+                        <th pSortableColumn="ativo">Status <p-sortIcon field="ativo"></p-sortIcon></th>
+                        <th>Ações</th>
+                    </tr>
+                </ng-template>
 
-    <!-- Container de Consulta -->
-    <div class="search-container card">
-        <h3>Consulta de Usuários</h3>
-        <div class="search-form-row">
-            <div class="form-group">
-                <label>Pesquisar por Nome</label>
-                <div class="input-with-icon">
-                    <i class="fa fa-search"></i>
-                    <input type="text" [(ngModel)]="filtroNome" (input)="onNomeInput()" placeholder="Mínimo 3 caracteres...">
-                </div>
-            </div>
+                <ng-template pTemplate="body" let-user>
+                    <tr>
+                        <td>
+                            {{ user.nome }}
+                        </td>
+                        <td>
+                            {{ user.cpfCnpj }}
+                        </td>
+                        <td class="hide-mobile">
+                            {{ user.telefone }}
+                        </td>
+                        <td class="hide-mobile">
+                            {{ user.role }}
+                        </td>
+                        <td>
+                            <p-tag [severity]="user.ativo ? 'success' : 'danger'" [value]="user.ativo ? 'Ativo' : 'Inativo'"></p-tag>
+                        </td>
+                        <td>
+                            <!-- Ações Desktop -->
+                            <div class="hidden lg:flex gap-2">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text" (click)="editar(user)" pTooltip="Editar/Visualizar"></button>
+                                <button pButton pRipple icon="pi pi-history" class="p-button-rounded p-button-warning p-button-text" (click)="verHistorico(user)" pTooltip="Histórico"></button>
+                                <button pButton pRipple icon="pi pi-envelope" class="p-button-rounded p-button-help p-button-text" (click)="reenviarConvite(user)" pTooltip="Convite"></button>
+                                <button pButton pRipple [icon]="user.ativo ? 'pi pi-ban' : 'pi pi-check'" 
+                                        [class]="user.ativo ? 'p-button-rounded p-button-danger p-button-text' : 'p-button-rounded p-button-success p-button-text'"
+                                        (click)="user.ativo ? desativar(user.id) : ativar(user.id)" 
+                                        [pTooltip]="user.ativo ? 'Desativar' : 'Ativar'"></button>
+                            </div>
+                            
+                            <!-- Ações Mobile -->
+                            <div class="flex lg:hidden">
+                                <button pButton pRipple icon="pi pi-ellipsis-v" class="p-button-rounded p-button-secondary p-button-text" (click)="configurarMenu(user, $event)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="6" class="text-center p-4">Nenhum usuário encontrado.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
         </div>
     </div>
+</div>
 
-    <!-- Listagem -->
-    <div class="user-list">
-        <table class="card">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>CPF/CNPJ</th>
-                    <th class="hide-mobile">Telefone</th>
-                    <th class="hide-mobile">Tipo</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let user of users">
-                    <td>{{ user.nome }}</td>
-                    <td>{{ user.cpfCnpj }}</td>
-                    <td class="hide-mobile">{{ user.telefone }}</td>
-                    <td class="hide-mobile">{{ user.role }}</td>
-                    <td>
-                        <span class="status-badge" [class.active]="user.ativo" [class.inactive]="!user.ativo">
-                            {{ user.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                    </td>
-                    <td>
-                        <!-- Ações Desktop -->
-                        <div class="actions hide-mobile">
-                            <button class="btn-action btn-edit" (click)="editar(user)" title="Editar/Visualizar">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn-action btn-history" (click)="verHistorico(user)" title="Histórico do Cliente">
-                                <i class="fa fa-history"></i>
-                            </button>
-                            <button class="btn-action btn-invite" (click)="reenviarConvite(user)" title="Reenviar Convite">
-                                <i class="fa fa-envelope"></i>
-                            </button>
-                            <button class="btn-action btn-danger" (click)="desativar(user.id)" *ngIf="user.ativo" title="Desativar">
-                                <i class="fa fa-ban"></i>
-                            </button>
-                            <button class="btn-action btn-success" (click)="ativar(user.id)" *ngIf="!user.ativo" title="Ativar">
-                                <i class="fa fa-check"></i>
-                            </button>
-                        </div>
-
-                        <!-- Ações Mobile (Menu Sanduíche) -->
-                        <div class="mobile-actions show-mobile">
-                            <button class="btn-sandwich" (click)="alternarMenuAcoes(user.id!, $event)">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </button>
-                            <div class="actions-menu" *ngIf="itemMenuAberto === user.id">
-                                <button (click)="editar(user)"><i class="fa fa-pencil-alt"></i> Editar</button>
-                                <button (click)="verHistorico(user)"><i class="fa fa-history"></i> Histórico</button>
-                                <button (click)="reenviarConvite(user)"><i class="fa fa-envelope"></i> Convite</button>
-                                <button (click)="desativar(user.id)" *ngIf="user.ativo" class="text-danger"><i class="fa fa-ban"></i> Desativar</button>
-                                <button (click)="ativar(user.id)" *ngIf="!user.ativo" class="text-success"><i class="fa fa-check"></i> Ativar</button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr *ngIf="users.length === 0">
-                    <td colspan="6" class="no-data">Nenhum usuário encontrado com os filtros aplicados.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+<p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
 
 <!-- Modal de Histórico -->
 <app-historico-cliente-modal 

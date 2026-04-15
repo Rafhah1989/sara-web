@@ -56,7 +56,7 @@ export class AppTopBarComponent implements OnInit {
 
         // Menu Base (Sempre visível)
         const baseItems: MenuItem[] = [
-            { label: 'Início', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+            { label: 'Início', icon: 'pi pi-fw pi-home', routerLink: ['/'], routerLinkActiveOptions: { exact: true } },
             { label: 'Quem Somos', icon: 'pi pi-fw pi-info-circle', routerLink: ['/quem-somos'] }
         ];
 
@@ -75,6 +75,7 @@ export class AppTopBarComponent implements OnInit {
                         { label: 'Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/usuarios'] },
                         { label: 'Formas de Pagamento', icon: 'pi pi-fw pi-credit-card', routerLink: ['/formas-pagamento'] },
                         { label: 'Setores', icon: 'pi pi-fw pi-map', routerLink: ['/setores'] },
+                        { label: 'Tabelas de Frete', icon: 'pi pi-fw pi-truck', routerLink: ['/frete'] },
                         { label: 'Configurações', icon: 'pi pi-fw pi-cog', routerLink: ['/configuracao'] },
                         { label: 'Logs de Acesso', icon: 'pi pi-fw pi-database', routerLink: ['/logs'] }
                     ]
@@ -108,6 +109,7 @@ export class AppTopBarComponent implements OnInit {
                         { label: 'Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/usuarios'] },
                         { label: 'Formas de Pagamento', icon: 'pi pi-fw pi-credit-card', routerLink: ['/formas-pagamento'] },
                         { label: 'Setores', icon: 'pi pi-fw pi-map', routerLink: ['/setores'] },
+                        { label: 'Tabelas de Frete', icon: 'pi pi-fw pi-truck', routerLink: ['/frete'] },
                         { label: 'Configurações', icon: 'pi pi-fw pi-cog', routerLink: ['/configuracao'] },
                         { label: 'Logs de Acesso', icon: 'pi pi-fw pi-database', routerLink: ['/logs'] }
                     ]

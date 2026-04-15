@@ -60,8 +60,10 @@
     color: #444;
 }
 
-.custom-info-msg {
-    border-radius: 12px;
+.custom-info-gold {
+    background-color: #fffbeb;
+    border: 1px solid #f1e5ac;
+    color: #8b6d1b;
 }
 
 /* Animations */
@@ -80,22 +82,7 @@
     }
 }
 
-/* Timer Progress Bar */
-.timer-progress ::ng-deep .p-progressbar {
-    background-color: #ececec;
-    border-radius: 10px;
-}
-
-.timer-progress ::ng-deep .p-progressbar-value {
-    background: linear-gradient(90deg, #d4af37, #f1e5ac);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-    transition: width 1s linear;
-}
-
-.expiring-bar ::ng-deep .p-progressbar-value {
-    background: linear-gradient(90deg, #ef4444, #fca5a5);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-}
+/* Utility */
 
 /* Utility */
 .tracking-wider {

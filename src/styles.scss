@@ -113,6 +113,15 @@ p-menubar, .p-menubar {
     color: var(--primary-gold) !important;
 }
 
+/* Remoção de borda azul (focus ring) no Topbar */
+.layout-topbar-logo:focus,
+.layout-topbar-logo:active,
+.btn-login:focus,
+.btn-login:active {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 /* Área de Usuário na Menubar */
 .user-display {
     display: flex;
@@ -349,4 +358,25 @@ p-menubar, .p-menubar {
     box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     border: 2px solid #000;
     z-index: 10;
+}
+
+/* Timer Progress Bar Global - Pix Payment */
+.timer-progress.p-progressbar {
+    background-color: #ececec !important;
+    border-radius: 10px !important;
+    height: 6px !important;
+    border: none !important;
+}
+
+.timer-progress .p-progressbar-value {
+    background: linear-gradient(90deg, #d4af37, #f1e5ac) !important;
+    background-image: linear-gradient(90deg, #d4af37, #f1e5ac) !important;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4) !important;
+    transition: width 1.1s linear !important;
+}
+
+.expiring-bar.timer-progress .p-progressbar-value {
+    background: linear-gradient(90deg, #ef4444, #fca5a5) !important;
+    background-image: linear-gradient(90deg, #ef4444, #fca5a5) !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
 }

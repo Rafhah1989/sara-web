@@ -37,8 +37,7 @@
             <span class="text-sm font-semibold text-700">O código PIX expira em:</span>
             <span class="font-bold text-xl" [class.text-red-500]="tempoRestante.startsWith('00:0')">{{ tempoRestante }}</span>
           </div>
-          <p-progressBar [value]="100" [showValue]="false" styleClass="timer-progress" 
-                         [style]="{'height': '6px', 'background': '#eee'}"
+          <p-progressBar [value]="porcentagemTimer" [showValue]="false" styleClass="timer-progress" 
                          [ngClass]="{'expiring-bar': tempoRestante.startsWith('00:0')}"></p-progressBar>
         </div>
 
@@ -53,7 +52,7 @@
           <button type="button" pButton icon="pi pi-copy" class="p-button-gold border-round-right-lg" (click)="copiarPix()"></button>
         </div>
 
-        <div class="flex align-items-center p-3 border-round-lg bg-blue-50 border-1 border-blue-100 text-blue-700 w-full mb-4">
+        <div class="flex align-items-center p-3 border-round-lg custom-info-gold w-full mb-4">
            <i class="pi pi-info-circle mr-2 text-xl"></i>
            <span class="text-sm">O status do pagamento será atualizado automaticamente em instantes.</span>
         </div>

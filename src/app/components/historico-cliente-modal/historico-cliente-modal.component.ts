@@ -19,6 +19,7 @@ export class HistoricoClienteModalComponent implements OnInit {
     exibirCancelados: boolean = false;
     filtroSituacao: string = '';
     situacoesPedido: any[] = [];
+    display: boolean = true;
 
     constructor(
         private pedidoService: PedidoService,
@@ -63,15 +64,15 @@ export class HistoricoClienteModalComponent implements OnInit {
         });
     }
 
-    getSituacaoBadgeClass(situacao: string): string {
+    getSeverity(situacao: string): string {
         switch (situacao) {
-            case 'PENDENTE': return 'badge-warning';
-            case 'CONFIRMADO': return 'badge-info';
-            case 'EM_PRODUCAO': return 'badge-primary';
-            case 'PRONTO_PARA_ENTREGA': return 'badge-success';
-            case 'ENTREGUE': return 'badge-dark';
-            case 'CANCELADO': return 'badge-danger';
-            default: return 'badge-secondary';
+            case 'PENDENTE': return 'warning';
+            case 'CONFIRMADO': return 'info';
+            case 'EM_PRODUCAO': return 'primary';
+            case 'PRONTO_PARA_ENTREGA': return 'success';
+            case 'ENTREGUE': return 'success';
+            case 'CANCELADO': return 'danger';
+            default: return 'secondary';
         }
     }
 

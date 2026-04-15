@@ -1,8 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../models/usuario.model';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 
 @Component({
     selector: 'app-usuarios',
@@ -21,7 +23,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     usuarioSelecionadoHistorico?: Usuario;
     exibirModalHistorico: boolean = false;
 
-    itemMenuAberto: number | null = null;
+    // Menu de Ações
+    @ViewChild('menu') menu!: Menu;
+    menuItems: MenuItem[] = [];
+    usuarioSelecionado?: Usuario;
 
     constructor(
         private usuarioService: UsuarioService,
@@ -114,8 +119,24 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         }
     }
 
-    alternarMenuAcoes(id: number, event: Event): void {
-        event.stopPropagation();
-        this.itemMenuAberto = this.itemMenuAberto === id ? null : id;
+    configurarMenu(user: Usuario, event: Event): void {
+        this.usuarioSelecionado = user;
+        this.menuItems = [
+            {
+                label: 'Ações',
+                items: [
+                    { label: 'Editar', icon: 'pi pi-pencil', command: () => this.editar(user) },
+                    { label: 'Histórico', icon: 'pi pi-history', command: () => this.verHistorico(user) },
+                    { label: 'Reenviar Convite', icon: 'pi pi-envelope', command: () => this.reenviarConvite(user) },
+                    { 
+                        label: user.ativo ? 'Desativar' : 'Ativar', 
+                        icon: user.ativo ? 'pi pi-ban' : 'pi pi-check',
+                        styleClass: user.ativo ? 'text-danger' : 'text-success',
+                        command: () => user.ativo ? this.desativar(user.id) : this.ativar(user.id)
+                    }
+                ]
+            }
+        ];
+        this.menu.toggle(event);
     }
 }

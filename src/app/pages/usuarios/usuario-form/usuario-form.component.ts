@@ -274,15 +274,9 @@ export class UsuarioFormComponent implements OnInit {
         return ids ? ids.includes(opcaoId) : false;
     }
 
-    onOpcaoToggle(opcaoId: number, event: any): void {
-        const ids = this.userForm.get('opcoesParcelamentoIds')?.value as number[];
-        if (event.target.checked) {
-            if (!ids.includes(opcaoId)) {
-                this.userForm.get('opcoesParcelamentoIds')?.setValue([...ids, opcaoId]);
-            }
-        } else {
-            this.userForm.get('opcoesParcelamentoIds')?.setValue(ids.filter(id => id !== opcaoId));
-        }
+    onOpcaoToggleManual(event: any, opcaoId: number): void {
+        // O PrimeNG retorna o novo array de valores em event.checked quando ngModel é um array
+        this.userForm.get('opcoesParcelamentoIds')?.setValue(event.checked);
     }
 
     isInvalid(controlName: string): boolean {

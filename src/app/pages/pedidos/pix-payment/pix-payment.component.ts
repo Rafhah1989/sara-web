@@ -31,6 +31,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
   boletoPdfUrl: string = '';
   boletoLinhaDigitavel: string = '';
   isRenovando: boolean = false;
+  porcentagemTimer: number = 100;
 
   constructor(
     private route: ActivatedRoute,
@@ -60,7 +61,8 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     this.erroGeracao = false;
     this.mensagemErro = '';
     
-    this.pedidoService.buscarPorId(this.pedidoId).subscribe({
+    // Passamos skipSpinner: true para usar apenas o spinner local
+    this.pedidoService.buscarPorId(this.pedidoId, true).subscribe({
       next: (pedido) => {
         this.totalPedido = pedido.valorTotal || 0;
 
@@ -90,7 +92,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
           if (pagamento.dataExpiracao) {
             this.dataExpiracao = new Date(pagamento.dataExpiracao);
             if (this.dataExpiracao < new Date() && !pagamento.pago) {
-              this.tentarGerarPix(false);
+              this.tentarGerarPix(false, true); // Regera sem spinner silenciosamente
               return;
             }
             this.iniciarTimer();
@@ -114,7 +116,7 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
     });
   }
 
-  tentarGerarPix(showLoading: boolean = true, skipSpinner: boolean = false): void {
+  tentarGerarPix(showLoading: boolean = true, skipSpinner: boolean = true): void {
     if (!this.pedidoId || this.loadingGeracao) return;
     
     if (this.timer) clearInterval(this.timer);
@@ -170,8 +172,9 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
 
   iniciarTimer(): void {
     if (this.timer) clearInterval(this.timer);
-    
-    this.timer = setInterval(() => {
+    const tempoTotalPix = 15 * 60 * 1000; // 15 minutos em ms
+
+    const atualizar = () => {
       if (!this.dataExpiracao) return;
 
       const agora = new Date().getTime();
@@ -180,14 +183,19 @@ export class PixPaymentComponent implements OnInit, OnDestroy {
 
       if (diferenca <= 0) {
         this.tempoRestante = 'EXPIRADO';
+        this.porcentagemTimer = 0;
         clearInterval(this.timer);
-        this.tentarGerarPix(false, true); // Regera sem spinner silenciosamente
+        this.tentarGerarPix(false, true);
       } else {
         const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
         const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
         this.tempoRestante = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        this.porcentagemTimer = Math.max(0, Math.min(100, (diferenca / tempoTotalPix) * 100));
       }
-    }, 1000);
+    };
+
+    atualizar(); // Chamada imediata
+    this.timer = setInterval(atualizar, 1000);
   }
 
   ngOnDestroy(): void {

@@ -1,133 +1,117 @@
-<div class="container mt-4">
-  <div class="card shadow">
-    <div class="card-header border-bottom">
-      <h2 class="mb-0"><i class="fa fa-cog mr-2"></i>Configurações do Sistema</h2>
+<div class="grid">
+    <div class="col-12">
+        <div class="card p-fluid">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">Configurações do Sistema</h5>
+
+            <p-tabView>
+                <!-- Aba 1: E-mail e Alertas -->
+                <p-tabPanel header="E-mail & Notificações" leftIcon="pi pi-envelope mr-2">
+                    <div class="grid mt-2">
+                        <div class="col-12 md:col-6">
+                            <label for="mailHost" class="font-bold">Host SMTP</label>
+                            <input pInputText id="mailHost" [(ngModel)]="config.mailHost" placeholder="ex: smtp.gmail.com">
+                        </div>
+                        <div class="col-12 md:col-2">
+                            <label for="mailPort" class="font-bold">Porta</label>
+                            <p-inputNumber id="mailPort" [(ngModel)]="config.mailPort" [useGrouping]="false"></p-inputNumber>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="mailUsername" class="font-bold">Usuário (E-mail)</label>
+                            <input pInputText id="mailUsername" [(ngModel)]="config.mailUsername" placeholder="seu-email@gmail.com">
+                        </div>
+
+                        <div class="col-12 md:col-4">
+                            <label for="mailPassword" class="font-bold">Senha de App</label>
+                            <p-password id="mailPassword" [(ngModel)]="config.mailPassword" [feedback]="false" [toggleMask]="true" placeholder="Deixe vazio para manter"></p-password>
+                        </div>
+
+                        <div class="col-12 md:col-8">
+                            <div class="flex flex-wrap gap-4 mt-4">
+                                <div class="field-checkbox">
+                                    <p-checkbox id="emailAtivo" [(ngModel)]="config.emailAtivo" [binary]="true"></p-checkbox>
+                                    <label for="emailAtivo" class="ml-2">Envio Ativo</label>
+                                </div>
+                                <div class="field-checkbox">
+                                    <p-checkbox id="mailAuth" [(ngModel)]="config.mailAuth" [binary]="true"></p-checkbox>
+                                    <label for="mailAuth" class="ml-2">Autenticação SMTP</label>
+                                </div>
+                                <div class="field-checkbox">
+                                    <p-checkbox id="mailStarttls" [(ngModel)]="config.mailStarttls" [binary]="true"></p-checkbox>
+                                    <label for="mailStarttls" class="ml-2">STARTTLS</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label for="emailsNotificacao" class="font-bold">E-mails de Alerta (Administração)</label>
+                            <textarea pInputTextarea id="emailsNotificacao" [(ngModel)]="config.emailsNotificacao" 
+                                      rows="3" placeholder="admin@empresa.com, vendas@empresa.com (separe por vírgula)"></textarea>
+                            <small class="text-secondary">Estes endereços receberão notificações detalhadas de novos pedidos.</small>
+                        </div>
+                    </div>
+                </p-tabPanel>
+
+                <!-- Aba 2: Regras de Boleto -->
+                <p-tabPanel header="Regras de Boleto" leftIcon="pi pi-file mr-2">
+                    <div class="grid mt-2">
+                        <!-- Multa -->
+                        <div class="col-12 md:col-4">
+                            <label class="font-bold">Multa após vencimento</label>
+                            <div class="p-inputgroup">
+                                <p-dropdown [options]="[{label: '%', value: 'percentage'}, {label: 'R$', value: 'fixed'}]" 
+                                            [(ngModel)]="configBoleto.multaTipo" optionLabel="label" optionValue="value"
+                                            [style]="{'width': '80px'}"></p-dropdown>
+                                <p-inputNumber [(ngModel)]="configBoleto.multaValor" 
+                                               [mode]="configBoleto.multaTipo === 'fixed' ? 'currency' : 'decimal'" 
+                                               currency="BRL" locale="pt-BR" 
+                                               [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+                            </div>
+                        </div>
+
+                        <!-- Juros -->
+                        <div class="col-12 md:col-4">
+                            <label class="font-bold">Juros de mora (mensal)</label>
+                            <div class="p-inputgroup">
+                                <p-dropdown [options]="[{label: '%', value: 'percentage'}, {label: 'R$', value: 'fixed'}]" 
+                                            [(ngModel)]="configBoleto.jurosTipo" optionLabel="label" optionValue="value"
+                                            [style]="{'width': '80px'}"></p-dropdown>
+                                <p-inputNumber [(ngModel)]="configBoleto.jurosValor" 
+                                               [mode]="configBoleto.jurosTipo === 'fixed' ? 'currency' : 'decimal'" 
+                                               currency="BRL" locale="pt-BR" 
+                                               [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+                            </div>
+                        </div>
+
+                        <!-- Desconto -->
+                        <div class="col-12 md:col-4">
+                            <label class="font-bold">Desconto p/ antecipação</label>
+                            <div class="p-inputgroup">
+                                <p-dropdown [options]="[{label: '%', value: 'percentage'}, {label: 'R$', value: 'fixed'}]" 
+                                            [(ngModel)]="configBoleto.descontoTipo" optionLabel="label" optionValue="value"
+                                            [style]="{'width': '80px'}"></p-dropdown>
+                                <p-inputNumber [(ngModel)]="configBoleto.descontoValor" 
+                                               [mode]="configBoleto.descontoTipo === 'fixed' ? 'currency' : 'decimal'" 
+                                               currency="BRL" locale="pt-BR" 
+                                               [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+                            </div>
+                        </div>
+
+                        <div class="col-12 md:col-4 mt-3">
+                            <label for="descontoDias" class="font-bold">Dias de antecedência para desconto</label>
+                            <p-inputNumber id="descontoDias" [(ngModel)]="configBoleto.descontoDiasAntecedencia" 
+                                           [showButtons]="true" [min]="0" buttonLayout="horizontal" 
+                                           spinnerMode="horizontal" incrementButtonIcon="pi pi-plus" 
+                                           decrementButtonIcon="pi pi-minus"></p-inputNumber>
+                        </div>
+                    </div>
+                </p-tabPanel>
+            </p-tabView>
+
+            <div class="flex justify-content-end mt-5">
+                <button pButton pRipple label="Salvar Todas as Configurações" icon="pi pi-save" 
+                        class="p-button-primary btn-gold md:w-20rem" 
+                        (click)="salvar()" [disabled]="loading"></button>
+            </div>
+        </div>
     </div>
-
-    <div class="card-body">
-      <!-- Toast Notification -->
-      <div class="toast-notification" *ngIf="exibirToast">
-        {{ mensagemToast }}
-      </div>
-
-      <div *ngIf="errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
-      </div>
-
-      <form (ngSubmit)="salvar()" #configForm="ngForm">
-        <h4 class="section-title">Servidor de E-mail</h4>
-        <div class="row mt-4">
-          <div class="col-md-4 form-group">
-            <label for="mailHost">Host SMTP</label>
-            <input type="text" id="mailHost" name="mailHost" [(ngModel)]="config.mailHost" class="form-control" required
-              placeholder="ex: smtp.gmail.com">
-          </div>
-          <div class="col-md-2 form-group">
-            <label for="mailPort">Porta</label>
-            <input type="number" id="mailPort" name="mailPort" [(ngModel)]="config.mailPort" class="form-control"
-              required>
-          </div>
-          <div class="col-md-3 form-group">
-            <label for="mailUsername">Usuário (E-mail)</label>
-            <input type="email" id="mailUsername" name="mailUsername" [(ngModel)]="config.mailUsername"
-              class="form-control" required placeholder="seu-email@gmail.com">
-          </div>
-          <div class="col-md-3 form-group">
-            <label for="mailPassword">Senha de App</label>
-            <input type="password" id="mailPassword" name="mailPassword" [(ngModel)]="config.mailPassword"
-              class="form-control" placeholder="Mantenha vazio para não alterar">
-          </div>
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-md-3 form-group pt-2">
-            <div class="checkbox-container">
-              <input type="checkbox" id="emailAtivo" name="emailAtivo" [(ngModel)]="config.emailAtivo">
-              <label class="font-weight-bold" for="emailAtivo">Envio de E-mail Ativo</label>
-            </div>
-          </div>
-          <div class="col-md-3 form-group pt-2">
-            <div class="checkbox-container">
-              <input type="checkbox" id="mailAuth" name="mailAuth" [(ngModel)]="config.mailAuth">
-              <label for="mailAuth">Autenticação SMTP</label>
-            </div>
-          </div>
-          <div class="col-md-3 form-group pt-2">
-            <div class="checkbox-container">
-              <input type="checkbox" id="mailStarttls" name="mailStarttls" [(ngModel)]="config.mailStarttls">
-              <label for="mailStarttls">Controle STARTTLS</label>
-            </div>
-          </div>
-        </div>
-
-        <h4 class="section-title mt-4">Configurações de Boleto</h4>
-        <div class="row mt-3">
-          <!-- Multa -->
-          <div class="col-md-3 form-group">
-            <label>Multa após vencimento</label>
-            <div class="input-group">
-              <select class="form-control" name="multaTipo" [(ngModel)]="configBoleto.multaTipo">
-                <option value="percentage">Percentual (%)</option>
-                <option value="fixed">Valor Fixo (R$)</option>
-              </select>
-              <input type="text" class="form-control" name="multaValor" [(ngModel)]="exibicaoMulta"
-                (blur)="processarInputDecimal('multa')" (focus)="$any($event.target).select()">
-            </div>
-          </div>
-
-          <!-- Juros -->
-          <div class="col-md-3 form-group">
-            <label>Juros de mora (ao mês)</label>
-            <div class="input-group">
-              <select class="form-control" name="jurosTipo" [(ngModel)]="configBoleto.jurosTipo">
-                <option value="percentage">Percentual (%)</option>
-                <option value="fixed">Valor Fixo (R$)</option>
-              </select>
-              <input type="text" class="form-control" name="jurosValor" [(ngModel)]="exibicaoJuros"
-                (blur)="processarInputDecimal('juros')" (focus)="$any($event.target).select()">
-            </div>
-          </div>
-
-          <!-- Desconto -->
-          <div class="col-md-3 form-group">
-            <label>Desconto por antecipação</label>
-            <div class="input-group">
-              <select class="form-control" name="descontoTipo" [(ngModel)]="configBoleto.descontoTipo">
-                <option value="percentage">Percentual (%)</option>
-                <option value="fixed">Valor Fixo (R$)</option>
-              </select>
-              <input type="text" class="form-control" name="descontoValor" [(ngModel)]="exibicaoDesconto"
-                (blur)="processarInputDecimal('desconto')" (focus)="$any($event.target).select()">
-            </div>
-          </div>
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-md-2 form-group">
-            <label for="descontoDias">Dias de antecedência</label>
-            <input type="number" id="descontoDias" name="descontoDiasAntecedencia"
-              [(ngModel)]="configBoleto.descontoDiasAntecedencia" class="form-control">
-            <small class="form-text text-muted">A quantidade de dias antes do vencimento para aplicar o
-              desconto.</small>
-          </div>
-        </div>
-
-        <h4 class="section-title mt-4">Notificações</h4>
-        <div class="form-group mt-3">
-          <label for="emailsNotificacao">E-mails de Alerta</label>
-          <textarea id="emailsNotificacao" name="emailsNotificacao" [(ngModel)]="config.emailsNotificacao"
-            class="form-control" rows="4" placeholder="admin@empresa.com, vendas@empresa.com"></textarea>
-          <small class="form-text text-muted">Administradores - Separar por vírgula. Estes endereços receberão
-            notificações detalhadas de novos pedidos.</small>
-        </div>
-
-        <div class="mt-4 text-right">
-          <button type="submit" class="btn btn-save" style="margin-bottom: 20px; margin-top: 20px;"
-            [disabled]="!configForm.form.valid || loading">
-            <i class="fa fa-save mr-2"></i>Salvar Alterações
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 </div>

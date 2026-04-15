@@ -3,6 +3,7 @@ import { Setor } from '../../models/setor.model';
 import { Frete } from '../../models/frete.model';
 import { SetorService } from '../../services/setor.service';
 import { FreteService } from '../../services/frete.service';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-setor',
@@ -15,17 +16,18 @@ export class SetorComponent implements OnInit {
     setorAtual: Setor = this.getNovoSetor();
     filtroDescricaoSetor: string = '';
     modoEdicao: boolean = false;
-    abaAtiva: number = 1;
+    activeIndex: number = 0;
 
-    // Relacionamento com Tabela de Frete
-    termoBuscaTabela: string = '';
+    // Relacionamento com Tabela de Frete (p-autoComplete)
+    tabelaSelecionada: any;
     tabelasFiltradas: Frete[] = [];
-    tabelaSelecionadaId?: number;
     tabelasVinculadas: Frete[] = [];
 
     constructor(
         private setorService: SetorService,
-        private freteService: FreteService
+        private freteService: FreteService,
+        private confirmationService: ConfirmationService,
+        private messageService: MessageService
     ) { }
 
     ngOnInit(): void {
@@ -40,9 +42,6 @@ export class SetorComponent implements OnInit {
         };
     }
 
-    setAba(aba: number): void {
-        this.abaAtiva = aba;
-    }
 
     carregarSetores(): void {
         this.setorService.listarTodos().subscribe({
@@ -62,29 +61,25 @@ export class SetorComponent implements OnInit {
         }
     }
 
-    onBuscaTabelaInput(event: any): void {
-        const termo = event.target.value;
+    filtrarTabelas(event: any): void {
+        const termo = event.query;
         if (termo && termo.length >= 3) {
             this.freteService.buscarPorDescricao(termo).subscribe({
                 next: (data) => this.tabelasFiltradas = data.filter(t => t.ativo),
                 error: (err) => console.error('Erro ao buscar tabelas de frete', err)
             });
-        } else {
-            this.tabelasFiltradas = [];
         }
     }
 
     adicionarTabela(): void {
-        if (this.tabelaSelecionadaId) {
-            const tabela = this.tabelasFiltradas.find(t => t.id === Number(this.tabelaSelecionadaId));
+        if (this.tabelaSelecionada) {
+            const tabela = this.tabelaSelecionada;
             if (tabela && !this.tabelasVinculadas.some(t => t.id === tabela.id)) {
                 this.tabelasVinculadas.push(tabela);
-                // Limpar busca após adicionar
-                this.tabelaSelecionadaId = undefined;
-                this.termoBuscaTabela = '';
+                this.tabelaSelecionada = null;
                 this.tabelasFiltradas = [];
             } else if (tabela) {
-                alert('Esta tabela já está vinculada ao setor.');
+                this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Esta tabela já está vinculada ao setor.' });
             }
         }
     }
@@ -104,23 +99,25 @@ export class SetorComponent implements OnInit {
                 next: () => {
                     this.finalizarAcao();
                     this.carregarSetores();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Setor alterado com sucesso!' });
                 },
-                error: (err) => alert(err.error || 'Erro ao alterar setor')
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error || 'Erro ao alterar setor' })
             });
         } else {
             this.setorService.cadastrar(this.setorAtual).subscribe({
                 next: () => {
                     this.finalizarAcao();
                     this.carregarSetores();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Setor cadastrado com sucesso!' });
                 },
-                error: (err) => alert(err.error || 'Erro ao cadastrar setor')
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Erro', detail: err.error || 'Erro ao cadastrar setor' })
             });
         }
     }
 
     editar(setor: Setor): void {
         this.modoEdicao = true;
-        this.abaAtiva = 1;
+        this.activeIndex = 0;
         this.setorAtual = { ...setor };
 
         if (setor.id) {
@@ -134,19 +131,35 @@ export class SetorComponent implements OnInit {
         window.scrollTo(0, 0);
     }
 
-    desativar(id?: number): void {
-        if (id && confirm('Tem certeza que deseja desativar este setor?')) {
-            this.setorService.desativar(id).subscribe({
-                next: () => this.carregarSetores(),
-                error: (err) => console.error('Erro ao desativar setor', err)
-            });
-        }
+    desativar(setor: Setor): void {
+        if (!setor.id) return;
+        
+        this.confirmationService.confirm({
+            message: `Tem certeza que deseja desativar o setor <b>${setor.descricao}</b>?`,
+            header: 'Confirmar Desativação',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            acceptButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this.setorService.desativar(setor.id!).subscribe({
+                    next: () => {
+                        this.carregarSetores();
+                        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Setor desativado!' });
+                    },
+                    error: (err) => console.error('Erro ao desativar setor', err)
+                });
+            }
+        });
     }
 
     ativar(id?: number): void {
         if (id) {
             this.setorService.ativar(id).subscribe({
-                next: () => this.carregarSetores(),
+                next: () => {
+                    this.carregarSetores();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Setor ativado!' });
+                },
                 error: (err) => console.error('Erro ao ativar setor', err)
             });
         }
@@ -158,11 +171,10 @@ export class SetorComponent implements OnInit {
 
     finalizarAcao(): void {
         this.setorAtual = this.getNovoSetor();
-        this.termoBuscaTabela = '';
+        this.tabelaSelecionada = null;
         this.tabelasFiltradas = [];
-        this.tabelaSelecionadaId = undefined;
         this.tabelasVinculadas = [];
-        this.abaAtiva = 1;
+        this.activeIndex = 0;
         this.modoEdicao = false;
     }
 }

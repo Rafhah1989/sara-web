@@ -67,6 +67,11 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { MenuModule } from 'primeng/menu';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { PasswordModule } from 'primeng/password';
+import { InputMaskModule } from 'primeng/inputmask';
+import { DividerModule } from 'primeng/divider';
+import { TieredMenuModule } from 'primeng/tieredmenu';
+import { TabViewModule } from 'primeng/tabview';
 
 registerLocaleData(localePt);
 
@@ -157,6 +162,11 @@ const routes: Routes = [
     MultiSelectModule,
     MenuModule,
     ConfirmDialogModule,
+    PasswordModule,
+    InputMaskModule,
+    DividerModule,
+    TieredMenuModule,
+    TabViewModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
   ],
   providers: [

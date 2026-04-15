@@ -1,247 +1,204 @@
-<div class="page-title-banner text-center">
-    <h1>{{ modoEdicao ? 'Alterar Usuário' : 'Novo Usuário' }}</h1>
-</div>
+<div class="grid">
+    <div class="col-12">
+        <div class="card p-fluid">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">{{ modoEdicao ? 'Alterar Usuário' : 'Novo Usuário' }}</h5>
+            
+            <form [formGroup]="userForm" (ngSubmit)="salvar()">
+                <!-- Dados Básicos -->
+                <p-card header="Dados Básicos" styleClass="mb-4 shadow-1">
+                    <div class="field grid">
+                        <div class="col-12">
+                            <label for="nome" class="font-bold">Nome Completo</label>
+                            <input pInputText id="nome" formControlName="nome" placeholder="Digite o nome completo" [ngClass]="{'ng-invalid ng-dirty': isInvalid('nome')}">
+                            <small class="p-error" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100 caracteres).</small>
+                        </div>
+                    </div>
+    
+                    <div class="field grid">
+                        <div class="col-12 md:col-4">
+                            <label for="cpfCnpj" class="font-bold">CPF / CNPJ</label>
+                            <input pInputText id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)" 
+                                   placeholder="000.000.000-00" [ngClass]="{'ng-invalid ng-dirty': isInvalid('cpfCnpj')}">
+                            <small class="p-error" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</small>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="email" class="font-bold">E-mail</label>
+                            <input pInputText id="email" formControlName="email" type="email" placeholder="exemplo@email.com" [ngClass]="{'ng-invalid ng-dirty': isInvalid('email')}">
+                            <small class="p-error" *ngIf="isInvalid('email')">E-mail válido é obrigatório.</small>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="telefone" class="font-bold">Telefone</label>
+                            <input pInputText id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)" 
+                                   placeholder="(00) 00000-0000" [ngClass]="{'ng-invalid ng-dirty': isInvalid('telefone')}">
+                            <small class="p-error" *ngIf="isInvalid('telefone')">Formato inválido.</small>
+                        </div>
+                    </div>
+                </p-card>
 
-<section class="user-form-page container">
-    <div class="user-form-container card">
-        <form [formGroup]="userForm" (ngSubmit)="salvar()">
-            <fieldset class="form-section">
-                <legend>Dados Básicos</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nome">Nome Completo</label>
-                        <input type="text" id="nome" formControlName="nome" [class.error]="isInvalid('nome')"
-                            placeholder="Digite o nome completo">
-                        <span class="error-msg" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100
-                            caracteres).</span>
+                <!-- Endereço -->
+                <p-card header="Endereço" styleClass="mb-4 shadow-1">
+                    <div class="field grid">
+                        <div class="col-12 md:col-3">
+                            <label for="cep" class="font-bold">CEP</label>
+                            <p-inputMask id="cep" mask="99999-999" formControlName="cep" (onBlur)="buscarCep()" 
+                                         placeholder="00000-000" [unmask]="true" [ngClass]="{'ng-invalid ng-dirty': isInvalid('cep')}"></p-inputMask>
+                            <small class="p-error" *ngIf="isInvalid('cep')">CEP obrigatório.</small>
+                        </div>
+                        <div class="col-12 md:col-6">
+                            <label for="endereco" class="font-bold">Endereço</label>
+                            <input pInputText id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
+                        </div>
+                        <div class="col-12 md:col-3">
+                            <label for="numero" class="font-bold">Número</label>
+                            <input pInputText id="numero" formControlName="numero" placeholder="Nº">
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cpfCnpj">CPF / CNPJ</label>
-                        <input type="text" id="cpfCnpj" formControlName="cpfCnpj" (input)="applyCpfCnpjMask($event)"
-                            [class.error]="isInvalid('cpfCnpj')" placeholder="000.000.000-00">
-                        <span class="error-msg" *ngIf="isInvalid('cpfCnpj')">CPF ou CNPJ inválido.</span>
+                    <div class="field grid">
+                        <div class="col-12 md:col-5">
+                            <label for="cidade" class="font-bold">Cidade</label>
+                            <input pInputText id="cidade" formControlName="cidade" placeholder="Cidade" [ngClass]="{'ng-invalid ng-dirty': isInvalid('cidade')}">
+                            <small class="p-error" *ngIf="isInvalid('cidade')">Obrigatório.</small>
+                        </div>
+                        <div class="col-12 md:col-5">
+                            <label for="bairro" class="font-bold">Bairro</label>
+                            <input pInputText id="bairro" formControlName="bairro" placeholder="Bairro" [ngClass]="{'ng-invalid ng-dirty': isInvalid('bairro')}">
+                            <small class="p-error" *ngIf="isInvalid('bairro')">Obrigatório.</small>
+                        </div>
+                        <div class="col-12 md:col-2">
+                            <label for="uf" class="font-bold">UF</label>
+                            <p-dropdown [options]="ufs" formControlName="uf" placeholder="UF" [ngClass]="{'ng-invalid ng-dirty': isInvalid('uf')}"></p-dropdown>
+                            <small class="p-error" *ngIf="isInvalid('uf')">Obrigatório.</small>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" formControlName="email" [class.error]="isInvalid('email')"
-                            placeholder="exemplo@email.com">
-                        <span class="error-msg" *ngIf="isInvalid('email')">E-mail válido é obrigatório.</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="telefone">Telefone</label>
-                        <input type="text" id="telefone" formControlName="telefone" (input)="applyTelefoneMask($event)"
-                            [class.error]="isInvalid('telefone')" placeholder="(00) 00000-0000">
-                        <span class="error-msg" *ngIf="isInvalid('telefone')">Formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx.</span>
-                    </div>
-                </div>
-            </fieldset>
+                </p-card>
 
-            <fieldset class="form-section">
-                <legend>Endereço</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cep">CEP</label>
-                        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
-                            [class.error]="isInvalid('cep')" placeholder="00000000">
-                        <span class="error-msg" *ngIf="isInvalid('cep')">CEP deve ter 8 dígitos numéricos.</span>
+                <!-- Paróquia -->
+                <p-card header="Paróquia" styleClass="mb-4 shadow-1">
+                    <div class="field grid">
+                        <div class="col-12 md:col-4">
+                            <label for="paroco" class="font-bold">Pároco</label>
+                            <input pInputText id="paroco" formControlName="paroco" placeholder="Nome do Pároco">
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="secretario" class="font-bold">Secretário(a)</label>
+                            <input pInputText id="secretario" formControlName="secretario" placeholder="Nome do(a) Secretário(a)">
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="tesoureiro" class="font-bold">Tesoureiro</label>
+                            <input pInputText id="tesoureiro" formControlName="tesoureiro" placeholder="Nome do Tesoureiro">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="endereco">Endereço</label>
-                        <input type="text" id="endereco" formControlName="endereco" placeholder="Rua, Av, etc.">
-                    </div>
-                    <div class="form-group small">
-                        <label for="numero">Número</label>
-                        <input type="text" id="numero" formControlName="numero" placeholder="Nº">
-                    </div>
-                </div>
+                </p-card>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cidade">Cidade</label>
-                        <input type="text" id="cidade" formControlName="cidade" [class.error]="isInvalid('cidade')"
-                            placeholder="Cidade">
-                        <span class="error-msg" *ngIf="isInvalid('cidade')">Cidade é obrigatória.</span>
+                <!-- Parcelamento -->
+                <p-card header="Parcelamento" styleClass="mb-4 shadow-1">
+                    <div class="field-checkbox mb-3">
+                        <p-checkbox id="permitirParcelamento" formControlName="permitirParcelamento" [binary]="true"></p-checkbox>
+                        <label for="permitirParcelamento" class="ml-2">Permitir Parcelamento para este usuário</label>
                     </div>
-                    <div class="form-group">
-                        <label for="bairro">Bairro</label>
-                        <input type="text" id="bairro" formControlName="bairro" [class.error]="isInvalid('bairro')"
-                            placeholder="Bairro">
-                        <span class="error-msg" *ngIf="isInvalid('bairro')">Bairro é obrigatório.</span>
-                    </div>
-                    <div class="form-group small">
-                        <label for="uf">UF</label>
-                        <select id="uf" formControlName="uf" [class.error]="isInvalid('uf')">
-                            <option value="">UF</option>
-                            <option *ngFor="let uf of ufs" [value]="uf">{{ uf }}</option>
-                        </select>
-                        <span class="error-msg" *ngIf="isInvalid('uf')">UF obrigatória.</span>
-                    </div>
-                </div>
-            </fieldset>
 
-            <fieldset class="form-section">
-                <legend>Paróquia</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="paroco">Pároco</label>
-                        <input type="text" id="paroco" formControlName="paroco" placeholder="Nome do Pároco">
-                    </div>
-                    <div class="form-group">
-                        <label for="secretario">Secretário(a)</label>
-                        <input type="text" id="secretario" formControlName="secretario"
-                            placeholder="Nome do(a) Secretário(a)">
-                    </div>
-                    <div class="form-group">
-                        <label for="tesoureiro">Tesoureiro</label>
-                        <input type="text" id="tesoureiro" formControlName="tesoureiro"
-                            placeholder="Nome do Tesoureiro">
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Parcelamento</legend>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="permitirParcelamento" formControlName="permitirParcelamento">
-                        <label for="permitirParcelamento">Permitir Parcelamento para este usuário</label>
-                    </div>
-                </div>
-
-                <div class="form-row" *ngIf="userForm.get('permitirParcelamento')?.value">
-                    <div class="form-group">
-                        <label>Opções de Parcelamento Autorizadas</label>
-                        <div class="installment-options-grid">
-                            <div *ngFor="let opt of todasOpcoesParcelamento" class="installment-option-item">
-                                <input type="checkbox" [id]="'opt-' + opt.id" [checked]="isOpcaoSelected(opt.id!)" (change)="onOpcaoToggle(opt.id!, $event)">
-                                <label [for]="'opt-' + opt.id">
-                                    <strong>{{ opt.formaPagamentoDescricao }}</strong>: 
-                                    Até {{ opt.qtdMaxParcelas }}x (Intervalo: {{ opt.diasVencimentoIntervalo }} dias)
-                                </label>
+                    <div *ngIf="userForm.get('permitirParcelamento')?.value" class="mt-3">
+                        <label class="font-bold block mb-2">Opções de Parcelamento Autorizadas</label>
+                        <div class="grid">
+                            <div *ngFor="let opt of todasOpcoesParcelamento" class="col-12 md:col-6 lg:col-4">
+                                <div class="field-checkbox p-2 border-1 border-300 border-round">
+                                    <p-checkbox [id]="'opt-' + opt.id" [value]="opt.id" 
+                                               [ngModel]="userForm.get('opcoesParcelamentoIds')?.value" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               (onChange)="onOpcaoToggleManual($event, opt.id!)"></p-checkbox>
+                                    <label [for]="'opt-' + opt.id" class="ml-2 text-sm">
+                                        <strong>{{ opt.formaPagamentoDescricao }}</strong>: Até {{ opt.qtdMaxParcelas }}x
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <div *ngIf="todasOpcoesParcelamento.length === 0" class="no-data" style="padding: 10px !important;">
-                            Nenhuma opção de parcelamento cadastrada no sistema.
+                        <div *ngIf="todasOpcoesParcelamento.length === 0" class="p-3 text-center surface-100 border-round">
+                            Nenhuma opção de parcelamento cadastrada.
                         </div>
                     </div>
-                </div>
-            </fieldset>
+                </p-card>
 
-            <fieldset class="form-section">
-                <legend>Pagamento e Frete</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="formaPagamento">Forma de Pagamento</label>
-                        <select id="formaPagamento" formControlName="formaPagamento">
-                            <option value="">Selecione...</option>
-                            <option *ngFor="let forma of formasPagamento" [value]="forma.id">{{ forma.descricao }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="desconto">Desconto (%)</label>
-                        <input type="text" id="desconto" formControlName="desconto"
-                            (input)="applyPercentualMask($event)" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label for="modalidadeEntrega">Modalidade de Entrega</label>
-                        <input type="text" id="modalidadeEntrega" formControlName="modalidadeEntrega"
-                            placeholder="Ex: Correios">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="setorId">Setor</label>
-                        <select id="setorId" formControlName="setorId" (change)="onSetorChange()">
-                            <option value="">Selecione o Setor...</option>
-                            <option *ngFor="let setor of setoresAtivos" [value]="setor.id">{{ setor.descricao }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tabelaFreteId">Tabela de Frete</label>
-                        <select id="tabelaFreteId" formControlName="tabelaFreteId"
-                            [disabled]="!userForm.get('setorId')?.value">
-                            <option value="">{{ !userForm.get('setorId')?.value ? 'Selecione um setor primeiro' :
-                                'Selecione a Tabela...' }}</option>
-                            <option *ngFor="let frete of tabelasFreteFiltradas" [value]="frete.id">{{ frete.descricao }}
-                                (R$ {{ frete.valor }})</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="role">Tipo de Usuário</label>
-                        <select id="role" formControlName="role">
-                            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="metodoPagamentoAutorizado">Método de Pagamento Autorizado</label>
-                        <select id="metodoPagamentoAutorizado" formControlName="metodoPagamentoAutorizado">
-                            <option *ngFor="let metodo of metodosAutorizados" [value]="metodo.id">{{ metodo.descricao }}</option>
-                        </select>
-                        <span class="error-msg" *ngIf="isInvalid('metodoPagamentoAutorizado')">Obrigatório.</span>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="ativarDescontoAVista" formControlName="ativarDescontoAVista">
-                        <label for="ativarDescontoAVista">Ativar Desconto à Vista da Forma de Pagamento para este usuário</label>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Observações</legend>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="observacao">Observação</label>
-                        <textarea id="observacao" formControlName="observacao" rows="2"
-                            placeholder="Observações adicionais..."></textarea>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
-                <legend>Autenticação</legend>
-                <div class="form-row">
-                    <div class="form-group password-field">
-                        <label for="senha">Senha (6 números) {{ modoEdicao ? '(Opcional)' : '' }}</label>
-                        <div class="input-wrapper">
-                            <input [type]="showSenha ? 'text' : 'password'" id="senha" formControlName="senha"
-                                [class.error]="isInvalid('senha')">
-                            <button type="button" class="eye-icon" (click)="showSenha = !showSenha">
-                                <i class="fas" [ngClass]="showSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
-                            </button>
+                <!-- Pagamento e Frete -->
+                <p-card header="Pagamento e Frete" styleClass="mb-4 shadow-1">
+                    <div class="field grid">
+                        <div class="col-12 md:col-4">
+                            <label for="formaPagamento" class="font-bold">Forma de Pagamento Preferencial</label>
+                            <p-dropdown [options]="formasPagamento" formControlName="formaPagamento" optionLabel="descricao" optionValue="id" placeholder="Selecione..."></p-dropdown>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="desconto" class="font-bold">Desconto (%)</label>
+                            <p-inputNumber formControlName="desconto" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00"></p-inputNumber>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="modalidadeEntrega" class="font-bold">Modalidade de Entrega</label>
+                            <input pInputText id="modalidadeEntrega" formControlName="modalidadeEntrega" placeholder="Ex: Correios">
                         </div>
                     </div>
-                    <div class="form-group password-field">
-                        <label for="confirmarSenha">Confirmar Senha {{ modoEdicao ? '(Opcional)' : '' }}</label>
-                        <div class="input-wrapper">
-                            <input [type]="showConfirmSenha ? 'text' : 'password'" id="confirmarSenha"
-                                formControlName="confirmarSenha"
-                                [class.error]="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">
-                            <button type="button" class="eye-icon" (click)="showConfirmSenha = !showConfirmSenha">
-                                <i class="fas" [ngClass]="showConfirmSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
-                            </button>
+
+                    <div class="field grid">
+                        <div class="col-12 md:col-4">
+                            <label for="setorId" class="font-bold">Setor</label>
+                            <p-dropdown [options]="setoresAtivos" formControlName="setorId" optionLabel="descricao" optionValue="id" (onChange)="onSetorChange()" placeholder="Selecione o Setor..."></p-dropdown>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="tabelaFreteId" class="font-bold">Tabela de Frete</label>
+                            <p-dropdown [options]="tabelasFreteFiltradas" formControlName="tabelaFreteId" optionLabel="descricao" optionValue="id" 
+                                       [disabled]="!userForm.get('setorId')?.value" 
+                                       [placeholder]="!userForm.get('setorId')?.value ? 'Selecione um setor primeiro' : 'Selecione a Tabela...'"></p-dropdown>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <label for="role" class="font-bold">Tipo de Usuário</label>
+                            <p-dropdown [options]="roles" formControlName="role" placeholder="Selecione..."></p-dropdown>
                         </div>
                     </div>
-                </div>
-            </fieldset>
 
-            <div class="form-actions">
-                <button type="submit" class="btn-gold" [disabled]="userForm.invalid">
-                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Usuário' }}
-                </button>
-                <button type="button" class="btn-outline" (click)="voltar()">Voltar</button>
-            </div>
-        </form>
+                    <div class="field grid">
+                        <div class="col-12">
+                            <label for="metodoPagamentoAutorizado" class="font-bold">Método de Pagamento Autorizado</label>
+                            <p-dropdown [options]="metodosAutorizados" formControlName="metodoPagamentoAutorizado" optionLabel="descricao" optionValue="id" [ngClass]="{'ng-invalid ng-dirty': isInvalid('metodoPagamentoAutorizado')}"></p-dropdown>
+                            <small class="p-error" *ngIf="isInvalid('metodoPagamentoAutorizado')">Obrigatório.</small>
+                        </div>
+                    </div>
+
+                    <div class="field-checkbox">
+                        <p-checkbox id="ativarDescontoAVista" formControlName="ativarDescontoAVista" [binary]="true"></p-checkbox>
+                        <label for="ativarDescontoAVista" class="ml-2">Ativar Desconto à Vista da Forma de Pagamento</label>
+                    </div>
+                </p-card>
+
+                <!-- Observações -->
+                <p-card header="Observações" styleClass="mb-4 shadow-1">
+                    <div class="field">
+                        <label for="observacao" class="font-bold">Observação</label>
+                        <textarea pInputTextarea id="observacao" formControlName="observacao" rows="3" placeholder="Observações adicionais..."></textarea>
+                    </div>
+                </p-card>
+
+                <!-- Autenticação -->
+                <p-card header="Autenticação" styleClass="mb-5 shadow-1">
+                    <div class="field grid">
+                        <div class="col-12 md:col-6">
+                            <label for="senha" class="font-bold">Senha (6 números) {{ modoEdicao ? '(Opcional)' : '' }}</label>
+                            <p-password id="senha" formControlName="senha" [toggleMask]="true" [feedback]="true" 
+                                       promptLabel="Digite a senha" weakLabel="Fraca" mediumLabel="Média" strongLabel="Forte"
+                                       [ngClass]="{'ng-invalid ng-dirty': isInvalid('senha')}"></p-password>
+                        </div>
+                        <div class="col-12 md:col-6">
+                            <label for="confirmarSenha" class="font-bold">Confirmar Senha</label>
+                            <p-password id="confirmarSenha" formControlName="confirmarSenha" [toggleMask]="true" [feedback]="false"
+                                       [ngClass]="{'ng-invalid ng-dirty': userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched}"></p-password>
+                            <small class="p-error" *ngIf="userForm.hasError('mismatch') && userForm.get('confirmarSenha')?.touched">As senhas não conferem.</small>
+                        </div>
+                    </div>
+                </p-card>
+
+                <!-- Ações -->
+                <div class="flex justify-content-end gap-3 mt-4">
+                    <button pButton pRipple type="button" label="Voltar" icon="pi pi-arrow-left" class="p-button-outlined p-button-secondary" (click)="voltar()"></button>
+                    <button pButton pRipple type="submit" [label]="modoEdicao ? 'Salvar Alterações' : 'Cadastrar Usuário'" icon="pi pi-check" class="p-button-success btn-gold" [disabled]="userForm.invalid"></button>
+                </div>
+            </form>
+        </div>
     </div>
-</section>
+</div>

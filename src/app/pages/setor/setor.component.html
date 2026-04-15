@@ -1,134 +1,144 @@
-<div class="page-title-banner">
-    <h1>Gestão de Setores</h1>
-</div>
+<div class="grid">
+    <!-- Formulário de Cadastro/Edição -->
+    <div class="col-12">
+        <div class="card p-fluid">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">
+                {{ modoEdicao ? 'Alterar Setor : ' + setorAtual.descricao : 'Novo Setor' }}
+            </h5>
 
-<section class="setor-page container">
-
-    <!-- Formulário -->
-    <div class="setor-form-container card">
-        <h2>{{ modoEdicao ? 'Alterar Setor' : 'Novo Setor' }}</h2>
-
-        <!-- Navegação por Abas -->
-        <div class="tabs-header">
-            <button type="button" class="tab-btn" [class.active]="abaAtiva === 1" (click)="setAba(1)">Dados do
-                Setor</button>
-            <button type="button" class="tab-btn" [class.active]="abaAtiva === 2" (click)="setAba(2)">Tabelas de
-                Frete</button>
-        </div>
-
-        <form (ngSubmit)="salvar()" #setorForm="ngForm">
-            <!-- Aba 1: Dados do Setor -->
-            <div *ngIf="abaAtiva === 1" class="tab-content">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="descricao">Descrição do Setor</label>
-                        <input type="text" id="descricao" name="descricao" [(ngModel)]="setorAtual.descricao" required
-                            placeholder="Digite o nome do setor">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label for="ativo">Ativo</label>
-                        <input type="checkbox" id="ativo" name="ativo" [(ngModel)]="setorAtual.ativo">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Aba 2: Tabelas de Frete -->
-            <div *ngIf="abaAtiva === 2" class="tab-content">
-                <div class="form-row relation-row">
-                    <div class="form-group">
-                        <label for="buscaTabela">Buscar Tabela de Frete</label>
-                        <input type="text" id="buscaTabela" name="buscaTabela" [(ngModel)]="termoBuscaTabela"
-                            (input)="onBuscaTabelaInput($event)" placeholder="Mínimo 3 letras...">
-                    </div>
-                    <div class="form-group">
-                        <label for="tabelaSelecionada">Tabela</label>
-                        <div class="select-with-button">
-                            <select id="tabelaSelecionada" name="tabelaSelecionada" [(ngModel)]="tabelaSelecionadaId">
-                                <option [ngValue]="undefined" disabled>Selecione uma tabela...</option>
-                                <option *ngFor="let tab of tabelasFiltradas" [value]="tab.id">{{ tab.descricao }} ({{
-                                    tab.valor | currency:'BRL' }})</option>
-                            </select>
-                            <button type="button" class="btn-add" (click)="adicionarTabela()"
-                                [disabled]="!tabelaSelecionadaId">+</button>
+            <p-tabView [(activeIndex)]="activeIndex">
+                <!-- Aba 1: Dados Gerais -->
+                <p-tabPanel header="Dados do Setor" leftIcon="pi pi-info-circle mr-2">
+                    <div class="grid mt-2">
+                        <div class="col-12 md:col-9">
+                            <label for="descricao" class="font-bold">Descrição do Setor</label>
+                            <input pInputText id="descricao" [(ngModel)]="setorAtual.descricao" placeholder="Digite o nome do setor">
+                        </div>
+                        <div class="col-12 md:col-3 flex align-items-end pb-2">
+                            <div class="field-checkbox mb-0">
+                                <p-checkbox id="ativo" [(ngModel)]="setorAtual.ativo" [binary]="true"></p-checkbox>
+                                <label for="ativo" class="ml-2">Setor Ativo</label>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </p-tabPanel>
 
-                <div class="linked-tables">
-                    <h3>Tabelas Vinculadas</h3>
-                    <table class="inner-table">
-                        <thead>
-                            <tr>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let tab of tabelasVinculadas">
-                                <td>{{ tab.descricao }}</td>
-                                <td>{{ tab.valor | currency:'BRL' }}</td>
-                                <td>
-                                    <button type="button" class="btn-remove"
-                                        (click)="removerTabela(tab.id)">Remover</button>
-                                </td>
-                            </tr>
-                            <tr *ngIf="tabelasVinculadas.length === 0">
-                                <td colspan="3" class="no-data-inner">Nenhuma tabela vinculada.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Aba 2: Tabelas de Frete -->
+                <p-tabPanel header="Tabelas de Frete" leftIcon="pi pi-truck mr-2">
+                    <div class="grid mt-2 align-items-end">
+                        <div class="col-12 md:col-8">
+                            <label for="buscaFrete" class="font-bold">Buscar Tabela de Frete</label>
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon">
+                                    <i class="pi pi-search"></i>
+                                </span>
+                                <p-autoComplete id="buscaFrete" 
+                                               [(ngModel)]="tabelaSelecionada" 
+                                               [suggestions]="tabelasFiltradas" 
+                                               (completeMethod)="filtrarTabelas($event)" 
+                                               field="descricao" 
+                                               [minLength]="3" 
+                                               [forceSelection]="true"
+                                               placeholder="Digite 3 ou mais letras..."
+                                               styleClass="w-full"
+                                               [style]="{'width':'100%'}"></p-autoComplete>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <button pButton pRipple label="Vincular Tabela" icon="pi pi-plus" 
+                                    class="p-button-success btn-gold" 
+                                    (click)="adicionarTabela()" 
+                                    [disabled]="!tabelaSelecionada"></button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="font-bold mb-3">Tabelas Vinculadas</h6>
+                        <p-table [value]="tabelasVinculadas" [responsiveLayout]="'scroll'" styleClass="p-datatable-sm p-datatable-gridlines">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th style="width: 100px">Ação</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-tab>
+                                <tr>
+                                    <td>{{ tab.descricao }}</td>
+                                    <td class="font-bold">{{ tab.valor | currency:'BRL' }}</td>
+                                    <td class="text-center">
+                                        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                                                (click)="removerTabela(tab.id)" pTooltip="Remover Vínculo"></button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="3" class="text-center p-4">Nenhuma tabela vinculada.</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </p-tabPanel>
+            </p-tabView>
+
+            <div class="flex justify-content-end gap-2 mt-4">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="cancelar()" *ngIf="modoEdicao"></button>
+                <button pButton pRipple [label]="modoEdicao ? 'Salvar Alterações' : 'Cadastrar Setor'" 
+                        [icon]="modoEdicao ? 'pi pi-save' : 'pi pi-check'" 
+                        class="p-button-primary btn-gold" 
+                        (click)="salvar()"
+                        [disabled]="!setorAtual.descricao"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro e Listagem de Setores -->
+    <div class="col-12">
+        <div class="card">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center mb-4">
+                <h5 class="cinzel-font m-0">Lista de Setores</h5>
+                <div class="p-inputgroup w-full md:w-25rem mt-3 md:mt-0">
+                    <input pInputText type="text" [(ngModel)]="filtroDescricaoSetor" placeholder="Pesquisar setor..." (keyup.enter)="pesquisarSetores()">
+                    <button type="button" pButton pRipple icon="pi pi-search" class="btn-gold" (click)="pesquisarSetores()"></button>
                 </div>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn-gold" [disabled]="!setorForm.form.valid">
-                    {{ modoEdicao ? 'Salvar Alterações' : 'Cadastrar Setor' }}
-                </button>
-                <button type="button" class="btn-outline" (click)="cancelar()" *ngIf="modoEdicao">Cancelar</button>
-            </div>
-        </form>
+            <p-table [value]="setores" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'" 
+                     styleClass="p-datatable-gridlines" [rowHover]="true" dataKey="id">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="descricao">Descrição <p-sortIcon field="descricao"></p-sortIcon></th>
+                        <th pSortableColumn="ativo" style="width: 15rem">Status <p-sortIcon field="ativo"></p-sortIcon></th>
+                        <th style="width: 10rem">Ações</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-setor>
+                    <tr>
+                        <td class="font-bold">{{ setor.descricao }}</td>
+                        <td>
+                            <p-tag [severity]="setor.ativo ? 'success' : 'danger'" 
+                                   [value]="setor.ativo ? 'ATIVO' : 'INATIVO'" 
+                                   [rounded]="true"></p-tag>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text" 
+                                        (click)="editar(setor)" pTooltip="Editar"></button>
+                                <button pButton pRipple [icon]="setor.ativo ? 'pi pi-slash' : 'pi pi-check'" 
+                                        [class]="setor.ativo ? 'p-button-rounded p-button-danger p-button-text' : 'p-button-rounded p-button-success p-button-text'" 
+                                        (click)="setor.ativo ? desativar(setor) : ativar(setor.id)" 
+                                        [pTooltip]="setor.ativo ? 'Desativar' : 'Ativar'"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="3" class="text-center p-4">Nenhum setor encontrado.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
     </div>
-
-    <hr class="divider">
-
-    <div class="search-container">
-        <input type="text" [(ngModel)]="filtroDescricaoSetor" placeholder="Pesquisar setor por descrição..."
-            (keyup.enter)="pesquisarSetores()">
-        <button class="btn-gold" (click)="pesquisarSetores()">Pesquisar</button>
-    </div>
-
-    <div class="setor-list">
-        <table class="card">
-            <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let setor of setores">
-                    <td>{{ setor.descricao }}</td>
-                    <td>
-                        <span class="status-badge" [class.active]="setor.ativo" [class.inactive]="!setor.ativo">
-                            {{ setor.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn-edit" (click)="editar(setor)" title="Editar">✏️</button>
-                        <button class="btn-delete" (click)="desativar(setor.id)" *ngIf="setor.ativo"
-                            title="Desativar">🚫</button>
-                        <button class="btn-success" (click)="ativar(setor.id)" *ngIf="!setor.ativo"
-                            title="Ativar">✅</button>
-                    </td>
-                </tr>
-                <tr *ngIf="setores.length === 0">
-                    <td colspan="3" class="no-data">Nenhum setor encontrado.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+</div>

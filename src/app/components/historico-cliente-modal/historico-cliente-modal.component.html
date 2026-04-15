@@ -1,97 +1,68 @@
-<div class="modal-overlay" (click)="onFechar()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="cinzel-font">Histórico de Pedidos</h2>
-            <p><strong>Cliente:</strong> {{ usuarioNome }}</p>
-            <button class="close-btn" (click)="onFechar()">&times;</button>
-        </div>
-
-        <div class="modal-filters">
-            <div class="filter-group">
-                <label for="situacaoSelect">Situação:</label>
-                <select id="situacaoSelect" [(ngModel)]="filtroSituacao" (change)="carregarHistorico()">
-                    <option value="">Todas</option>
-                    <option *ngFor="let sit of situacoesPedido" [value]="sit.codigo">{{ sit.descricao }}</option>
-                </select>
+<p-dialog [(visible)]="display" [modal]="true" [style]="{width: '70vw'}" [breakpoints]="{'960px': '95vw'}" 
+          [header]="'Histórico de Pedidos - ' + usuarioNome" (onHide)="onFechar()">
+    
+    <div class="p-fluid">
+        <div class="grid mb-4">
+            <div class="col-12 md:col-6">
+                <label for="situacaoSelect" class="font-bold mb-2 block">Situação</label>
+                <p-dropdown [options]="situacoesPedido" [(ngModel)]="filtroSituacao" 
+                           optionLabel="descricao" optionValue="codigo" 
+                           placeholder="Todas as situações" (onChange)="carregarHistorico()"
+                           [showClear]="true"></p-dropdown>
             </div>
-            <div class="filter-group checkbox-group">
-                <input type="checkbox" id="exibirCancelados" [(ngModel)]="exibirCancelados" (change)="carregarHistorico()">
-                <label for="exibirCancelados">Cancelados</label>
-            </div>
-        </div>
-
-        <div class="modal-body">
-            <div *ngIf="loading" class="loading-spinner">
-                <i class="fa fa-spinner fa-spin fa-2x"></i>
-                <p>Carregando histórico...</p>
-            </div>
-
-            <div *ngIf="!loading && pedidos.length === 0" class="no-data">
-                Nenhum pedido encontrado.
-            </div>
-
-            <!-- Tabela Desktop -->
-            <table class="history-table hide-mobile" *ngIf="!loading && pedidos.length > 0">
-                <thead>
-                    <tr>
-                        <th>Pedido</th>
-                        <th>Data</th>
-                        <th>Valor</th>
-                        <th>Situação</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let pedido of pedidos" [class.cancelled]="pedido.cancelado">
-                        <td>#{{ pedido.id }}</td>
-                        <td>{{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}</td>
-                        <td>{{ pedido.valorTotal | currency:'BRL' }}</td>
-                        <td>
-                            <span class="badge" [ngClass]="getSituacaoBadgeClass(pedido.situacao)">
-                                {{ pedido.situacaoDescricao }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn-icon" (click)="editarPedido(pedido.id)" title="Ver Detalhes">
-                                <i class="fa fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Lista Compacta Mobile -->
-            <div class="history-cards show-mobile" *ngIf="!loading && pedidos.length > 0">
-                <div class="history-card" *ngFor="let pedido of pedidos" [class.cancelled]="pedido.cancelado">
-                    <div class="card-main-content">
-                        <div class="card-top-row">
-                            <span class="order-id">#{{ pedido.id }}</span>
-                            <span class="badge" [ngClass]="getSituacaoBadgeClass(pedido.situacao)">
-                                {{ pedido.situacaoDescricao }}
-                            </span>
-                        </div>
-                        <div class="card-mid-row">
-                            <div class="detail-item">
-                                <i class="fa fa-calendar-alt"></i>
-                                <span>{{ pedido.dataPedido | date:'dd/MM/yy HH:mm' }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fa fa-dollar-sign"></i>
-                                <strong>{{ pedido.valorTotal | currency:'BRL' }}</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-actions-col">
-                        <button class="btn-visualizar-mobile" (click)="editarPedido(pedido.id)">
-                            <i class="fa fa-chevron-right"></i>
-                        </button>
-                    </div>
+            <div class="col-12 md:col-6 flex align-items-end">
+                <div class="field-checkbox mb-2">
+                    <p-checkbox id="exibirCancelados" [(ngModel)]="exibirCancelados" [binary]="true" (onChange)="carregarHistorico()"></p-checkbox>
+                    <label for="exibirCancelados" class="ml-2">Exibir Cancelados</label>
                 </div>
             </div>
         </div>
 
-        <div class="modal-footer">
-            <button class="btn-outline" (click)="onFechar()">Fechar</button>
+        <div *ngIf="loading" class="flex flex-column align-items-center justify-content-center p-5">
+            <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4"></p-progressSpinner>
+            <p class="mt-3">Carregando histórico...</p>
         </div>
+
+        <p-table *ngIf="!loading" [value]="pedidos" [rows]="5" [paginator]="true" 
+                 responsiveLayout="scroll" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 15%">Pedido</th>
+                    <th style="width: 25%">Data</th>
+                    <th style="width: 20%">Valor</th>
+                    <th style="width: 25%">Situação</th>
+                    <th style="width: 15%">Ações</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-pedido>
+                <tr [ngStyle]="{'opacity': pedido.cancelado ? '0.6' : '1'}">
+                    <td>
+                        #{{ pedido.id }}
+                    </td>
+                    <td>
+                        {{ pedido.dataPedido | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td>
+                        <strong>{{ pedido.valorTotal | currency:'BRL' }}</strong>
+                    </td>
+                    <td>
+                        <p-tag [severity]="getSeverity(pedido.situacao)" [value]="pedido.situacaoDescricao"></p-tag>
+                    </td>
+                    <td>
+                        <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-text p-button-info" 
+                                (click)="editarPedido(pedido.id)" pTooltip="Ver Detalhes"></button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center p-4">Nenhum pedido encontrado para este cliente.</td>
+                </tr>
+            </ng-template>
+        </p-table>
     </div>
-</div>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Fechar" icon="pi pi-times" class="p-button-text" (click)="onFechar()"></button>
+    </ng-template>
+</p-dialog>

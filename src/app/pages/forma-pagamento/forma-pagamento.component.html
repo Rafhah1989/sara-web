@@ -1,167 +1,155 @@
-<div class="page-title-banner">
-    <h1>Gerenciamento de Formas de Pagamento</h1>
-</div>
-
-<section class="container form-page">
-    <div class="header-actions">
-        <h2>Lista de Formas de Pagamento</h2>
-        <button class="btn-primary" (click)="abrirModalParaCriar()"><i class="fa fa-plus"></i> Novo Cadastro</button>
-    </div>
-
-    <!-- Tabela de Listagem -->
-    <div class="table-container shadow-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Forma</th>
-                    <th>Ícone Visual</th>
-                    <th>Desconto (%)</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let forma of formasPagamento">
-                    <td>{{ forma.id }}</td>
-                    <td class="destaque">{{ forma.descricao }}</td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <i *ngIf="forma.iconeFontAwesome" [ngClass]="forma.iconeFontAwesome" class="fa-lg preview-icon" [title]="forma.iconeFontAwesome"></i>
-                            <span *ngIf="forma.iconeFontAwesome" class="text-muted" style="font-size: 0.85rem; font-family: monospace; user-select: all;">
-                                &lt;i class="{{ forma.iconeFontAwesome }}"&gt;&lt;/i&gt;
-                            </span>
-                            <span *ngIf="!forma.iconeFontAwesome">-</span>
-                        </div>
-                    </td>
-                    <td>{{ forma.desconto }} %</td>
-                    <td class="td-actions">
-                        <button class="btn-icon text-primary" (click)="abrirModalParaEditar(forma)" title="Editar">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                        <button class="btn-icon text-danger" (click)="confirmarExclusao(forma.id)" title="Excluir">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                <tr *ngIf="formasPagamento.length === 0">
-                    <td colspan="5" class="text-center">Nenhuma forma de pagamento encontrada.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<!-- Modal de Cadastro / Edição -->
-<div class="modal-overlay" *ngIf="exibirModal">
-    <div class="modal-content shadow-card">
-        <h3>{{ formaPagamentoAtual.id ? 'Editar Forma de Pagamento' : 'Nova Forma de Pagamento' }}</h3>
-        
-        <form (ngSubmit)="salvarFormaPagamento()">
-            <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group flex-col">
-                    <label for="descricao">Descrição</label>
-                    <input type="text" id="descricao" name="descricao" [(ngModel)]="formaPagamentoAtual.descricao" class="gold-input" placeholder="Ex: Cartão de Crédito">
-                </div>
-                <div class="form-group flex-col">
-                    <label for="icone">Ícone FontAwesome</label>
-                    <input type="text" id="icone" name="icone" [(ngModel)]="formaPagamentoAtual.iconeFontAwesome" class="gold-input" placeholder="Ex: fa-credit-card">
-                </div>
-            </div>
-
-            <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group flex-col">
-                    <label for="desconto">Desconto (%)</label>
-                    <input type="number" id="desconto" name="desconto" [(ngModel)]="formaPagamentoAtual.desconto" step="0.01" min="0" class="gold-input" placeholder="0.00">
-                </div>
-                <div class="form-group flex-col">
-                    <label for="valorMinimo">Valor Mínimo (À Vista)</label>
-                    <input type="text" id="valorMinimo" name="valorMinimo" [value]="valorMinimoFormatado" 
-                           (input)="applyMoedaMask($event, 'valorMinimo')" placeholder="R$ 0,00" class="gold-input">
-                </div>
-            </div>
-
-            <hr class="divider" *ngIf="formaPagamentoAtual.id">
+<div class="grid">
+    <div class="col-12">
+        <div class="card">
+            <h5 class="cinzel-font mb-4" style="color: var(--primary-gold-dark);">Gerenciamento de Formas de Pagamento</h5>
             
-            <div class="installment-section">
-                <h3>Regras de Parcelamento</h3>
+            <p-table #dt [value]="formasPagamento" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'"
+                     styleClass="p-datatable-gridlines" [rowHover]="true" dataKey="id">
                 
-                <div class="rule-add-card">
-                    <p class="rule-entry-title">
-                        <i class="fa" [ngClass]="editandoOpcaoId ? 'fa-pencil' : 'fa-plus-circle'"></i> 
-                        {{ editandoOpcaoId ? 'Editando Regra #' + editandoOpcaoId : 'Nova Regra' }}
-                    </p>
-                    <div class="installment-form-row">
-                        <div class="form-group flex-col">
-                            <label>Máx. Parcelas</label>
-                            <input type="number" [(ngModel)]="novaOpcao.qtdMaxParcelas" name="qtdMax" min="1" max="12" class="gold-input" placeholder="Ex: 12">
-                        </div>
-                        <div class="form-group flex-col">
-                            <label>Intervalo (Dias)</label>
-                            <input type="number" [(ngModel)]="novaOpcao.diasVencimentoIntervalo" name="intervalo" min="1" class="gold-input" placeholder="Ex: 30">
-                        </div>
-                        <div class="form-group flex-col w-40">
-                            <label>Vlr. Mín. Parcela</label>
-                            <input type="text" [value]="valorMinimoParcelaFormatada" (input)="applyMoedaMask($event, 'valorMinimoParcela')" 
-                                   name="vlrMinParcela" placeholder="R$ 0,00" class="gold-input">
-                        </div>
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <button pButton pRipple label="Novo Cadastro" icon="pi pi-plus" class="p-button-success mr-2 mb-2 md:mb-0 btn-gold" (click)="abrirModalParaCriar()"></button>
                     </div>
+                </ng-template>
 
-                    <div class="installment-form-actions">
-                        <button type="button" class="btn-primary-gold btn-main" (click)="adicionarOpcaoParcelamento()">
-                            <i class="fa" [ngClass]="editandoOpcaoId ? 'fa-save' : 'fa-plus'"></i> 
-                            {{ editandoOpcaoId ? 'Salvar Alterações da Regra' : 'Adicionar Nova Regra' }}
-                        </button>
-                        <button type="button" class="btn-secondary-gold btn-main" *ngIf="editandoOpcaoId" (click)="cancelarEdicaoOpcao()">
-                            <i class="fa fa-times"></i> Cancelar Edição
-                        </button>
-                    </div>
-                </div>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 10%">ID</th>
+                        <th pSortableColumn="descricao" style="width: 30%">Descrição <p-sortIcon field="descricao"></p-sortIcon></th>
+                        <th style="width: 20%">Ícone</th>
+                        <th pSortableColumn="desconto" style="width: 20%">Desconto (%) <p-sortIcon field="desconto"></p-sortIcon></th>
+                        <th style="width: 20%">Ações</th>
+                    </tr>
+                </ng-template>
 
-                <div class="rules-container">
-                    <div class="rules-grid">
-                        <div class="rule-card-mini" *ngFor="let opt of opcoesParcelamento">
-                            <div class="rule-info">
-                                <span class="rule-installments">{{ opt.qtdMaxParcelas }}x</span>
-                                <span class="rule-interval">{{ opt.diasVencimentoIntervalo }} dias</span>
-                                <span class="rule-min-value" *ngIf="opt.valorMinimoParcela > 0">
-                                    Min: {{ opt.valorMinimoParcela | currency:'BRL' }}
-                                </span>
+                <ng-template pTemplate="body" let-forma>
+                    <tr>
+                        <td>{{ forma.id }}</td>
+                        <td class="font-bold">{{ forma.descricao }}</td>
+                        <td>
+                            <div class="flex align-items-center gap-2">
+                                <i *ngIf="forma.iconeFontAwesome" [ngClass]="forma.iconeFontAwesome" class="fa-lg text-primary" [title]="forma.iconeFontAwesome"></i>
+                                <span *ngIf="forma.iconeFontAwesome" class="text-xs font-mono surface-100 p-1 border-round">{{ forma.iconeFontAwesome }}</span>
+                                <span *ngIf="!forma.iconeFontAwesome">-</span>
                             </div>
-                            <div class="rule-actions">
-                                <button type="button" class="btn-icon btn-edit" (click)="prepararEdicaoOpcao(opt)">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
-                                <button type="button" class="btn-icon btn-delete" (click)="removerOpcaoParcelamento(opt.id!)">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                        </td>
+                        <td>{{ forma.desconto | number:'1.2-2' }} %</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text" 
+                                        (click)="abrirModalParaEditar(forma)" pTooltip="Editar"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" 
+                                        (click)="confirmarExclusao(forma)" pTooltip="Excluir"></button>
                             </div>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
+                </ng-template>
 
-                    <div class="empty-rules" *ngIf="opcoesParcelamento.length === 0">
-                        <i class="fa fa-info-circle"></i> Nenhuma regra definida
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary-gold" (click)="fecharModal()">Cancelar</button>
-                <button type="submit" class="btn-primary-gold" [disabled]="!formaPagamentoAtual.descricao">
-                    {{ formaPagamentoAtual.id ? 'Salvar Alterações' : 'Criar Forma de Pagamento' }}
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal de Avisos e Excluir -->
-<div class="modal-overlay" *ngIf="exibirAviso">
-    <div class="modal-content text-center alert-shadow">
-        <h3>Atenção</h3>
-        <p [innerHTML]="mensagemAviso"></p>
-        <div class="modal-actions justify-center mt-20">
-            <button *ngIf="eExclusao" class="btn-secondary" (click)="fecharAviso()">Não</button>
-            <button class="btn-primary" [ngClass]="{'btn-danger': eExclusao}" (click)="executarAcaoAviso()">{{ eExclusao ? 'Sim, Excluir' : 'Ok' }}</button>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="5" class="text-center p-4">Nenhuma forma de pagamento encontrada.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
         </div>
     </div>
 </div>
+
+<!-- Modal de Cadastro / Edição -->
+<p-dialog [(visible)]="exibirModal" [style]="{width: '700px'}" 
+          [header]="formaPagamentoAtual.id ? 'Editar Forma de Pagamento' : 'Nova Forma de Pagamento'" 
+          [modal]="true" [maximizable]="true" class="p-fluid" (onHide)="fecharModal()">
+    
+    <ng-template pTemplate="content">
+        <!-- Dados da Forma de Pagamento -->
+        <p-card header="Dados Gerais" styleClass="mb-4 shadow-1">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-6">
+                    <label for="descricao" class="font-bold">Descrição</label>
+                    <input pInputText id="descricao" [(ngModel)]="formaPagamentoAtual.descricao" placeholder="Ex: Cartão de Crédito">
+                </div>
+                <div class="col-12 md:col-6">
+                    <label for="icone" class="font-bold">Ícone (FontAwesome)</label>
+                    <div class="p-inputgroup">
+                        <span class="p-inputgroup-addon">
+                            <i *ngIf="formaPagamentoAtual.iconeFontAwesome" [ngClass]="formaPagamentoAtual.iconeFontAwesome"></i>
+                            <i *ngIf="!formaPagamentoAtual.iconeFontAwesome" class="pi pi-image text-400"></i>
+                        </span>
+                        <input pInputText id="icone" [(ngModel)]="formaPagamentoAtual.iconeFontAwesome" placeholder="Ex: fa-credit-card">
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label for="desconto" class="font-bold">Desconto (%)</label>
+                    <p-inputNumber id="desconto" [(ngModel)]="formaPagamentoAtual.desconto" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" placeholder="0.00"></p-inputNumber>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label for="valorMinimo" class="font-bold">Valor Mínimo (À Vista)</label>
+                    <p-inputNumber id="valorMinimo" [(ngModel)]="formaPagamentoAtual.valorMinimo" mode="currency" currency="BRL" locale="pt-BR" placeholder="R$ 0,00"></p-inputNumber>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Regras de Parcelamento -->
+        <div class="mb-5">
+            <h5 class="cinzel-font mb-3">Regras de Parcelamento</h5>
+            
+            <!-- Formulário de Nova Regra -->
+            <p-card subheader="{{ editandoOpcaoId ? 'Editando Regra #' + editandoOpcaoId : 'Nova Regra' }}" styleClass="surface-100 border-gold mb-4">
+                <div class="grid p-fluid align-items-end">
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold">Máx. Parcelas</label>
+                        <p-inputNumber [(ngModel)]="novaOpcao.qtdMaxParcelas" [min]="1" [max]="12" placeholder="Ex: 12"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold">Intervalo (Dias)</label>
+                        <p-inputNumber [(ngModel)]="novaOpcao.diasVencimentoIntervalo" [min]="1" placeholder="Ex: 30"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold">Vlr. Mín. Parcela</label>
+                        <p-inputNumber [(ngModel)]="novaOpcao.valorMinimoParcela" mode="currency" currency="BRL" locale="pt-BR" placeholder="R$ 0,00"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-3 flex gap-2">
+                        <button pButton pRipple type="button" [icon]="editandoOpcaoId ? 'pi pi-save' : 'pi pi-plus'" 
+                                (click)="adicionarOpcaoParcelamento()" 
+                                [class]="editandoOpcaoId ? 'p-button-warning' : 'p-button-success'"></button>
+                        <button pButton pRipple type="button" icon="pi pi-times" class="p-button-secondary" *ngIf="editandoOpcaoId" (click)="cancelarEdicaoOpcao()"></button>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Lista de Regras -->
+            <div class="grid mt-2">
+                <div class="col-12 md:col-6 lg:col-4" *ngFor="let opt of opcoesParcelamento">
+                    <div class="rule-card p-3 border-round-md shadow-1 surface-0 border-1 border-200 flex flex-column">
+                        <div class="flex justify-content-between align-items-start mb-2">
+                            <span class="text-2xl font-bold text-primary">{{ opt.qtdMaxParcelas }}x</span>
+                            <div class="flex gap-1">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm" (click)="prepararEdicaoOpcao(opt)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="removerOpcaoParcelamento(opt.id!)"></button>
+                            </div>
+                        </div>
+                        <div class="flex flex-column gap-1 text-sm">
+                            <div class="flex align-items-center gap-2">
+                                <i class="pi pi-calendar text-400"></i>
+                                <span>Intervalo: {{ opt.diasVencimentoIntervalo }} dias</span>
+                            </div>
+                            <div class="flex align-items-center gap-2" *ngIf="opt.valorMinimoParcela > 0">
+                                <i class="pi pi-dollar text-400"></i>
+                                <span>Mín. Parcela: <b>{{ opt.valorMinimoParcela | currency:'BRL' }}</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 text-center p-4 surface-100 border-round font-italic" *ngIf="opcoesParcelamento.length === 0">
+                    Nenhuma regra definida para esta forma de pagamento.
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="fecharModal()"></button>
+        <button pButton pRipple [label]="formaPagamentoAtual.id ? 'Salvar Alterações' : 'Criar Forma'" icon="pi pi-check" 
+                class="p-button-primary btn-gold" [disabled]="!formaPagamentoAtual.descricao" (click)="salvarFormaPagamento()"></button>
+    </ng-template>
+</p-dialog>

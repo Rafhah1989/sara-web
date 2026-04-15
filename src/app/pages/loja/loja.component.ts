@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OpcaoParcelamento } from '../../models/opcao-parcelamento.model';
 import { UsuarioService } from '../../services/usuario.service';
 import { MessageService, SelectItem } from 'primeng/api';
+import { removerAcentos } from '../../utils/string-utils';
 
 @Component({
   selector: 'app-loja',
@@ -615,10 +616,10 @@ export class LojaComponent implements OnInit, AfterViewInit, OnDestroy {
       let matchPreco = true;
 
       if (this.filtroModalNome && this.filtroModalNome.trim() !== '') {
-        const term = this.filtroModalNome.toLowerCase();
+        const term = removerAcentos(this.filtroModalNome.toLowerCase());
         // Filtra por NOME, ID ou CÓDIGO
-        matchNome = p.nome.toLowerCase().includes(term) || 
-                   (p.codigo && p.codigo.toLowerCase().includes(term));
+        matchNome = removerAcentos(p.nome.toLowerCase()).includes(term) || 
+                   (p.codigo && removerAcentos(p.codigo.toLowerCase()).includes(term));
       }
       if (this.filtroModalTamanho && this.filtroModalTamanho.trim() !== '') {
         matchTamanho = p.tamanho != null && p.tamanho.toString().toLowerCase() === this.filtroModalTamanho.toLowerCase();
