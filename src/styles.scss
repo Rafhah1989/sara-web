@@ -307,6 +307,24 @@ p-menubar, .p-menubar {
     }
 }
 
+@media (max-width: 576px) {
+    .layout-topbar {
+        padding: 0 0.75rem !important;
+    }
+
+    .layout-topbar-logo {
+        margin-right: 0.5rem !important;
+    }
+
+    .layout-topbar-logo span {
+        font-size: 1.2rem !important;
+    }
+
+    .layout-topbar-logo img {
+        height: 2rem !important;
+    }
+}
+
 .btn-login {
     border: none !important;
     color: #ffffff !important;
