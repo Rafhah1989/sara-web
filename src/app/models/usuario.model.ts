@@ -5,6 +5,7 @@ export enum Role {
 
 export interface Usuario {
     id?: number;
+    codigo?: string;
     nome: string;
     cep: string;
     endereco: string;

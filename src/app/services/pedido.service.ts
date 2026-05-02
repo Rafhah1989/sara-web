@@ -22,6 +22,7 @@ export interface Pagamento {
 
 export interface Pedido {
     id: number;
+    numero?: string;
     usuarioId: number;
     usuarioNome: string;
     formaPagamentoId?: number;
@@ -65,7 +66,7 @@ export class PedidoService {
 
     constructor(private http: HttpClient) { }
 
-    listar(id?: number, clienteNome?: string, dataInicio?: string, dataFim?: string, situacao?: string, page: number = 0, size: number = 10, sort?: string, exibirCancelados?: boolean, usuarioId?: number): Observable<any> {
+    listar(id?: string | number, clienteNome?: string, dataInicio?: string, dataFim?: string, situacao?: string, page: number = 0, size: number = 10, sort?: string, exibirCancelados?: boolean, usuarioId?: number): Observable<any> {
         let params = new HttpParams()
             .set('page', page.toString())
             .set('size', size.toString());

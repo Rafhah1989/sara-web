@@ -7,10 +7,17 @@
                 <!-- Dados Básicos -->
                 <p-card header="Dados Básicos" styleClass="mb-4 shadow-1">
                     <div class="field grid">
-                        <div class="col-12">
+                        <div class="col-12 md:col-9">
                             <label for="nome" class="font-bold">Nome Completo</label>
                             <input pInputText id="nome" formControlName="nome" placeholder="Digite o nome completo" [ngClass]="{'ng-invalid ng-dirty': isInvalid('nome')}">
                             <small class="p-error" *ngIf="isInvalid('nome')">Nome é obrigatório (máx 100 caracteres).</small>
+                        </div>
+                        <div class="col-12 md:col-3">
+                            <label for="codigo" class="font-bold">Código (4 dígitos)</label>
+                            <input pInputText id="codigo" formControlName="codigo" placeholder="Ex: 1101" maxlength="4"
+                                   (input)="onCodigoChange()" [ngClass]="{'ng-invalid ng-dirty': isInvalid('codigo') || codigoJaExiste}">
+                            <small class="p-error" *ngIf="isInvalid('codigo') && !codigoJaExiste">Obrigatório (4 dígitos).</small>
+                            <small class="p-error" *ngIf="codigoJaExiste">Este código já está em uso.</small>
                         </div>
                     </div>
     

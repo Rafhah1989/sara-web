@@ -16,7 +16,7 @@ export class PedidoListComponent implements OnInit {
     usuarios: Usuario[] = [];
     filtroCliente: string = '';
     isAdmin: boolean = false;
-    filtroId: number | null = null;
+    filtroId: string = '';
     filtroDataInicio: string = '';
     filtroDataFim: string = '';
     filtroSituacao: string = '';
@@ -41,6 +41,7 @@ export class PedidoListComponent implements OnInit {
     avisoPdf: boolean = false;
     exibirModalSucessoNovoPedido: boolean = false;
     pedidoRecemCriadoId: number | null = null;
+    pedidoRecemCriadoNumero: string | null = null;
     
     exibirModalCancelamento: boolean = false;
     motivoCancelamento: string = '';
@@ -83,8 +84,9 @@ export class PedidoListComponent implements OnInit {
         this.carregarSituacoes();
         this.carregarPedidos();
 
-        if (history.state && history.state.novoPedidoCriadoId) {
+        if (history.state && (history.state.novoPedidoCriadoId || history.state.novoPedidoCriadoNumero)) {
             this.pedidoRecemCriadoId = history.state.novoPedidoCriadoId;
+            this.pedidoRecemCriadoNumero = history.state.novoPedidoCriadoNumero;
             this.exibirModalSucessoNovoPedido = true;
             // Limpa o state para evitar reabertura no refresh
             window.history.replaceState({}, '');
@@ -114,7 +116,7 @@ export class PedidoListComponent implements OnInit {
         }
 
         this.pedidoService.listar(
-            this.filtroId || undefined,
+            this.filtroId ? this.filtroId : undefined,
             this.filtroCliente || undefined,
             dataInicioISO,
             dataFimISO,
@@ -174,7 +176,7 @@ export class PedidoListComponent implements OnInit {
 
     limparFiltros(): void {
         this.filtroCliente = '';
-        this.filtroId = null;
+        this.filtroId = '';
         this.filtroDataInicio = '';
         this.filtroDataFim = '';
         this.filtroSituacao = '';
@@ -516,6 +518,7 @@ export class PedidoListComponent implements OnInit {
             this.gerarPdf(this.pedidoRecemCriadoId);
         }
         this.pedidoRecemCriadoId = null;
+        this.pedidoRecemCriadoNumero = null;
     }
 
     abrirModalNotaFiscal(pedido: Pedido): void {

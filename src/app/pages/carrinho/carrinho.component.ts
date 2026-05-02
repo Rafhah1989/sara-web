@@ -504,7 +504,11 @@ export class CarrinhoComponent implements OnInit {
                               queryParams: proximo ? { pagamentoId: proximo.id } : {} 
                           });
                       } else {
-                          this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: res.id } });
+                          const numeroParaExibir = res.numero || (res as any).numero;
+                          this.router.navigate(['/pedidos'], { state: { 
+                              novoPedidoCriadoId: res.id,
+                              novoPedidoCriadoNumero: numeroParaExibir
+                          } });
                       }
                   },
                   error: (err) => console.error('Limpa carrinho erro', err)

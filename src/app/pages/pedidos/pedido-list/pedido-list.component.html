@@ -19,8 +19,8 @@
                 <input pInputText type="text" [(ngModel)]="filtroCliente" (input)="filtrarPedidos()" placeholder="Nome do cliente">
             </div>
             <div class="field col-12 md:col-1">
-                <label class="font-bold block mb-2">#ID</label>
-                <input pInputText type="number" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="ID">
+                <label class="font-bold block mb-2">Número</label>
+                <input pInputText type="text" [(ngModel)]="filtroId" (input)="filtrarPedidos()" placeholder="Número">
             </div>
             <div class="field col-12 md:col-2">
                 <label class="font-bold block mb-2"><i class="pi pi-calendar mr-1 gold-text"></i> Início</label>
@@ -54,7 +54,7 @@
         
         <ng-template pTemplate="header">
             <tr>
-                <th pSortableColumn="id" style="width: 80px;">Nº <p-sortIcon field="id"></p-sortIcon></th>
+                <th pSortableColumn="numero" style="width: 100px;">Nº <p-sortIcon field="numero"></p-sortIcon></th>
                 <th pSortableColumn="usuario.nome" *ngIf="isAdmin" [class.hidden]="isMobile">Cliente <p-sortIcon field="usuario.nome"></p-sortIcon></th>
                 <th pSortableColumn="dataPedido" [style.width]="isMobile ? '120px' : (isAdmin ? '140px' : '220px')">Data <p-sortIcon field="dataPedido"></p-sortIcon></th>
                 <th pSortableColumn="valorTotal" style="width: 130px;">{{ isMobile ? 'Valor' : 'Valor Total' }} <p-sortIcon field="valorTotal"></p-sortIcon></th>
@@ -67,7 +67,7 @@
         <ng-template pTemplate="body" let-pedido>
             <tr [class.pedido-cancelado]="pedido.cancelado">
                 <td>
-                    {{ pedido.id }}
+                    {{ pedido.numero || pedido.id }}
                 </td>
                 <td [class.hidden]="isMobile" *ngIf="isAdmin">
                     {{ pedido.usuarioNome }}
@@ -121,14 +121,14 @@
 
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td [attr.colspan]="isAdmin ? 7 : 6" class="text-center py-5">Nenhum pedido encontrado.</td>
+                <td [attr.colspan]="isAdmin ? 7 : 6" class="text-center py-5 text-600 italic">Nenhum pedido encontrado.</td>
             </tr>
         </ng-template>
     </p-table>
 </div>
 
 <!-- Modal: Cancelamento de Pedido -->
-<p-dialog [(visible)]="exibirModalCancelamento" [header]="'Cancelar Pedido #' + pedidoParaCancelar?.id" [modal]="true" 
+<p-dialog [(visible)]="exibirModalCancelamento" [header]="'Cancelar Pedido #' + (pedidoParaCancelar?.numero || pedidoParaCancelar?.id)" [modal]="true" 
           [style]="{width: '450px'}" styleClass="p-fluid">
     <div class="flex align-items-center justify-content-center mb-4">
         <i class="pi pi-exclamation-triangle text-red-500 text-6xl"></i>
@@ -150,8 +150,8 @@
 <p-dialog [(visible)]="exibirModalSucessoNovoPedido" header="Pedido Criado!" [modal]="true" [style]="{width: '400px'}" [closable]="false">
     <div class="text-center">
         <i class="pi pi-check-circle text-green-500 text-7xl mb-4"></i>
-        <h3 class="font-bold text-2xl mb-2 text-900">Pedido Sucesso!</h3>
-        <p class="text-700 mb-4">O pedido <strong>#{{ pedidoRecemCriadoId }}</strong> foi gerado corretamente.</p>
+        <h3 class="font-bold text-2xl mb-2 text-900">Sucesso!</h3>
+        <p class="text-700 mb-4">O pedido <strong>#{{ pedidoRecemCriadoNumero ? pedidoRecemCriadoNumero : pedidoRecemCriadoId }}</strong> foi gerado corretamente.</p>
         <p class="text-600 mb-5">Deseja gerar o PDF com o resumo agora?</p>
     </div>
     <ng-template pTemplate="footer">
@@ -163,7 +163,7 @@
 </p-dialog>
 
 <!-- Modal: Nota Fiscal (ADMIN) -->
-<p-dialog [(visible)]="exibirModalNotaFiscal" [header]="'Nota Fiscal - Pedido #' + pedidoParaNotaFiscal?.id" [modal]="true" 
+<p-dialog [(visible)]="exibirModalNotaFiscal" [header]="'Nota Fiscal - Pedido #' + (pedidoParaNotaFiscal?.numero || pedidoParaNotaFiscal?.id)" [modal]="true" 
           [style]="{width: '500px'}" styleClass="p-fluid">
     
     <div *ngIf="!pedidoParaNotaFiscal?.notaFiscalPath" class="animate-fade-in">
@@ -217,7 +217,7 @@
 </p-dialog>
 
 <!-- Modal: Confirmação de Pedido (ADMIN) -->
-<p-dialog [(visible)]="exibirModalConfirmacao" [header]="'Confirmar Pedido #' + pedidoParaConfirmar?.id" [modal]="true" [style]="{width: '450px'}">
+<p-dialog [(visible)]="exibirModalConfirmacao" [header]="'Confirmar Pedido #' + (pedidoParaConfirmar?.numero || pedidoParaConfirmar?.id)" [modal]="true" [style]="{width: '450px'}">
     <div class="p-3 bg-yellow-50 border-round border-1 border-yellow-200 mb-4">
         <p class="m-0 font-bold text-yellow-800">Você está alterando a situação para CONFIRMADO.</p>
     </div>

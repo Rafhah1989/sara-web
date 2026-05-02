@@ -23,6 +23,7 @@ export class UsuarioFormComponent implements OnInit {
     modoEdicao: boolean = false;
     usuarioIdEmEdicao?: number;
     todasOpcoesParcelamento: OpcaoParcelamento[] = [];
+    codigoJaExiste: boolean = false;
     
     showSenha: boolean = false;
     showConfirmSenha: boolean = false;
@@ -46,6 +47,7 @@ export class UsuarioFormComponent implements OnInit {
     ) {
         this.userForm = this.fb.group({
             nome: ['', [Validators.required, Validators.maxLength(100)]],
+            codigo: ['', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/^\d{4}$/)]],
             cep: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
             endereco: [''],
             bairro: ['', Validators.required],
@@ -82,6 +84,7 @@ export class UsuarioFormComponent implements OnInit {
         if (id) {
             this.modoEdicao = true;
             this.usuarioIdEmEdicao = Number(id);
+            this.userForm.get('codigo')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/^\d{4}$/)]);
             this.carregarUsuario(this.usuarioIdEmEdicao);
         }
     }
@@ -214,13 +217,39 @@ export class UsuarioFormComponent implements OnInit {
         this.userForm.get('desconto')?.setValue(num, { emitEvent: false });
     }
 
+    onCodigoChange(): void {
+        const codigo = this.userForm.get('codigo')?.value;
+        if (codigo && codigo.length >= 1) {
+            this.usuarioService.verificarCodigo(codigo, this.usuarioIdEmEdicao).subscribe({
+                next: (disponivel) => {
+                    this.codigoJaExiste = !disponivel;
+                    if (this.codigoJaExiste) {
+                        this.userForm.get('codigo')?.setErrors({ alreadyExists: true });
+                    } else {
+                        const errors = this.userForm.get('codigo')?.errors;
+                        if (errors) {
+                            delete errors['alreadyExists'];
+                            if (Object.keys(errors).length === 0) {
+                                this.userForm.get('codigo')?.setErrors(null);
+                            } else {
+                                this.userForm.get('codigo')?.setErrors(errors);
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            this.codigoJaExiste = false;
+        }
+    }
+
     salvar(): void {
         const senha = this.userForm.get('senha')?.value;
         const confirmarSenha = this.userForm.get('confirmarSenha')?.value;
 
         if (senha || confirmarSenha) {
-            if (senha !== confirmarSenha || (senha && senha.length !== 6)) {
-                alert('A senha deve ter 6 números e as confirmações devem ser iguais.');
+            if (senha !== confirmarSenha || (senha && senha.length < 6)) {
+                alert('A senha deve ter pelo menos 6 números e as confirmações devem ser iguais.');
                 return;
             }
         }

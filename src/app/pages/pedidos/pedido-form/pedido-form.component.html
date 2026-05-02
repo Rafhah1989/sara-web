@@ -2,7 +2,7 @@
     <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4 gap-3 border-bottom-1 surface-border pb-3">
         <div class="flex align-items-center gap-3">
             <button pButton pRipple type="button" icon="pi pi-arrow-left" class="p-button-rounded p-button-text p-button-secondary" (click)="voltar()" pTooltip="Voltar"></button>
-            <h1 class="cinzel-font m-0 text-3xl gold-text">{{ modoEdicao ? 'Editar Pedido #' + pedidoId : 'Novo Pedido' }}</h1>
+            <h1 class="cinzel-font m-0 text-3xl gold-text">{{ modoEdicao ? 'Pedido #' + (pedidoNumero || pedidoId) : 'Novo Pedido' }}</h1>
         </div>
         <div class="flex flex-wrap gap-2" *ngIf="modoEdicao && notaFiscalPath">
             <button pButton pRipple type="button" label="Ver Nota Fiscal" icon="pi pi-file-invoice" class="p-button-outlined btn-gold-outline" (click)="visualizarNotaFiscal()"></button>

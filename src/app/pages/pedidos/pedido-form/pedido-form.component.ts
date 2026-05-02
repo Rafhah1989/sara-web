@@ -24,6 +24,7 @@ export class PedidoFormComponent implements OnInit {
     pedidoForm: FormGroup;
     modoEdicao: boolean = false;
     pedidoId?: number;
+    pedidoNumero?: string;
 
     usuariosFiltrados: Usuario[] = [];
     produtosFiltrados: Produto[] = [];
@@ -630,7 +631,7 @@ export class PedidoFormComponent implements OnInit {
         );
 
         if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.APENAS_ONLINE) {
-            this.pedidoForm.get('pagamentoOnline')?.setValue(true);
+            this.pedidoForm.get('pagamentoOnline')?.setValue(isOnlineMetodo ? true : false);
         } else if (this.metodoPagamentoAutorizadoCliente === MetodoPagamentoAutorizado.ENTREGA_E_ONLINE) {
             if (!isOnlineMetodo) {
                 this.pedidoForm.get('pagamentoOnline')?.setValue(false);
@@ -1157,6 +1158,7 @@ export class PedidoFormComponent implements OnInit {
         this.isCarregandoPedido = true;
         this.pedidoService.buscarPorId(id).subscribe({
             next: (pedido) => {
+                this.pedidoNumero = pedido.numero;
                 const freteFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pedido.frete || 0);
 
                 this.pedidoForm.patchValue({
@@ -1335,8 +1337,12 @@ export class PedidoFormComponent implements OnInit {
                             queryParams: proximo ? { pagamentoId: proximo.id } : {} 
                         });
                     } else {
-                        // Se não for online ou se for Boleto, volta para a lista passando o ID para mostrar o modal de sucesso (com opção de PDF)
-                        this.router.navigate(['/pedidos'], { state: { novoPedidoCriadoId: salvo.id } });
+                        // Se não for online ou se for Boleto, volta para a lista passando o ID e Numero para mostrar o modal de sucesso (com opção de PDF)
+                        const numeroParaExibir = salvo.numero || (salvo as any).numero;
+                        this.router.navigate(['/pedidos'], { state: { 
+                            novoPedidoCriadoId: salvo.id,
+                            novoPedidoCriadoNumero: numeroParaExibir
+                        } });
                     }
                 },
                 error: (err) => {
@@ -1586,7 +1592,7 @@ export class PedidoFormComponent implements OnInit {
     }
 
     visualizarImagem(produto: any): void {
-        const id = produto.id || produto.produtoId;
+        const id = produto.produtoId || produto.id;
         this.imagemUrlVisualizacao = ''; // Reset previous image
         
         if (!produto.imagem && (produto.temImagem || id)) {

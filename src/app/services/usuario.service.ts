@@ -17,6 +17,14 @@ export class UsuarioService {
         return this.http.get<Usuario[]>(this.apiUrl);
     }
 
+    verificarCodigo(codigo: string, id?: number): Observable<boolean> {
+        let params = `?codigo=${codigo}`;
+        if (id) {
+            params += `&id=${id}`;
+        }
+        return this.http.get<boolean>(`${this.apiUrl}/verificar-codigo${params}`);
+    }
+
     buscarPorId(id: number): Observable<Usuario> {
         return this.http.get<Usuario>(`${this.apiUrl}/${id}`);
     }
